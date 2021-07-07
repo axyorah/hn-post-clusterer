@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <main class="container">
+        <form action="/" method="POST" class="box">            
+
+            <div class="hor">
+                <div id="filter-by-id">
+                    <h4>Filter by Id</h4>
+                    <div>
+                        <label for="begin-id-range" id="begin-id-label">From:</label>
+                        <br>
+                        <input type="range" name="begin-id-range" id="begin-id-range" min="1" , max="10" , value="1">
+                    </div>
+                    <div>
+                        <label for="end-id-range" id="end-id-label">To:</label>
+                        <br>
+                        <input type="range" name="end-id-range" id="end-id-range" min="1" , max="10" , value="10">
+                    </div>
+                </div>
+    
+                <div id="filter-by-date" style="visibility: hidden;">
+                    <h4>Filter by Date</h4>
+                    <div>
+                        <label for="begin-date-range" id="begin-date-label">From:</label>
+                        <br>
+                        <input type="range" name="begin-date-range" id="begin-date-range" min="1" , max="10" , value="1">
+                    </div>
+                    <div>
+                        <label for="end-date-range" id="end-date-label">To:</label>
+                        <br>
+                        <input type="range" name="end-date-range" id="end-date-range" min="1" , max="10" , value="10">
+                    </div>
+                </div>
+            </div>            
+
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if stories %}
+        <table class="box hor">
+            <tr>
+                <th>story_id</th>
+                <th>author</th>
+                <th>unix_time</th>
+                <th>score</th>
+                <th>title</th>
+                <th>descendants</th>
+            </tr>
+        {% for story in stories %}
+            <tr>
+                <td>{{ story.story_id }}</td>
+                <td>{{ story.author }}</td>
+                <td>{{ story.unix_time }}</td>
+                <td>{{ story.score }}</td>
+                <td>{{ story.title }}</td>
+                <td>{{ story.descendants }}</td>
+            </tr>            
+        {% endfor %}            
+        </table>
+        {% endif %}
+    </main>
+
+    <script src="{{url_for('static', filename='js/index.js')}}"></script>
+
+</body>
+
+</html>
