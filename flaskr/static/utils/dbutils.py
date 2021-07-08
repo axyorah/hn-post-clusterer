@@ -19,15 +19,13 @@ def is_item_id_in_db(db, item_id):
 def add_story_to_db(db, story):
     db.execute(
         'INSERT INTO story ' +\
-        '(story_id, deleted, author, unix_time, body, dead, url, score, title, descendants) ' + \
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        '(story_id, author, unix_time, body, url, score, title, descendants) ' + \
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         (
             story.get('id'),
-            story.get('deleted'),
             story.get('by'), 
             story.get('time'), 
-            story.get('text'), 
-            story.get('dead'), 
+            story.get('text'),
             story.get('url'), 
             story.get('score'), 
             story.get('title'), 
@@ -40,14 +38,12 @@ def update_story_in_db(db, story):
     db.execute(
         '''UPDATE story
            SET 
-           deleted = ?, author = ?, unix_time = ?, body = ?, dead = ?, url = ?, score = ?, title = ?, descendants = ?
+           author = ?, unix_time = ?, body = ?, url = ?, score = ?, title = ?, descendants = ?
            WHERE story_id = ?''',
         (
-            story.get('deleted'),
             story.get('by'), 
             story.get('time'), 
-            story.get('text'), 
-            story.get('dead'), 
+            story.get('text'),
             story.get('url'), 
             story.get('score'), 
             story.get('title'), 
@@ -60,15 +56,13 @@ def update_story_in_db(db, story):
 def add_comment_to_db(db, comment):
     db.execute(
         'INSERT INTO comment ' +\
-        '(comment_id, deleted, author, unix_time, body, dead, story_id) ' + \
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
+        '(comment_id, author, unix_time, body, story_id) ' + \
+        'VALUES (?, ?, ?, ?, ?)',
         (
             comment.get('id'),
-            comment.get('deleted'),
             comment.get('by'), 
             comment.get('time'), 
             comment.get('text'), 
-            comment.get('dead'), 
             comment.get('story_id'),
         )
     )    
@@ -79,6 +73,21 @@ def add_item_to_db(db, item):
         add_story_to_db(db, item)
     elif item.get('type', None) == 'comment':
         add_comment_to_db(db, item)
+
+def delete_item_by_id_from_db_if_present(db, item_id):
+    if db.execute(
+        'SELECT * FROM story WHERE story_id = ?', (item_id,)
+    ).fetchone() is not None:
+        db.execute(
+            'DELETE FROM story WHERE story_id = ?', (item_id,)
+        )
+    elif db.execute(
+        'SELECT * FROM comment WHERE comment_id = ?', (item_id,)
+    ).fetchone() is not None:
+        db.execute(
+            'DELETE FROM comment WHERE comment_id = ?', (item_id,)
+        )
+    db.commit()
 
 def query_api(item_id):
     url = f'https://hacker-news.firebaseio.com/v0/item/{item_id}.json?print=pretty'
@@ -101,6 +110,7 @@ def add_or_update_item_by_id(db, item_id):
     # delete item from db if empty/deleted/dead and still in db
     if item is None or item.get('deleted',False) or item.get('dead',False):
         print('got empty, deleted or dead...')
+        delete_item_by_id_from_db_if_present(db, item_id)
         return
 
     # add/update item if not empty
@@ -165,3 +175,25 @@ def get_requested_items(form_request):
             comments.append(maybe_comment)
 
     return {'stories': stories, 'comments': comments}
+
+def get_requested_stories_with_children(form_request):
+    db = get_db()
+
+    return db.execute(
+        '''
+        SELECT 
+            s.story_id,
+            s.title,
+            s.author,
+            s.unix_time,
+            s.url,
+            s.score,
+            s.descendants,
+            GROUP_CONCAT(c.body, "\n") AS children
+        FROM story AS s
+        LEFT JOIN comment AS c
+        ON s.story_id = c.story_id 
+        WHERE s.story_id > ? AND s.story_id < ?
+        GROUP BY s.story_id , s.title, s.author, s.unix_time, s.url, s.score, s.descendants
+        ''', (form_request['begin_id'], form_request['end_id']+1)
+    ).fetchall()
