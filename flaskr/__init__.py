@@ -3,7 +3,7 @@ import os, json, datetime
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
-from flaskr.static.utils.utils import (
+from flaskr.static.utils.formutils import (
     parse_form, 
     update_display_record
 )
