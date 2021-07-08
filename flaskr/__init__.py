@@ -3,9 +3,11 @@ import os, json, datetime
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
-from .static.utils.utils import (
+from flaskr.static.utils.utils import (
     parse_form, 
-    update_display_record, 
+    update_display_record
+)
+from flaskr.static.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_requested_items
 )

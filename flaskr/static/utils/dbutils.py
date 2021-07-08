@@ -3,37 +3,6 @@ import requests as rq
 import datetime
 import json
 
-from ...db import get_db
-
-def parse_form(request):
-    req = request.form
-    form = dict()
-
-    names = [
-        ('begin_ts', 'begin-date-range'),
-        ('end_ts', 'end-date-range'),
-        ('begin_id', 'begin-id-range'),
-        ('end_id', 'end-id-range')
-    ]
-
-    for form_name, html_name in names:
-        try:
-            form[form_name] = int(req.get(html_name))
-        except:
-            raise NameError(f'Error accessing element with id "{html_name}"')
-        
-    return form
-
-def update_display_record(display, form):
-    begin_date = datetime.datetime.fromtimestamp(form.get('begin_ts') // 1000)
-    end_date = datetime.datetime.fromtimestamp(form.get('end_ts') // 1000)
-
-    display.begin_date = f'{begin_date.year}/{begin_date.month}/{begin_date.day}'
-    display.end_date = f'{end_date.year}/{end_date.month}/{end_date.day}'
-
-    display.begin_id = form.get('begin_id')
-    display.end_id = form.get('end_id')
-
 def is_item_id_in_db(db, item_id):
     if db.execute(
         'SELECT * FROM story WHERE story_id = ?', (item_id,)
@@ -129,10 +98,12 @@ def add_or_update_item_by_id(db, item_id):
     # get item
     item = query_api(item_id)
 
-    # add/update item if not empty
-    if item is None:
-        print('got empty...')
+    # delete item from db if empty/deleted/dead and still in db
+    if item is None or item.get('deleted',False) or item.get('dead',False):
+        print('got empty, deleted or dead...')
         return
+
+    # add/update item if not empty
     print(
         f'got {item.get("type", "UNKNOWN")} ' +\
         f'from {str(datetime.datetime.fromtimestamp(int(item.get("time") | 0))).split(" ")[0]}, ' +\
@@ -152,6 +123,8 @@ def query_api_and_add_result_to_db(form_request):
     collect all the stories in the requested range and 
     all thhe comments parented by these stories + 
     all the comments in the requested range
+
+    TODO: deal with deleted and dead items
     """
     db = get_db()
     extra_comment_ids = []
@@ -172,7 +145,10 @@ def query_api_and_add_result_to_db(form_request):
         add_or_update_item_by_id(db, item_id)
 
 def get_requested_items(form_request):
-    """use story_ids and comment_ids"""
+    """
+    use story_ids and comment_ids
+    TODO: this shouldn't make new queries...
+    """
     db = get_db()
     stories, comments = [], []
 
