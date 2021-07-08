@@ -9,7 +9,7 @@ from flaskr.static.utils.formutils import (
 )
 from flaskr.static.utils.dbutils import (
     query_api_and_add_result_to_db,
-    get_requested_items
+    get_requested_stories_with_children
 )
 from . import db
 
@@ -50,15 +50,10 @@ def create_app(test_config=None):
             update_display_record(display, form_request)
             query_api_and_add_result_to_db(form_request)
 
-            items = get_requested_items(form_request)
-            stories = items['stories']
-            comments = items['comments']
-
-            print('story_ids:', [story['story_id'] for story in stories])
-            print('comment_ids:', [comment['comment_id'] for comment in comments])
-
+            stories = get_requested_stories_with_children(form_request)
+            print(len(stories))
         else:
-            stories, comments = None, None
-        return render_template('index.html', stories=stories, comments=comments)
+            stories = None
+        return render_template('index.html', stories=stories)
 
     return app

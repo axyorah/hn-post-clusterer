@@ -63,7 +63,7 @@ def add_comment_to_db(db, comment):
             comment.get('by'), 
             comment.get('time'), 
             comment.get('text'), 
-            comment.get('story_id'),
+            comment.get('parent'),
         )
     )    
     db.commit()
@@ -145,38 +145,19 @@ def query_api_and_add_result_to_db(form_request):
 
         # for stories only: record comments (kids) outside requested range
         if item is not None and item.get('kids', None) is not None:
-            extra_comment_ids.extend([
-                c for c in item['kids'] if c > form_request['end_id']
-            ])
+            extra_comment_ids.extend(item['kids'])
 
     # add comments outside the requested range
     # if they are parented by the stories withing the requested range
     for item_id in extra_comment_ids:
         add_or_update_item_by_id(db, item_id)
 
-def get_requested_items(form_request):
-    """
-    use story_ids and comment_ids
-    TODO: this shouldn't make new queries...
-    """
-    db = get_db()
-    stories, comments = [], []
-
-    for item_id in range(form_request['begin_id'], form_request['end_id']+1):
-        maybe_story = db.execute(
-            'SELECT * FROM story WHERE story_id = ?', (item_id, )
-        ).fetchone()
-        maybe_comment = db.execute(
-            'SELECT * FROM comment WHERE comment_id = ?', (item_id,)
-        ).fetchone()
-        if maybe_story is not None:
-            stories.append(maybe_story)
-        elif maybe_comment is not None:
-            comments.append(maybe_comment)
-
-    return {'stories': stories, 'comments': comments}
-
 def get_requested_stories_with_children(form_request):
+    """
+    comments can be parented by stories and other comments!!!
+    TODO: change scheme to account for it!!!
+    TODO: comments can also get updated with more comments.... should be requeried?
+    """
     db = get_db()
 
     return db.execute(
@@ -189,10 +170,18 @@ def get_requested_stories_with_children(form_request):
             s.url,
             s.score,
             s.descendants,
-            GROUP_CONCAT(c.body, "\n") AS children
+            COALESCE(GROUP_CONCAT(c1.body, "<br><br>"), " ") ||
+            COALESCE(GROUP_CONCAT(
+                (
+                    SELECT c2.body
+                    FROM comment AS c2
+                    WHERE c2.story_id = c1.comment_id
+                ), "<br><br>"
+            ), " ")
+            AS children
         FROM story AS s
-        LEFT JOIN comment AS c
-        ON s.story_id = c.story_id 
+        LEFT JOIN comment AS c1
+        ON s.story_id = c1.story_id
         WHERE s.story_id > ? AND s.story_id < ?
         GROUP BY s.story_id , s.title, s.author, s.unix_time, s.url, s.score, s.descendants
         ''', (form_request['begin_id'], form_request['end_id']+1)
