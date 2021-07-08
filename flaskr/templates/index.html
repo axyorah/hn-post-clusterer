@@ -59,6 +59,7 @@
                 <th>score</th>
                 <th>title</th>
                 <th>descendants</th>
+                <th>children</th>
             </tr>
         {% for story in stories %}
             <tr>
@@ -68,6 +69,12 @@
                 <td>{{ story.score }}</td>
                 <td>{{ story.title }}</td>
                 <td>{{ story.descendants }}</td>
+                <td>  
+                    <details>
+                        <summary>show</summary>
+                        <p> {{story.children | safe}} </p>
+                    </details>                    
+                </td>
             </tr>            
         {% endfor %}            
         </table>
