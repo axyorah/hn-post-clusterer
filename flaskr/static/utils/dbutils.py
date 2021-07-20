@@ -17,6 +17,7 @@ def is_item_id_in_db(db, item_id):
         return 'unknown', False
 
 def add_story_to_db(db, story):
+    # add to `story` table
     db.execute(
         'INSERT INTO story ' +\
         '(story_id, author, unix_time, body, url, score, title, descendants) ' + \
@@ -32,6 +33,18 @@ def add_story_to_db(db, story):
             story.get('descendants')
         )
     )    
+    # add to `parent` table
+    db.execute(
+        '''
+        INSERT INTO parent
+        (parent_id, parent_type)
+        VALUES (?, ?)
+        ''',
+        (
+            story.get('id'),
+            'story'
+        )
+    )
     db.commit()
 
 def update_story_in_db(db, story):
@@ -54,9 +67,10 @@ def update_story_in_db(db, story):
     db.commit()
 
 def add_comment_to_db(db, comment):
+    # add to `comment` table
     db.execute(
         'INSERT INTO comment ' +\
-        '(comment_id, author, unix_time, body, story_id) ' + \
+        '(comment_id, author, unix_time, body, parent_id) ' + \
         'VALUES (?, ?, ?, ?, ?)',
         (
             comment.get('id'),
@@ -65,7 +79,19 @@ def add_comment_to_db(db, comment):
             comment.get('text'), 
             comment.get('parent'),
         )
-    )    
+    ) 
+    # add to `parent` table
+    db.execute(
+        '''
+        INSERT INTO parent
+        (parent_id, parent_type)
+        VALUES (?, ?)
+        ''',
+        (
+            comment.get('id'),
+            'comment'
+        )
+    )   
     db.commit()
 
 def add_item_to_db(db, item):
@@ -75,17 +101,23 @@ def add_item_to_db(db, item):
         add_comment_to_db(db, item)
 
 def delete_item_by_id_from_db_if_present(db, item_id):
+    # if db.execute(
+    #     'SELECT * FROM story WHERE story_id = ?', (item_id,)
+    # ).fetchone() is not None:
+    #     db.execute(
+    #         'DELETE FROM story WHERE story_id = ?', (item_id,)
+    #     )
+    # elif db.execute(
+    #     'SELECT * FROM comment WHERE comment_id = ?', (item_id,)
+    # ).fetchone() is not None:
+    #     db.execute(
+    #         'DELETE FROM comment WHERE comment_id = ?', (item_id,)
+    #     )
     if db.execute(
-        'SELECT * FROM story WHERE story_id = ?', (item_id,)
+        'SELECT 1 FROM parent WHERE parent_id = ?', (item_id,)
     ).fetchone() is not None:
         db.execute(
-            'DELETE FROM story WHERE story_id = ?', (item_id,)
-        )
-    elif db.execute(
-        'SELECT * FROM comment WHERE comment_id = ?', (item_id,)
-    ).fetchone() is not None:
-        db.execute(
-            'DELETE FROM comment WHERE comment_id = ?', (item_id,)
+            'DELETE FROM parent WHERE parent_id = ?', (item_id, )
         )
     db.commit()
 
@@ -175,13 +207,13 @@ def get_requested_stories_with_children(form_request):
                 (
                     SELECT c2.body
                     FROM comment AS c2
-                    WHERE c2.story_id = c1.comment_id
+                    WHERE c2.parent_id = c1.comment_id
                 ), "<br><br>"
             ), " ")
             AS children
         FROM story AS s
         LEFT JOIN comment AS c1
-        ON s.story_id = c1.story_id
+        ON s.story_id = c1.parent_id
         WHERE s.story_id > ? AND s.story_id < ?
         GROUP BY s.story_id , s.title, s.author, s.unix_time, s.url, s.score, s.descendants
         ''', (form_request['begin_id'], form_request['end_id']+1)

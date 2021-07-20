@@ -23,6 +23,6 @@ CREATE TABLE IF NOT EXISTS comment (
     author VARCHAR,
     unix_time INTEGER,
     body VARCHAR,
-    story_id INTEGER,
+    parent_id INTEGER,
     FOREIGN KEY (parent_id) REFERENCES parent (parent_id)
 );
