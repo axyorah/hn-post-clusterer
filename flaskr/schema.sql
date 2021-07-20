@@ -1,13 +1,13 @@
-DROP TABLE IF EXISTS story;
-DROP TABLE IF EXISTS comment;
-DROP TABLE IF EXISTS parent;
+-- DROP TABLE IF EXISTS story;
+-- DROP TABLE IF EXISTS comment;
+-- DROP TABLE IF EXISTS parent;
 
-CREATE TABLE parent (
+CREATE TABLE IF NOT EXISTS parent (
     parent_id INTEGER PRIMARY KEY NOT NULL,
     parent_type VARCHAR CHECK(parent_type IN ('story', 'comment')) NOT NULL
 );
 
-CREATE TABLE story (
+CREATE TABLE IF NOT EXISTS story (
     story_id INTEGER PRIMARY KEY,
     author VARCHAR,
     unix_time INTEGER,
@@ -18,7 +18,7 @@ CREATE TABLE story (
     descendants INTEGER
 );
 
-CREATE TABLE comment (
+CREATE TABLE IF NOT EXISTS comment (
     comment_id INTEGER PRIMARY KEY,
     author VARCHAR,
     unix_time INTEGER,
