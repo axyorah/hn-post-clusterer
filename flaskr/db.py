@@ -21,7 +21,7 @@ def close_db(e=None):
         db.close()
 
 def init_db():
-    print('[INFO] initializing db (old data is deleted)')
+    print('[INFO] maybe initializing db (old data will be preserved)')
     db = get_db()
 
     with current_app.open_resource('schema.sql') as f:
@@ -30,9 +30,9 @@ def init_db():
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
-    """Clear the existing data and create new tables"""
+    """Create new tables if don't exist"""
     init_db()
-    click.echo('Initialized the database.')
+    click.echo('Database is up.')
 
 def init_app(app):
     app.teardown_appcontext(close_db)
