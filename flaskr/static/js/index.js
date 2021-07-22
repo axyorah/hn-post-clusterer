@@ -14,7 +14,7 @@ const minTS = new Date(2006, 10, 9).valueOf();
 const maxTS = new Date().valueOf();
 
 const minID = 27750741
-const maxID = 27750841
+const maxID = 27752765
 
 const configDateRangesAndLabels = () => {
     beginDateRange.min = minTS;

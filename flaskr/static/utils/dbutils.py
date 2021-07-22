@@ -19,9 +19,11 @@ def is_item_id_in_db(db, item_id):
 def add_story_to_db(db, story):
     # add to `story` table
     db.execute(
-        'INSERT INTO story ' +\
-        '(story_id, author, unix_time, body, url, score, title, descendants) ' + \
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        '''
+        INSERT INTO story
+        (story_id, author, unix_time, body, url, score, title, descendants)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''',
         (
             story.get('id'),
             story.get('by'), 
@@ -49,10 +51,12 @@ def add_story_to_db(db, story):
 
 def update_story_in_db(db, story):
     db.execute(
-        '''UPDATE story
-           SET 
-           author = ?, unix_time = ?, body = ?, url = ?, score = ?, title = ?, descendants = ?
-           WHERE story_id = ?''',
+        '''
+        UPDATE story
+        SET 
+        author = ?, unix_time = ?, body = ?, url = ?, score = ?, title = ?, descendants = ?
+        WHERE story_id = ?
+        ''',
         (
             story.get('by'), 
             story.get('time'), 
@@ -69,9 +73,11 @@ def update_story_in_db(db, story):
 def add_comment_to_db(db, comment):
     # add to `comment` table
     db.execute(
-        'INSERT INTO comment ' +\
-        '(comment_id, author, unix_time, body, parent_id) ' + \
-        'VALUES (?, ?, ?, ?, ?)',
+        '''
+        INSERT INTO comment
+        (comment_id, author, unix_time, body, parent_id)
+        VALUES (?, ?, ?, ?, ?)
+        ''',
         (
             comment.get('id'),
             comment.get('by'), 
@@ -101,18 +107,6 @@ def add_item_to_db(db, item):
         add_comment_to_db(db, item)
 
 def delete_item_by_id_from_db_if_present(db, item_id):
-    # if db.execute(
-    #     'SELECT * FROM story WHERE story_id = ?', (item_id,)
-    # ).fetchone() is not None:
-    #     db.execute(
-    #         'DELETE FROM story WHERE story_id = ?', (item_id,)
-    #     )
-    # elif db.execute(
-    #     'SELECT * FROM comment WHERE comment_id = ?', (item_id,)
-    # ).fetchone() is not None:
-    #     db.execute(
-    #         'DELETE FROM comment WHERE comment_id = ?', (item_id,)
-    #     )
     if db.execute(
         'SELECT 1 FROM parent WHERE parent_id = ?', (item_id,)
     ).fetchone() is not None:
@@ -186,35 +180,33 @@ def query_api_and_add_result_to_db(form_request):
 
 def get_requested_stories_with_children(form_request):
     """
-    comments can be parented by stories and other comments!!!
-    TODO: change scheme to account for it!!!
-    TODO: comments can also get updated with more comments.... should be requeried?
     """
     db = get_db()
 
-    return db.execute(
+    return  db.execute(        
         '''
-        SELECT 
-            s.story_id,
-            s.title,
-            s.author,
-            s.unix_time,
-            s.url,
-            s.score,
-            s.descendants,
-            COALESCE(GROUP_CONCAT(c1.body, "<br><br>"), " ") ||
-            COALESCE(GROUP_CONCAT(
-                (
-                    SELECT c2.body
-                    FROM comment AS c2
-                    WHERE c2.parent_id = c1.comment_id
-                ), "<br><br>"
-            ), " ")
-            AS children
-        FROM story AS s
-        LEFT JOIN comment AS c1
-        ON s.story_id = c1.parent_id
-        WHERE s.story_id > ? AND s.story_id < ?
-        GROUP BY s.story_id , s.title, s.author, s.unix_time, s.url, s.score, s.descendants
-        ''', (form_request['begin_id'], form_request['end_id']+1)
+        WITH RECURSIVE tab(story_id, unix_time, score, title, children) AS (
+            SELECT 
+                s.story_id, 
+                0,
+                1,
+                s.title,
+                ""
+            FROM story AS s
+            WHERE s.story_id = 27750770
+
+            UNION
+
+            SELECT
+                c.comment_id, 
+                c.parent_id,
+                tab.score + 1,
+                c.author,
+                c.body
+            FROM tab, comment as c WHERE c.parent_id = tab.story_id
+        ) 
+        SELECT story_id, unix_time, score, title, children FROM tab;
+        ''', ()
     ).fetchall()
+
+    
