@@ -185,28 +185,48 @@ def get_requested_stories_with_children(form_request):
 
     return  db.execute(        
         '''
-        WITH RECURSIVE tab(story_id, unix_time, score, title, children) AS (
+        WITH RECURSIVE tab(id, parent_id, root_id, level, title, body) AS (
             SELECT 
                 s.story_id, 
-                0,
+                s.story_id,
+                s.story_id,
                 1,
                 s.title,
-                ""
+                s.url
             FROM story AS s
-            WHERE s.story_id = 27750770
+            WHERE s.story_id BETWEEN ? AND ?
 
             UNION
 
             SELECT
                 c.comment_id, 
                 c.parent_id,
-                tab.score + 1,
+                tab.root_id,
+                tab.level + 1,
                 c.author,
                 c.body
-            FROM tab, comment as c WHERE c.parent_id = tab.story_id
+            FROM tab, comment as c WHERE c.parent_id = tab.id
         ) 
-        SELECT story_id, unix_time, score, title, children FROM tab;
-        ''', ()
-    ).fetchall()
 
-    
+        SELECT 
+            s.story_id,
+            s.author, 
+            s.unix_time,
+            s.score,                    
+            s.title, 
+            s.descendants,
+            (
+                SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
+                FROM tab
+                WHERE root_id = s.story_id
+                GROUP BY root_id
+            ) AS children            
+        FROM story AS s
+        WHERE s.story_id BETWEEN ? AND ?
+        ;
+        ''', 
+        (
+            form_request['begin_id'], form_request['end_id']+1, 
+            form_request['begin_id'], form_request['end_id']+1
+        )
+    ).fetchall()
