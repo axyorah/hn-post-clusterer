@@ -43,17 +43,24 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # main page
-    @app.route('/', methods=["GET", "POST"])
+    @app.route("/", methods=["GET", "POST"])
     def index():
         if request.method == "POST":
-            form_request = parse_form(request)
+            form_request = parse_form(request, 'show')
             update_display_record(display, form_request)
-            query_api_and_add_result_to_db(form_request)
 
             stories = get_requested_stories_with_children(form_request)
             print(len(stories))
         else:
             stories = None
-        return render_template('index.html', stories=stories)
+        return render_template("index.html", stories=stories)
+
+    @app.route("/seed", methods=["POST"])
+    def seed_db():
+        if request.method == "POST":
+            form_request = parse_form(request, 'seed')
+            query_api_and_add_result_to_db(form_request)
+
+        return redirect("/")
 
     return app

@@ -15,40 +15,80 @@
 <body>
 
     <main class="container">
-        <form action="/" method="POST" class="box">            
+        <form action="/seed" method="POST" class="box">  
+            <h2>(Re)Seed the Database</h2>
+            <p>This will take time, but you'd only need to do it once.</p>
 
             <div class="hor">
-                <div id="filter-by-id">
+                <div id="seed-filter-by-id">
                     <h4>Filter by Id</h4>
                     <div>
-                        <label for="begin-id-range" id="begin-id-label">From:</label>
+                        <label for="seed-begin-id-range" id="seed-begin-id-label">From:</label>
                         <br>
-                        <input type="range" name="begin-id-range" id="begin-id-range" min="1" , max="10" , value="1">
+                        <input type="range" name="seed-begin-id-range" id="seed-begin-id-range" min="1" , max="10" , value="1">
                     </div>
                     <div>
-                        <label for="end-id-range" id="end-id-label">To:</label>
+                        <label for="seed-end-id-range" id="seed-end-id-label">To:</label>
                         <br>
-                        <input type="range" name="end-id-range" id="end-id-range" min="1" , max="10" , value="10">
+                        <input type="range" name="seed-end-id-range" id="seed-end-id-range" min="1" , max="10" , value="10">
                     </div>
                 </div>
     
-                <div id="filter-by-date" style="visibility: hidden;">
+                <div id="seed-filter-by-date" style="visibility: hidden;">
                     <h4>Filter by Date</h4>
                     <div>
-                        <label for="begin-date-range" id="begin-date-label">From:</label>
+                        <label for="seed-begin-date-range" id="seed-begin-date-label">From:</label>
                         <br>
-                        <input type="range" name="begin-date-range" id="begin-date-range" min="1" , max="10" , value="1">
+                        <input type="range" name="seed-begin-date-range" id="seed-begin-date-range" min="1" , max="10" , value="1">
                     </div>
                     <div>
-                        <label for="end-date-range" id="end-date-label">To:</label>
+                        <label for="seed-end-date-range" id="seed-end-date-label">To:</label>
                         <br>
-                        <input type="range" name="end-date-range" id="end-date-range" min="1" , max="10" , value="10">
+                        <input type="range" name="seed-end-date-range" id="seed-end-date-range" min="1" , max="10" , value="10">
                     </div>
                 </div>
             </div>            
 
             <button type="submit">Submit</button>
         </form>
+
+        <form action="/" method="POST" class="box">
+            
+            <p>Select the range of data to display.</p>
+
+            <div class="hor">
+                <div id="show-filter-by-id">
+                    <h4>Filter by Id</h4>
+                    <div>
+                        <label for="show-begin-id-range" id="show-begin-id-label">From:</label>
+                        <br>
+                        <input type="range" name="show-begin-id-range" id="show-begin-id-range" min="1" , max="10" , value="1">
+                    </div>
+                    <div>
+                        <label for="show-end-id-range" id="show-end-id-label">To:</label>
+                        <br>
+                        <input type="range" name="show-end-id-range" id="show-end-id-range" min="1" , max="10" , value="10">
+                    </div>
+                </div>
+    
+                <div id="show-filter-by-date" style="visibility: hidden;">
+                    <h4>Filter by Date</h4>
+                    <div>
+                        <label for="show-begin-date-range" id="show-begin-date-label">From:</label>
+                        <br>
+                        <input type="range" name="show-begin-date-range" id="show-begin-date-range" min="1" , max="10" , value="1">
+                    </div>
+                    <div>
+                        <label for="show-end-date-range" id="show-end-date-label">To:</label>
+                        <br>
+                        <input type="range" name="show-end-date-range" id="show-end-date-range" min="1" , max="10" , value="10">
+                    </div>
+                </div>
+            </div>            
+
+            <button type="submit">Submit</button>
+        </form>
+
 
         {% if stories %}
         <table class="box hor">

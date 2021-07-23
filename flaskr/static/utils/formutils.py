@@ -3,15 +3,16 @@ import requests as rq
 import datetime
 import json
 
-def parse_form(request):
+def parse_form(request, form_type='show'):
+    # form_type is either `seed` or `show`, depending on the type of form
     req = request.form
     form = dict()
 
     names = [
-        ('begin_ts', 'begin-date-range'),
-        ('end_ts', 'end-date-range'),
-        ('begin_id', 'begin-id-range'),
-        ('end_id', 'end-id-range')
+        ('begin_ts', f'{form_type}-begin-date-range'),
+        ('end_ts', f'{form_type}-end-date-range'),
+        ('begin_id', f'{form_type}-begin-id-range'),
+        ('end_id', f'{form_type}-end-id-range')
     ]
 
     for form_name, html_name in names:

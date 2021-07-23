@@ -1,94 +1,165 @@
 container = document.querySelector('.container');
 
-beginDateRange = document.querySelector('#begin-date-range');
-endDateRange = document.querySelector('#end-date-range');
-beginDateLabel = document.querySelector('#begin-date-label');
-endDateLabel = document.querySelector('#end-date-label');
+seedBeginDateRange = document.querySelector('#seed-begin-date-range');
+seedEndDateRange = document.querySelector('#seed-end-date-range');
+seedBeginDateLabel = document.querySelector('#seed-begin-date-label');
+seedEndDateLabel = document.querySelector('#seed-end-date-label');
 
-beginIdRange = document.querySelector('#begin-id-range');
-endIdRange = document.querySelector('#end-id-range');
-beginIdLabel = document.querySelector('#begin-id-label');
-endIdLabel = document.querySelector('#end-id-label');
+seedBeginIdRange = document.querySelector('#seed-begin-id-range');
+seedEndIdRange = document.querySelector('#seed-end-id-range');
+seedBeginIdLabel = document.querySelector('#seed-begin-id-label');
+seedEndIdLabel = document.querySelector('#seed-end-id-label');
 
+showBeginDateRange = document.querySelector('#show-begin-date-range');
+showEndDateRange = document.querySelector('#show-end-date-range');
+showBeginDateLabel = document.querySelector('#show-begin-date-label');
+showEndDateLabel = document.querySelector('#show-end-date-label');
+
+showBeginIdRange = document.querySelector('#show-begin-id-range');
+showEndIdRange = document.querySelector('#show-end-id-range');
+showBeginIdLabel = document.querySelector('#show-begin-id-label');
+showEndIdLabel = document.querySelector('#show-end-id-label');
+
+// Globals
 const minTS = new Date(2006, 10, 9).valueOf();
 const maxTS = new Date().valueOf();
 
 const minID = 27750741
 const maxID = 27752765
 
-const configDateRangesAndLabels = () => {
-    beginDateRange.min = minTS;
-    beginDateRange.max = maxTS;
-    beginDateRange.value = minTS;
 
-    endDateRange.min = minTS;
-    endDateRange.max = maxTS;
-    endDateRange.value = maxTS;
+// Helpers
+configDateRangesAndLabels = function (beginRange, endRange, beginLabel, endLabel) {
+    beginRange.min = minTS;
+    beginRange.max = maxTS;
+    beginRange.value = minTS;
+
+    endRange.min = minTS;
+    endRange.max = maxTS;
+    endRange.value = maxTS;
 
     const [m0, d0, y0] = new Date(minTS).toLocaleDateString().split('/');
     const [mf, df, yf] = new Date(maxTS).toLocaleDateString().split('/');
-    beginDateLabel.innerText = `From: ${y0}/${m0}/${d0}`;
-    endDateLabel.innerText = `To: ${yf}/${mf}/${df}`;
+    beginLabel.innerText = `From: ${y0}/${m0}/${d0}`;
+    endLabel.innerText = `To: ${yf}/${mf}/${df}`;
 }
 
-const configIdRangesAndLabels = () => {
-    beginIdRange.min = minID;
-    beginIdRange.max = maxID;
-    beginIdRange.value = minID;
+configIdRangesAndLabels = function (beginRange, endRange, beginLabel, endLabel) {
+    beginRange.min = minID;
+    beginRange.max = maxID;
+    beginRange.value = minID;
 
-    endIdRange.min = minID;
-    endIdRange.max = maxID;
-    endIdRange.value = maxID;
+    endRange.min = minID;
+    endRange.max = maxID;
+    endRange.value = maxID;
 
-    beginIdLabel.innerText = `From: ${minID}`;
-    endIdLabel.innerText = `To: ${maxID}`;
+    beginLabel.innerText = `From: ${minID}`;
+    endLabel.innerText = `To: ${maxID}`;
 }
 
-beginDateRange.addEventListener('change', (evt) => {
-    let beginVal = parseInt(beginDateRange.value);
-    let endVal = parseInt(endDateRange.value);
+updateBeginDateRange = function (beginRange, endRange, beginLabel, endLabel) {
+    let beginVal = parseInt(beginRange.value);
+    let endVal = parseInt(endRange.value);
     if (beginVal >= endVal) {
         beginVal = endVal - 1000 * 60 * 60 * 24;
-        beginDateRange.value = beginVal;
+        beginRange.value = beginVal;
     }
     const [m, d, y] = new Date(beginVal).toLocaleDateString().split('/');
-    beginDateLabel.innerText = `From: ${y}/${m}/${d}`;
-})
+    beginLabel.innerText = `From: ${y}/${m}/${d}`;
+}
 
-
-endDateRange.addEventListener('change', (evt) => {
-    let beginVal = parseInt(beginDateRange.value);
-    let endVal = parseInt(endDateRange.value);
+updateEndDateRange = function (beginRange, endRange, beginLabel, endLabel) {
+    let beginVal = parseInt(beginRange.value);
+    let endVal = parseInt(endRange.value);
     if (endVal <= beginVal) {
         endVal = beginVal + 1000 * 60 * 60 * 24;
         endDateRange.value = endVal;
     }
     const [m, d, y] = new Date(endVal).toLocaleDateString().split('/');
-    endDateLabel.innerText = `To: ${y}/${m}/${d}`;
-})
+    endLabel.innerText = `To: ${y}/${m}/${d}`;
+}
 
-beginIdRange.addEventListener('change', (evt) => {
-    let beginVal = parseInt(beginIdRange.value);
-    let endVal = parseInt(endIdRange.value);
+updateBeginIdRange = function(beginRange, endRange, beginLabel, endLabel) {
+    let beginVal = parseInt(beginRange.value);
+    let endVal = parseInt(endRange.value);
     if (beginVal >= endVal) {
         beginVal = endVal - 1;
-        beginIdRange.value = beginVal;
+        beginRange.value = beginVal;
     }
-    beginIdLabel.innerText = `From: ${beginVal}`;
-})
+    beginLabel.innerText = `From: ${beginVal}`;
+}
 
-
-endIdRange.addEventListener('change', (evt) => {
-    let beginVal = parseInt(beginIdRange.value);
-    let endVal = parseInt(endIdRange.value);
+updateEndIdRange = function (beginRange, endRange, beginLabel, endLabel) {
+    let beginVal = parseInt(beginRange.value);
+    let endVal = parseInt(endRange.value);
     if (endVal <= beginVal) {
         endVal = beginVal + 1;
-        endIdRange.value = endVal;
+        endRange.value = endVal;
     }
-    endIdLabel.innerText = `To: ${endVal}`;
+    endLabel.innerText = `To: ${endVal}`;
+}
+
+
+// Event Listeners
+seedBeginDateRange.addEventListener('change', (evt) => {
+    updateBeginDateRange(
+        seedBeginDataRange, seedEndDataRange, seedBeginDateLabel, seedEndDateLabel
+    );
+})
+
+seedEndDateRange.addEventListener('change', (evt) => {
+    updateEndDateRange(
+        seedBeginDateRange, seedEndDateRange, seedBeginDateLabel, seedEndDataLabel
+    );
+})
+
+showBeginDateRange.addEventListener('change', (evt) => {
+    updateBeginDateRange(
+        showBeginDataRange, showEndDataRange, showBeginDateLabel, showEndDateLabel
+    );
+})
+
+showEndDateRange.addEventListener('change', (evt) => {
+    updateEndDateRange(
+        showBeginDateRange, showEndDateRange, showBeginDateLabel, showEndDataLabel
+    );
+})
+
+seedBeginIdRange.addEventListener('change', (evt) => {
+    updateBeginIdRange(
+        seedBeginIdRange, seedEndIdRange, seedBeginIdLabel, seedEndIdLabel
+    );
+})
+
+seedEndIdRange.addEventListener('change', (evt) => {
+    updateEndIdRange(
+        seedBeginIdRange, seedEndIdRange, seedBeginIdLabel, seedEndIdLabel
+    )
+})
+
+showBeginIdRange.addEventListener('change', (evt) => {
+    updateBeginIdRange(
+        showBeginIdRange, showEndIdRange, showBeginIdLabel, showEndIdLabel
+    );
+})
+
+showEndIdRange.addEventListener('change', (evt) => {
+    updateEndIdRange(
+        showBeginIdRange, showEndIdRange, showBeginIdLabel, showEndIdLabel
+    )
 })
 
 window.addEventListener('load', (evt) => {
-    configDateRangesAndLabels();
-    configIdRangesAndLabels();
+    configDateRangesAndLabels(
+        seedBeginDateRange, seedEndDateRange, seedBeginDateLabel, seedEndDateLabel
+    );
+    configDateRangesAndLabels(
+        showBeginDateRange, showEndDateRange, showBeginDateLabel, showEndDateLabel
+    );
+    configIdRangesAndLabels(
+        seedBeginIdRange, seedEndIdRange, seedBeginIdLabel, seedEndIdLabel
+    );
+    configIdRangesAndLabels(
+        showBeginIdRange, showEndIdRange, showBeginIdLabel, showEndIdLabel
+    );
 })
