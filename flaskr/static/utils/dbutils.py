@@ -222,11 +222,16 @@ def get_requested_stories_with_children(form_request):
                 GROUP BY root_id
             ) AS children            
         FROM story AS s
-        WHERE s.story_id BETWEEN ? AND ?
+        WHERE 
+            s.story_id BETWEEN ? AND ? AND
+            s.descendants BETWEEN ? AND ? AND
+            s.score BETWEEN ? AND ?
         ;
         ''', 
         (
-            form_request['begin_id'], form_request['end_id']+1, 
-            form_request['begin_id'], form_request['end_id']+1
+            form_request['begin_id'], form_request['end_id'], 
+            form_request['begin_id'], form_request['end_id'],
+            form_request['begin_comm'], form_request['end_comm'],
+            form_request['begin_score'], form_request['end_score']
         )
     ).fetchall()

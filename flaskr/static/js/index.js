@@ -30,44 +30,61 @@ for (let filterBy of ['date', 'id', 'comm', 'score']) {
     }
 }
 
-// Globals
-const minTS = new Date(2006, 10, 9).valueOf();
-const maxTS = new Date().valueOf();
+const range = {
+    date: {
+        min: new Date(2006, 10, 9).valueOf(),
+        max: new Date().valueOf()
+    }, 
 
-const minID = 27750741
-const maxID = 27752765
+    id: {
+        min: 27750741,
+        max: 27752765
+    },
 
+    comm: {
+        min: 0,
+        max: 300
+    },
+
+    score: {
+        min: 0, 
+        max: 300
+    }
+}
 
 // Helpers
 const config = {
-    date: function (beginRange, endRange, beginLabel, endLabel) {
-        beginRange.min = minTS;
-        beginRange.max = maxTS;
-        beginRange.value = minTS;
+    date: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {
+        beginRange.min = minVal;
+        beginRange.max = maxVal;
+        beginRange.value = minVal;
     
-        endRange.min = minTS;
-        endRange.max = maxTS;
-        endRange.value = maxTS;
+        endRange.min = minVal;
+        endRange.max = maxVal;
+        endRange.value = maxVal;
     
-        const [m0, d0, y0] = new Date(minTS).toLocaleDateString().split('/');
-        const [mf, df, yf] = new Date(maxTS).toLocaleDateString().split('/');
+        const [m0, d0, y0] = new Date(minVal).toLocaleDateString().split('/');
+        const [mf, df, yf] = new Date(maxVal).toLocaleDateString().split('/');
         beginLabel.innerText = `From: ${y0}/${m0}/${d0}`;
         endLabel.innerText = `To: ${yf}/${mf}/${df}`;
     },
 
-    id: function (beginRange, endRange, beginLabel, endLabel) {
-        beginRange.min = minID;
-        beginRange.max = maxID;
-        beginRange.value = minID;
+    general: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {
+        beginRange.min = minVal;
+        beginRange.max = maxVal;
+        beginRange.value = minVal;
     
-        endRange.min = minID;
-        endRange.max = maxID;
-        endRange.value = maxID;
+        endRange.min = minVal;
+        endRange.max = maxVal;
+        endRange.value = maxVal;
     
-        beginLabel.innerText = `From: ${minID}`;
-        endLabel.innerText = `To: ${maxID}`;
-    }
+        beginLabel.innerText = `From: ${minVal}`;
+        endLabel.innerText = `To: ${maxVal}`;
+    }, 
 };
+config.id = config.general;
+config.comm = config.general;
+config.score = config.general;
 
 const update = {
     date: {
@@ -94,7 +111,7 @@ const update = {
         }
     }, 
 
-    id: {
+    general: {
         begin: function(beginRange, endRange, beginLabel, endLabel) {
             let beginVal = parseInt(beginRange.value);
             let endVal = parseInt(endRange.value);
@@ -114,29 +131,47 @@ const update = {
             }
             endLabel.innerText = `To: ${endVal}`;            
         }
-    }
+    },
 }
+update.id = update.general;
+update.comm = update.general;
+update.score = update.general;
 
 
 // Event Listeners
 for (let form of [seed, show]) {
-    for (let filterBy of ['date', 'id']) {
+    
+    const filterList = (form === seed) ? ['date', 'id'] : ['date', 'id', 'comm', 'score'];
+    
+    for (let filterBy of filterList) {
         for (let loc of ['begin', 'end']) {
 
             form[filterBy][loc].range.addEventListener('change', (evt) => {
                 update[filterBy][loc](
-                    form[filterBy].begin.range, form[filterBy].end.range, form[filterBy].begin.label, form[filterBy].end.label
+                    form[filterBy].begin.range, form[filterBy].end.range, 
+                    form[filterBy].begin.label, form[filterBy].end.label
                 );
             })
 
         }
     }
+
 }
 
 window.addEventListener('load', (evt) => {    
     for (let form of [seed, show]) {
-        for (let filterBy of ['date', 'id']) {
-            config[filterBy](form[filterBy].begin.range, form[filterBy].end.range, form[filterBy].begin.label, form[filterBy].end.label)
+        
+        const filterList = (form === seed) ? ['date', 'id'] : ['date', 'id', 'comm', 'score'];
+        
+        for (let filterBy of filterList) {
+            
+            config[filterBy](
+                form[filterBy].begin.range, form[filterBy].end.range, 
+                form[filterBy].begin.label, form[filterBy].end.label,
+                range[filterBy].min, range[filterBy].max
+            )
+
         }
+
     }
 })
