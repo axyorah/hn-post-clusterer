@@ -1,5 +1,6 @@
 container = document.querySelector('.container');
 
+// form fields
 const seed = new Object();
 const show = new Object();
 
@@ -11,8 +12,8 @@ for (let filterBy of ['date', 'id']) {
         if (seed[filterBy][loc] === undefined) {
             seed[filterBy][loc] = new Object();
         }
-        seed[filterBy][loc]['range'] = document.querySelector(`#seed-${loc}-${filterBy}-range`);
-        seed[filterBy][loc]['label'] = document.querySelector(`#seed-${loc}-${filterBy}-label`);
+        seed[filterBy][loc]['range'] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
+        seed[filterBy][loc]['label'] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
     }
 }
 
@@ -24,8 +25,8 @@ for (let filterBy of ['date', 'id', 'comm', 'score']) {
         if (show[filterBy][loc] === undefined) {
             show[filterBy][loc] = new Object();
         }
-        show[filterBy][loc]['range'] = document.querySelector(`#show-${loc}-${filterBy}-range`);
-        show[filterBy][loc]['label'] = document.querySelector(`#show-${loc}-${filterBy}-label`);
+        show[filterBy][loc]['range'] = document.querySelector(`#show-${filterBy}-${loc}-range`);
+        show[filterBy][loc]['label'] = document.querySelector(`#show-${filterBy}-${loc}-label`);
     }
 }
 
@@ -132,8 +133,7 @@ for (let form of [seed, show]) {
     }
 }
 
-window.addEventListener('load', (evt) => {
-    
+window.addEventListener('load', (evt) => {    
     for (let form of [seed, show]) {
         for (let filterBy of ['date', 'id']) {
             config[filterBy](form[filterBy].begin.range, form[filterBy].end.range, form[filterBy].begin.label, form[filterBy].end.label)
