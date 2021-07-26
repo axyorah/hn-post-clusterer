@@ -57,6 +57,20 @@
             <p>Select the range of data to display.</p>
 
             <div class="hor">
+                <div id="show-filter-by-date" style="visibility: hidden; width: 0%;">
+                    <h4>Filter by Date</h4>
+                    <div>
+                        <label for="show-begin-date-range" id="show-begin-date-label">From:</label>
+                        <br>
+                        <input type="range" name="show-begin-date-range" id="show-begin-date-range" min="1" , max="10" , value="1">
+                    </div>
+                    <div>
+                        <label for="show-end-date-range" id="show-end-date-label">To:</label>
+                        <br>
+                        <input type="range" name="show-end-date-range" id="show-end-date-range" min="1" , max="10" , value="10">
+                    </div>
+                </div>
+
                 <div id="show-filter-by-id">
                     <h4>Filter by Id</h4>
                     <div>
@@ -70,20 +84,36 @@
                         <input type="range" name="show-end-id-range" id="show-end-id-range" min="1" , max="10" , value="10">
                     </div>
                 </div>
-    
-                <div id="show-filter-by-date" style="visibility: hidden;">
-                    <h4>Filter by Date</h4>
+
+                <div id="show-filter-by-comments">
+                    <h4>Filter by the Number of Comments</h4>
                     <div>
-                        <label for="show-begin-date-range" id="show-begin-date-label">From:</label>
+                        <label for="show-begin-comm-range" id="show-begin-comm-label">From:</label>
                         <br>
-                        <input type="range" name="show-begin-date-range" id="show-begin-date-range" min="1" , max="10" , value="1">
+                        <input type="range" name="show-begin-comm-range" id="show-begin-comm-range" min="1" , max="300" , value="1">
                     </div>
                     <div>
-                        <label for="show-end-date-range" id="show-end-date-label">To:</label>
+                        <label for="show-end-comm-range" id="show-end-comm-label">To:</label>
                         <br>
-                        <input type="range" name="show-end-date-range" id="show-end-date-range" min="1" , max="10" , value="10">
+                        <input type="range" name="show-end-comm-range" id="show-end-comm-range" min="1" , max="300" , value="10">
                     </div>
                 </div>
+
+                <div id="show-filter-by-score">
+                    <h4>Filter by Score</h4>
+                    <div>
+                        <label for="show-begin-score-range" id="show-begin-score-label">From:</label>
+                        <br>
+                        <input type="range" name="show-begin-score-range" id="show-begin-score-range" min="1" , max="300" , value="1">
+                    </div>
+                    <div>
+                        <label for="show-end-score-range" id="show-end-score-label">To:</label>
+                        <br>
+                        <input type="range" name="show-end-score-range" id="show-end-score-range" min="1" , max="300" , value="10">
+                    </div>
+                </div>
+    
+                
             </div>            
 
             <button type="submit">Submit</button>
