@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,110 +15,135 @@
 
 <body>
 
-    <main class="container">
-        <form action="/seed" method="POST" class="box">  
-            <h2>(Re)Seed the Database</h2>
-            <p>This will take time, but you'd only need to do it once.</p>
+    <main class="container m-5">
 
-            <div class="hor">
-                <div id="seed-filter-by-id">
-                    <h4>Filter by Id</h4>
-                    <div>
-                        <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" , max="10" , value="1">
-                    </div>
-                    <div>
-                        <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
-                        <br>
-                        <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" , value="10">
-                    </div>
-                </div>
-    
-                <div id="seed-filter-by-date" style="visibility: hidden;">
-                    <h4>Filter by Date</h4>
-                    <div>
-                        <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" , max="10" , value="1">
-                    </div>
-                    <div>
-                        <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
-                        <br>
-                        <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" , max="10" , value="10">
-                    </div>
-                </div>
-            </div>            
+        <ul class="nav nav-tabs" id="seed-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="seed-tab-btn" data-bs-toggle="tab" data-bs-target="#seed-form" type="button" role="tab" aria-controls="seed" aria-selected="true">
+                    <h2>Seed DataBase</h2>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="show-tab-btn" data-bs-toggle="tab" data-bs-target="#show-form" type="button" role="tab" aria-controls="show" aria-selected="false">
+                    <h2>Display Data</h2>
+                </button>
+            </li>
+        </ul>
 
-            <button type="submit">Submit</button>
-        </form>
+        <div class="tab-content" id="tab-content">
 
-        <form action="/" method="POST" class="box">
+            <div class="tab-pane fade show active" id="seed-form" role="tabpanel" aria-labelledby="seed-form">
+                <form action="/seed" method="POST" class="box">
+                    <p>This will take time, but you'd only need to do it once.</p>
+        
+                    <div class="hor">
+                        <div id="seed-filter-by-id">
+                            <h4>Filter by Id</h4>
+                            <div>
+                                <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" , max="10" , value="1">
+                            </div>
+                            <div>
+                                <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
+                                <br>
+                                <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" , value="10">
+                            </div>
+                        </div>
             
-            <p>Select the range of data to display.</p>
+                        <div id="seed-filter-by-date" style="visibility: hidden;">
+                            <h4>Filter by Date</h4>
+                            <div>
+                                <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" , max="10" , value="1">
+                            </div>
+                            <div>
+                                <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
+                                <br>
+                                <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" , max="10" , value="10">
+                            </div>
+                        </div>
+                    </div>            
+        
+                    <button type="submit" id="seed-submit-btn">Submit</button>
+                </form>
+            </div>
 
-            <div class="hor">
-                <div id="show-filter-by-date" style="visibility: hidden; width: 0%;">
-                    <h4>Filter by Date</h4>
-                    <div>
-                        <label for="show-date-begin-range" id="show-date-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" , max="10" , value="1">
+            <div class="tab-pane fade" id="show-form" role="tabpanel" aria-labelledby="show-tab">
+                <form action="/" method="POST" class="box">
+            
+                    <p>Select the range of data to display.</p>
+        
+                    <div class="hor">
+                        <div id="show-filter-by-date" style="visibility: hidden">
+                            <h4>Filter by Date</h4>
+                            <div>
+                                <label for="show-date-begin-range" id="show-date-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" , max="10" , value="1">
+                            </div>
+                            <div>
+                                <label for="show-date-end-range" id="show-date-end-label">To:</label>
+                                <br>
+                                <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" , max="10" , value="10">
+                            </div>
+                        </div>
+        
+                        <div id="show-filter-by-id">
+                            <h4>Filter by Id</h4>
+                            <div>
+                                <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" , max="10" , value="1">
+                            </div>
+                            <div>
+                                <label for="show-id-end-range" id="show-id-end-label">To:</label>
+                                <br>
+                                <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" , max="10" , value="10">
+                            </div>
+                        </div>
+        
+                        <div id="show-filter-by-comments">
+                            <h4>Filter by the Number of Comments</h4>
+                            <div>
+                                <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="show-comm-begin-range" id="show-comm-begin-range" min="1" , max="300" , value="1">
+                            </div>
+                            <div>
+                                <label for="show-comm-end-range" id="show-comm-end-label">To:</label>
+                                <br>
+                                <input type="range" name="show-comm-end-range" id="show-comm-end-range" min="1" , max="300" , value="10">
+                            </div>
+                        </div>
+        
+                        <div id="show-filter-by-score">
+                            <h4>Filter by Score</h4>
+                            <div>
+                                <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="show-score-begin-range" id="show-score-begin-range" min="1" , max="300" , value="1">
+                            </div>
+                            <div>
+                                <label for="show-score-end-range" id="show-score-end-label">To:</label>
+                                <br>
+                                <input type="range" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" , value="10">
+                            </div>
+                        </div>            
+                        
                     </div>
-                    <div>
-                        <label for="show-date-end-range" id="show-date-end-label">To:</label>
-                        <br>
-                        <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" , max="10" , value="10">
-                    </div>
-                </div>
+        
+                    <button type="submit" id="show-submit-btn">Submit</button>
+                </form>
+            </div>
 
-                <div id="show-filter-by-id">
-                    <h4>Filter by Id</h4>
-                    <div>
-                        <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" , max="10" , value="1">
-                    </div>
-                    <div>
-                        <label for="show-id-end-range" id="show-id-end-label">To:</label>
-                        <br>
-                        <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" , max="10" , value="10">
-                    </div>
-                </div>
+        </div>
 
-                <div id="show-filter-by-comments">
-                    <h4>Filter by the Number of Comments</h4>
-                    <div>
-                        <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="show-comm-begin-range" id="show-comm-begin-range" min="1" , max="300" , value="1">
-                    </div>
-                    <div>
-                        <label for="show-comm-end-range" id="show-comm-end-label">To:</label>
-                        <br>
-                        <input type="range" name="show-comm-end-range" id="show-comm-end-range" min="1" , max="300" , value="10">
-                    </div>
-                </div>
 
-                <div id="show-filter-by-score">
-                    <h4>Filter by Score</h4>
-                    <div>
-                        <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
-                        <br>
-                        <input type="range" name="show-score-begin-range" id="show-score-begin-range" min="1" , max="300" , value="1">
-                    </div>
-                    <div>
-                        <label for="show-score-end-range" id="show-score-end-label">To:</label>
-                        <br>
-                        <input type="range" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" , value="10">
-                    </div>
-                </div>
-    
-                
-            </div>            
+        
 
-            <button type="submit">Submit</button>
-        </form>
+        
 
 
         {% if stories %}
@@ -152,6 +178,7 @@
     </main>
 
     <script src="{{url_for('static', filename='js/index.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
 </body>
 

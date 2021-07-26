@@ -1,4 +1,6 @@
 container = document.querySelector('.container');
+seedSubmitBtn = document.querySelector('#seed-submit-btn');
+showSubmitBtn = document.querySelector('#show-submit-btn');
 
 // form fields
 const seed = new Object();
@@ -139,6 +141,11 @@ update.score = update.general;
 
 
 // Event Listeners
+seedSubmitBtn.addEventListener('click', (evt) => {
+    seedSubmitBtn.innerHTML = 
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Data from HN...'
+})
+
 for (let form of [seed, show]) {
     
     const filterList = (form === seed) ? ['date', 'id'] : ['date', 'id', 'comm', 'score'];
