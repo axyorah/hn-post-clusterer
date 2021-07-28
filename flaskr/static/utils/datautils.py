@@ -13,7 +13,7 @@ def serialize_to_disc(corpus_dir, rows):
 
         # parse children (story's comments are stored as an html doc)
         soup = bs.BeautifulSoup(dct['children'], 'lxml')
-        dct['children'] = ' '.join(p.text for p in soup.find_all('p'))
+        dct['children'] = ' '.join(p.get_text(separator=' ') for p in soup.find_all('p'))
 
         # write into a separate file
         jsoned = json.dumps(dct)
