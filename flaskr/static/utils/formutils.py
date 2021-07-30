@@ -20,6 +20,8 @@ def parse_form(request, form_type='show'):
         ('end_comm', 'show-comm-end-range'),
         ('begin_score', 'show-score-begin-range'),
         ('end_score', 'show-score-end-range'),
+        ('num_topics', 'show-lsi-topics-num'),
+        ('n_clusters', 'show-kmeans-clusters-num')
     ]
 
     if form_type == 'show':
@@ -29,6 +31,7 @@ def parse_form(request, form_type='show'):
         try:
             form[form_name] = int(req.get(html_name))
         except:
+            print(req)
             raise NameError(f'Error accessing element with id "{html_name}"')
         
     return form

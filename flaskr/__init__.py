@@ -11,6 +11,10 @@ from flaskr.static.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_requested_stories_with_children
 )
+from flaskr.static.utils.simple_clustering_utils import (
+    get_documents_from_sqlite_rows,
+    cluster_documents
+)
 from . import db
 
 from flaskr.static.utils.datautils import serialize_to_disc
@@ -52,6 +56,10 @@ def create_app(test_config=None):
             #update_display_record(display, form_request)
 
             stories = get_requested_stories_with_children(form_request)
+            documents = get_documents_from_sqlite_rows(stories)
+            clusters = cluster_documents(
+                documents, form_request['num_topics'], form_request['n_clusters']
+            )
             #serialize_to_disc("data", stories)
         else:
             stories = None
