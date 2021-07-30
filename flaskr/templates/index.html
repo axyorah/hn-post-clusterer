@@ -19,13 +19,22 @@
 
         <ul class="nav nav-tabs" id="seed-tab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="seed-tab-btn" data-bs-toggle="tab" data-bs-target="#seed-form" type="button" role="tab" aria-controls="seed" aria-selected="true">
+                <button class="nav-link active" id="seed-tab-btn" 
+                    data-bs-toggle="tab" data-bs-target="#seed-form" aria-selected="true">
                     <h2>Seed DataBase</h2>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="show-tab-btn" data-bs-toggle="tab" data-bs-target="#show-form" type="button" role="tab" aria-controls="show" aria-selected="false">
-                    <h2>Display Data</h2>
+                <button class="nav-link" id="simple-cluster-tab-btn" 
+                    data-bs-toggle="tab" data-bs-target="#simple-cluster" aria-selected="false">
+                    <h2>Simple Clustering</h2>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="test-tab-btn" 
+                    data-bs-toggle="tab" data-bs-target="#test-form" 
+                    type="button" role="tab" aria-controls="test" aria-selected="false">
+                    <h2>Testing stuff...</h2>
                 </button>
             </li>
         </ul>
@@ -70,28 +79,25 @@
                 </form>
             </div>
 
-            <div class="tab-pane fade" id="show-form" role="tabpanel" aria-labelledby="show-tab">
-                <form action="/" method="POST" class="box">
-            
-                    <p>Select the range of data to display.</p>
-        
-                    <div class="hor">
-                        <div id="show-filter-by-date" style="visibility: hidden">
-                            <h4>Filter by Date</h4>
-                            <div>
-                                <label for="show-date-begin-range" id="show-date-begin-label">From:</label>
-                                <br>
-                                <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" , max="10" , value="1">
-                            </div>
-                            <div>
-                                <label for="show-date-end-range" id="show-date-end-label">To:</label>
-                                <br>
-                                <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" , max="10" , value="10">
-                            </div>
-                        </div>
-        
+            <div class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
+                <form action="/" method="POST" class="box">                    
+                    <p>
+                        Before we start using any "heavy artillery" to group HN posts, we might as well try out some simple clustering methods first and see how far we can go with that.
+                    </p>
+
+                    <p>
+                        TODO: explain which texts are used for analysis (all post comments + title)
+                    </p>
+
+                    <p>
+                        Let's first filter out the posts that would be used for analysis by <code>id</code>, <code>score</code> and <code>number of comments</code>.
+                        You can change these settings any time later.
+                    </p>
+
+                    <div class="hor my-4">
+
                         <div id="show-filter-by-id">
-                            <h4>Filter by Id</h4>
+                            <b>Filter by Id</b>
                             <div>
                                 <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
                                 <br>
@@ -105,7 +111,7 @@
                         </div>
         
                         <div id="show-filter-by-comments">
-                            <h4>Filter by the Number of Comments</h4>
+                            <b>Filter by the Number of Comments</b>
                             <div>
                                 <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
                                 <br>
@@ -119,7 +125,7 @@
                         </div>
         
                         <div id="show-filter-by-score">
-                            <h4>Filter by Score</h4>
+                            <b>Filter by Score</b>
                             <div>
                                 <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
                                 <br>
@@ -130,20 +136,74 @@
                                 <br>
                                 <input type="number" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" , value="10">
                             </div>
-                        </div>            
-                        
+                        </div>  
                     </div>
+
+                    <p>
+                        We'll start with Bag-of-Words representation for each document in the corpus, calculate TF-IDF weights for each token in each document, and use Latent Semantic Indexing to find document embeddings in low dimensional embedding space.
+                        Finally, we'll run simple k-Means clustering in this embedding space with reduced dimensionality.
+                        At the end we want to see if the clusters we get in this way correspond to any semantically meaningful "tags" that we can use to group the posts!
+                    </p>
+
+                    <p>
+                        TODO: Explain what do parameters below mean<br>
+                        TODO: show python code???
+                    </p>
+
+                    <div class="hor my-4">
+
+                        <div id="show-lsi-topics">
+                            <b>Number of topics (LSI)</b>
+                            <div>
+                                <label for="show-lsi-topics-num" id="show-lsi-topics-label">From:</label>
+                                <br>
+                                <input type="number" name="show-lsi-topics-num" id="show-lsi-topics-num" min="3" , max="25" , value="20">
+                            </div>
+                        </div>
         
+                        <div id="show-kmeans-clusters">
+                            <b>Number of clusters (k-Means)</b>
+                            <div>
+                                <label for="show-kmeans-clusters-num" id="show-kmeans-clusters-label">From:</label>
+                                <br>
+                                <input type="number" name="show-kmeans-clusters-num" id="show-kmeans-clusters-num" min="2" , max="30" , value="6">
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    
                     <button type="submit" id="show-submit-btn">Submit</button>
                 </form>
             </div>
 
-        </div>
-
-
+            <div class="tab-pane fade" id="test-form" role="tabpanel" aria-labelledby="test-tab">
+                <form action="/" method="POST" class="box">
+            
+                    <p>Select the range of data to display.</p>
         
-
+                    <div class="hor">
+                        <div id="test-filter-by-date">
+                            <h4>Filter by Date</h4>
+                            <div>
+                                <label for="show-date-begin-range" id="show-date-begin-label">From:</label>
+                                <br>
+                                <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" , max="10" , value="1">
+                            </div>
+                            <div>
+                                <label for="show-date-end-range" id="show-date-end-label">To:</label>
+                                <br>
+                                <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" , max="10" , value="10">
+                            </div>
+                        </div>                        
+                    </div>
         
+                    <button type="submit" id="test-submit-btn">Submit</button>
+                </form>
+            </div>
+
+        </div>        
 
 
         {% if stories %}

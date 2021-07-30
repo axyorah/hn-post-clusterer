@@ -9,8 +9,8 @@ def parse_form(request, form_type='show'):
     form = dict()
 
     names = [
-        ('begin_date', f'{form_type}-date-begin-range'),
-        ('end_date', f'{form_type}-date-end-range'),
+        #('begin_date', f'{form_type}-date-begin-range'),
+        #('end_date', f'{form_type}-date-end-range'),
         ('begin_id', f'{form_type}-id-begin-range'),
         ('end_id', f'{form_type}-id-end-range'),
     ]

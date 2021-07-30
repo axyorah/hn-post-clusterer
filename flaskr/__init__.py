@@ -13,10 +13,12 @@ from flaskr.static.utils.dbutils import (
 )
 from . import db
 
-class RecordDisplay:
-    pass
+from flaskr.static.utils.datautils import serialize_to_disc
 
-display = RecordDisplay()
+# class RecordDisplay:
+#     pass
+
+# display = RecordDisplay()
 
 def create_app(test_config=None):
     # create and configure the app
@@ -46,11 +48,11 @@ def create_app(test_config=None):
     @app.route("/", methods=["GET", "POST"])
     def index():
         if request.method == "POST":
-            form_request = parse_form(request, 'show')
-            update_display_record(display, form_request)
+            form_request = parse_form(request, "show")
+            #update_display_record(display, form_request)
 
             stories = get_requested_stories_with_children(form_request)
-            print(len(stories))
+            #serialize_to_disc("data", stories)
         else:
             stories = None
         return render_template("index.html", stories=stories)
@@ -58,7 +60,7 @@ def create_app(test_config=None):
     @app.route("/seed", methods=["POST"])
     def seed_db():
         if request.method == "POST":
-            form_request = parse_form(request, 'seed')
+            form_request = parse_form(request, "seed")
             query_api_and_add_result_to_db(form_request)
 
         return redirect("/")
