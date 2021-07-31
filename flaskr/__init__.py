@@ -5,14 +5,15 @@ from flask import request, make_response, Response
 
 from flaskr.static.utils.formutils import (
     parse_form, 
+    get_document_list_from_sqlite_rows,
+    get_document_dict_from_sqlite_rows,
     update_display_record
 )
 from flaskr.static.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_requested_stories_with_children
 )
-from flaskr.static.utils.simple_clustering_utils import (
-    get_documents_from_sqlite_rows,
+from flaskr.static.utils.simple_clustering_utils import (    
     cluster_documents
 )
 from . import db
@@ -56,7 +57,7 @@ def create_app(test_config=None):
             #update_display_record(display, form_request)
 
             stories = get_requested_stories_with_children(form_request)
-            documents = get_documents_from_sqlite_rows(stories)
+            documents = get_document_list_from_sqlite_rows(stories)
             clusters = cluster_documents(
                 documents, form_request['num_topics'], form_request['n_clusters']
             )
@@ -72,5 +73,12 @@ def create_app(test_config=None):
             query_api_and_add_result_to_db(form_request)
 
         return redirect("/")
+
+    @app.route("/db", methods=["POST"])
+    def query_db():
+        form_request = parse_form(request)
+        stories = get_requested_stories_with_children(form_request)
+        documents = get_document_dict_from_sqlite_rows(stories)        
+        return json.dumps(documents)
 
     return app

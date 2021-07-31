@@ -128,7 +128,29 @@ update.id = update.general;
 update.comm = update.general;
 update.score = update.general;
 
+function urlify(json) {
+    const entries = Object.keys(json).map(key => `${key}=${json[key]}`);
+    return entries.join('&')
+}
 
+async function postData(url, data) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+        method: 'POST', 
+        mode: 'cors', 
+        cache: 'no-cache', 
+        credentials: 'same-origin', 
+        headers: {
+            'Accept': 'application/json, text/plain',
+            // 'Content-Type': 'application/json; charset=UTF-8'
+            'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      redirect: 'follow', 
+      referrerPolicy: 'no-referrer', 
+      body: urlify(data)//JSON.stringify(data) 
+    });
+    return response.json(); 
+}
 
 // Event Listeners    
 for (let filterBy of ['date', 'id', 'comm', 'score']) {
@@ -142,7 +164,24 @@ for (let filterBy of ['date', 'id', 'comm', 'score']) {
     }
 }
 
+queryDbBtn.addEventListener('click', function (evt) {
+    const data = {
+        'show-id-begin-range': show.id.begin.range.value,
+        'show-id-end-range': show.id.end.range.value,
+        'show-comm-begin-range': show.comm.begin.range.value,
+        'show-comm-end-range': show.comm.end.range.value,
+        'show-score-begin-range': show.score.begin.range.value,
+        'show-score-end-range': show.score.end.range.value,
+        'show-lsi-topics-num': showLsiTopicsNum.value,
+        'show-kmeans-clusters-num': showKmeansClustersNum.value
+    };
 
+    postData('/db', data)
+        .then(res => {
+            console.log(res); // JSON data parsed by `data.json()` call
+        })
+        .catch((err) => console.log(err));
+})
 
 window.addEventListener('load', (evt) => {
     for (let filterBy of ['date', 'id', 'comm', 'score']) {            
@@ -152,4 +191,4 @@ window.addEventListener('load', (evt) => {
             range[filterBy].min, range[filterBy].max
         )
     }
-})  
+})
