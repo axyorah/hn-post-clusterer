@@ -80,7 +80,7 @@
             </div>
 
             <div class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
-                <form action="/" method="POST" class="box">                    
+                <div class="box">                    
                     <p>
                         Before we start using any "heavy artillery" to group HN posts, we might as well try out some simple clustering methods first and see how far we can go with that.
                     </p>
@@ -94,8 +94,8 @@
                         You can change these settings any time later.
                     </p>
 
-                    <div class="hor my-4">
-
+                    <div class="controls">
+                    <div class="hor">
                         <div id="show-filter-by-id">
                             <b>Filter by Id</b>
                             <div>
@@ -137,6 +137,9 @@
                                 <input type="number" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" , value="10">
                             </div>
                         </div>  
+
+                    </div>
+                    <button id="post-db-btn">Query DB</button>
                     </div>
 
                     <p>
@@ -150,8 +153,8 @@
                         TODO: show python code???
                     </p>
 
-                    <div class="hor my-4">
-
+                    <div class="controls">
+                    <div class="hor">
                         <div id="show-lsi-topics">
                             <b>Number of topics (LSI)</b>
                             <div>
@@ -166,14 +169,10 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
-                    
-
-                    
-                    <button type="submit" id="show-submit-btn">Submit</button>
-                </form>
-
-                <button id="post-db-btn">Query DB</button>
+                </div>
+                
             </div>
 
             <div class="tab-pane fade" id="test-form" role="tabpanel" aria-labelledby="test-tab">

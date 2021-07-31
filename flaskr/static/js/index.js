@@ -1,5 +1,4 @@
 container = document.querySelector('.container');
-showSubmitBtn = document.querySelector('#show-submit-btn');
 
 queryDbBtn = document.querySelector('#post-db-btn');
 showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
