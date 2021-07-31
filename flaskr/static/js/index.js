@@ -1,23 +1,12 @@
 container = document.querySelector('.container');
-seedSubmitBtn = document.querySelector('#seed-submit-btn');
 showSubmitBtn = document.querySelector('#show-submit-btn');
 
-// form fields
-const seed = new Object();
-const show = new Object();
+queryDbBtn = document.querySelector('#post-db-btn');
+showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
+showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
 
-for (let filterBy of ['date', 'id']) {
-    if (seed[filterBy] === undefined) {
-        seed[filterBy] = new Object();
-    }
-    for (let loc of ['begin', 'end']) {
-        if (seed[filterBy][loc] === undefined) {
-            seed[filterBy][loc] = new Object();
-        }
-        seed[filterBy][loc]['range'] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
-        seed[filterBy][loc]['label'] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
-    }
-}
+// form fields
+const show = new Object();
 
 for (let filterBy of ['date', 'id', 'comm', 'score']) {
     if (show[filterBy] === undefined) {
@@ -39,8 +28,8 @@ const range = {
     }, 
 
     id: {
-        min: 27750741,
-        max: 27752765
+        min: 27700000,//27750741,27758000,27776268
+        max: 27975530//27752765
     },
 
     comm: {
@@ -140,45 +129,27 @@ update.comm = update.general;
 update.score = update.general;
 
 
-// Event Listeners
-seedSubmitBtn.addEventListener('click', (evt) => {
-    seedSubmitBtn.innerHTML = 
-    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Data from HN...'
-})
 
-for (let form of [seed, show]) {
-    
-    const filterList = (form === seed) ? ['date', 'id'] : ['date', 'id', 'comm', 'score'];
-    
-    for (let filterBy of filterList) {
-        for (let loc of ['begin', 'end']) {
-
-            form[filterBy][loc].range.addEventListener('change', (evt) => {
-                update[filterBy][loc](
-                    form[filterBy].begin.range, form[filterBy].end.range, 
-                    form[filterBy].begin.label, form[filterBy].end.label
-                );
-            })
-
-        }
+// Event Listeners    
+for (let filterBy of ['date', 'id', 'comm', 'score']) {
+    for (let loc of ['begin', 'end']) {
+        show[filterBy][loc].range.addEventListener('change', (evt) => {
+            update[filterBy][loc](
+                show[filterBy].begin.range, show[filterBy].end.range, 
+                show[filterBy].begin.label, show[filterBy].end.label
+            );
+        })
     }
-
 }
 
-window.addEventListener('load', (evt) => {    
-    for (let form of [seed, show]) {
-        
-        const filterList = (form === seed) ? ['date', 'id'] : ['date', 'id', 'comm', 'score'];
-        
-        for (let filterBy of filterList) {
-            
-            config[filterBy](
-                form[filterBy].begin.range, form[filterBy].end.range, 
-                form[filterBy].begin.label, form[filterBy].end.label,
-                range[filterBy].min, range[filterBy].max
-            )
 
-        }
 
+window.addEventListener('load', (evt) => {
+    for (let filterBy of ['date', 'id', 'comm', 'score']) {            
+        config[filterBy](
+            show[filterBy].begin.range, show[filterBy].end.range, 
+            show[filterBy].begin.label, show[filterBy].end.label,
+            range[filterBy].min, range[filterBy].max
+        )
     }
-})
+})  
