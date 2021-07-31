@@ -10,21 +10,6 @@ from sklearn.metrics import silhouette_score
 #TODO: implement streaming to avoid too much memory use:
 # https://radimrehurek.com/gensim/auto_examples/core/run_corpora_and_vector_spaces.html#sphx-glr-auto-examples-core-run-corpora-and-vector-spaces-py
 
-def get_documents_from_sqlite_rows(rows) -> 'List[str]':
-    """
-    Extract 'texts' from HN posts - SQLite Row objects corresponding to HN stories
-    with an extra field 'children' corresponding to all comments 
-    concatenated into a single string;
-    These concatenated comments constitute corpus documents - 
-    single document contains all comments parented by the same HN story
-    """
-    documents = []
-    for row in rows:
-        documents.append(
-            f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
-        )
-    return documents
-
 def remove_rare_words_from_documents(documents: 'List[int]', min_freq=2) -> 'List[int]':
     count = defaultdict(int)
 

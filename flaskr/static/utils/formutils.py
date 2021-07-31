@@ -36,6 +36,36 @@ def parse_form(request, form_type='show'):
         
     return form
 
+def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
+    """
+    Extract 'texts' from HN posts - SQLite Row objects corresponding to HN stories
+    with an extra field 'children' corresponding to all comments 
+    concatenated into a single string;
+    These concatenated comments constitute corpus documents - 
+    single document contains all comments parented by the same HN story
+    """
+    documents = []
+    for row in rows:
+        documents.append(
+            f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+        )
+    return documents
+
+def get_document_dict_from_sqlite_rows(rows) -> 'dict':
+    """
+    Extract 'texts' from HN posts - SQLite Row objects corresponding to HN stories
+    with an extra field 'children' corresponding to all comments 
+    concatenated into a single string;
+    These concatenated comments constitute corpus documents - 
+    single document contains all comments parented by the same HN story
+    """
+    documents = dict()
+    for row in rows:
+        documents[row.__getitem__("story_id")] = \
+            f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+        
+    return documents
+
 def update_display_record(display, form):
     begin_date = datetime.datetime.fromtimestamp(form.get('begin_date') // 1000)
     end_date = datetime.datetime.fromtimestamp(form.get('end_date') // 1000)
