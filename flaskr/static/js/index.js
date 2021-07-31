@@ -1,12 +1,12 @@
+// DOM
 container = document.querySelector('.container');
-
+tableRoot = document.querySelector('#table-root');
 queryDbBtn = document.querySelector('#post-db-btn');
+
 showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
 showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
 
-// form fields
 const show = new Object();
-
 for (let filterBy of ['date', 'id', 'comm', 'score']) {
     if (show[filterBy] === undefined) {
         show[filterBy] = new Object();
@@ -20,6 +20,7 @@ for (let filterBy of ['date', 'id', 'comm', 'score']) {
     }
 }
 
+// Vars
 const range = {
     date: {
         min: new Date(2006, 10, 9).valueOf(),
@@ -151,6 +152,59 @@ async function postData(url, data) {
     return response.json(); 
 }
 
+function getHTMLDetails(title, innerHTML) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const p = document.createElement('p');
+
+    summary.innerText = title;
+    p.innerHTML = innerHTML;
+
+    details.appendChild(summary);
+    details.appendChild(p);
+
+    return details;
+}
+
+function addDataToTable(data) {
+    // clear table
+    tableRoot.innerHTML = '';
+    const table = document.createElement('table');
+
+    // create header
+    const trHead = document.createElement('tr');
+    for (let field of ['story_id', 'author', 'unix_time', 'score', 'title', '#comments', 'comments']) {
+        const th = document.createElement('th')
+        th.innerText = field;
+        trHead.appendChild(th);
+    }
+    // add data
+    table.appendChild(trHead);
+    for (let storyId of Object.keys(data)) {
+        const tr = document.createElement('tr');
+        for (let field of ['story_id', 'author', 'unix_time', 'score', 'title', 'descendants']) {
+            const td = document.createElement('td') 
+            if (field === 'unix_time') {
+                const date = new Date(data[storyId][field] * 1000);
+                td.innerText = `${date.getFullYear()}/${date.getMonth()}/${date.getDate()}`;
+            } else {
+                td.innerText = data[storyId][field];
+            }            
+            tr.appendChild(td);
+        }
+        // add comments as details
+        const td = document.createElement('td');
+        const details = getHTMLDetails('show', data[storyId]['children']);
+        td.appendChild(details);
+        tr.appendChild(td);
+        
+        // add row to table
+        table.appendChild(tr);
+    }
+
+    tableRoot.append(table);   
+}
+
 // Event Listeners    
 for (let filterBy of ['date', 'id', 'comm', 'score']) {
     for (let loc of ['begin', 'end']) {
@@ -177,7 +231,8 @@ queryDbBtn.addEventListener('click', function (evt) {
 
     postData('/db', data)
         .then(res => {
-            console.log(res); // JSON data parsed by `data.json()` call
+            //console.log(res); // JSON data parsed by `data.json()` call
+            addDataToTable(res);
         })
         .catch((err) => console.log(err));
 })

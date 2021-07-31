@@ -202,36 +202,7 @@
 
         </div>        
 
-
-        {% if stories %}
-        <table class="box hor">
-            <tr>
-                <th>story_id</th>
-                <th>author</th>
-                <th>unix_time</th>
-                <th>score</th>
-                <th>title</th>
-                <th>descendants</th>
-                <th>children</th>
-            </tr>
-        {% for story in stories %}
-            <tr>
-                <td>{{ story.story_id }}</td>
-                <td>{{ story.author }}</td>
-                <td>{{ story.unix_time }}</td>
-                <td>{{ story.score }}</td>
-                <td>{{ story.title }}</td>
-                <td>{{ story.descendants }}</td>
-                <td>  
-                    <details>
-                        <summary>show</summary>
-                        <p> {{story.children | safe}} </p>
-                    </details>                    
-                </td>
-            </tr>            
-        {% endfor %}            
-        </table>
-        {% endif %}
+        <div class="box hor" id="table-root"></div>
     </main>
 
     <script src="{{url_for('static', filename='js/tabstyle.js')}}"></script>    
