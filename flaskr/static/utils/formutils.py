@@ -61,8 +61,13 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
     """
     documents = dict()
     for row in rows:
-        documents[row.__getitem__("story_id")] = \
-            f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+        documents[row.__getitem__('story_id')] = {
+            'author': row.__getitem__('author'),
+            'unix_time': row.__getitem__('unix_time'),
+            'score': row.__getitem__('score'),
+            'title': row.__getitem__('title'),
+            'children': f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+        }
         
     return documents
 
