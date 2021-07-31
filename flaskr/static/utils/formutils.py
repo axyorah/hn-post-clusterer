@@ -3,19 +3,22 @@ import requests as rq
 import datetime
 import json
 
-def parse_form(request, form_type='show'):
-    # form_type is either `seed` or `show`, depending on the type of form
+def parse_request(request, key2html):
     req = request.form
     form = dict()
+    for form_name, html_name in key2html:
+        try:
+            form[form_name] = int(req.get(html_name))
+        except:
+            print(req)
+            raise NameError(f'Error accessing element with id "{html_name}"')
+        
+    return form
 
-    names = [
-        #('begin_date', f'{form_type}-date-begin-range'),
-        #('end_date', f'{form_type}-date-end-range'),
-        ('begin_id', f'{form_type}-id-begin-range'),
-        ('end_id', f'{form_type}-id-end-range'),
-    ]
-
-    show_names = [
+def parse_show_request(request):
+    key2html = [
+        ('begin_id', f'show-id-begin-range'),
+        ('end_id', f'show-id-end-range'),
         ('begin_comm', 'show-comm-begin-range'),
         ('end_comm', 'show-comm-end-range'),
         ('begin_score', 'show-score-begin-range'),
@@ -24,17 +27,15 @@ def parse_form(request, form_type='show'):
         ('n_clusters', 'show-kmeans-clusters-num')
     ]
 
-    if form_type == 'show':
-        names.extend(show_names)
+    return parse_request(request, key2html)
 
-    for form_name, html_name in names:
-        try:
-            form[form_name] = int(req.get(html_name))
-        except:
-            print(req)
-            raise NameError(f'Error accessing element with id "{html_name}"')
-        
-    return form
+def parse_seed_request(request):
+    key2html = [
+        ('begin_id', f'show-id-begin-range'),
+        ('end_id', f'show-id-end-range'),
+    ]
+
+    return parse_request(request, key2html)
 
 def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     """

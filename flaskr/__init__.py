@@ -4,7 +4,8 @@ from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
 from flaskr.static.utils.formutils import (
-    parse_form, 
+    parse_show_request,
+    parse_seed_request, 
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     update_display_record
@@ -53,7 +54,7 @@ def create_app(test_config=None):
     @app.route("/", methods=["GET", "POST"])
     def index():
         if request.method == "POST":
-            form_request = parse_form(request, "show")
+            form_request = parse_show_request(request)
             #update_display_record(display, form_request)
 
             stories = get_requested_stories_with_children(form_request)
@@ -69,14 +70,14 @@ def create_app(test_config=None):
     @app.route("/seed", methods=["POST"])
     def seed_db():
         if request.method == "POST":
-            form_request = parse_form(request, "seed")
+            form_request = parse_seed_request(request)
             query_api_and_add_result_to_db(form_request)
 
         return redirect("/")
 
     @app.route("/db", methods=["POST"])
     def query_db():
-        form_request = parse_form(request)
+        form_request = parse_show_request(request)
         stories = get_requested_stories_with_children(form_request)
         documents = get_document_dict_from_sqlite_rows(stories)        
         return json.dumps(documents)
