@@ -23,16 +23,14 @@ def parse_show_request(request):
         ('end_comm', 'show-comm-end-range'),
         ('begin_score', 'show-score-begin-range'),
         ('end_score', 'show-score-end-range'),
-        ('num_topics', 'show-lsi-topics-num'),
-        ('n_clusters', 'show-kmeans-clusters-num')
     ]
 
     return parse_request(request, key2html)
 
 def parse_seed_request(request):
     key2html = [
-        ('begin_id', f'show-id-begin-range'),
-        ('end_id', f'show-id-end-range'),
+        ('begin_id', f'seed-id-begin-range'),
+        ('end_id', f'seed-id-end-range'),
     ]
 
     return parse_request(request, key2html)
