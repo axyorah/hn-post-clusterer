@@ -51,21 +51,9 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # main page
-    @app.route("/", methods=["GET", "POST"])
+    @app.route("/", methods=["GET"])
     def index():
-        if request.method == "POST":
-            form_request = parse_show_request(request)
-            #update_display_record(display, form_request)
-
-            stories = get_requested_stories_with_children(form_request)
-            documents = get_document_list_from_sqlite_rows(stories)
-            clusters = cluster_documents(
-                documents, form_request['num_topics'], form_request['n_clusters']
-            )
-            #serialize_to_disc("data", stories)
-        else:
-            stories = None
-        return render_template("index.html", stories=stories)
+        return render_template("index.html")
 
     @app.route("/seed", methods=["POST"])
     def seed_db():
@@ -77,9 +65,10 @@ def create_app(test_config=None):
 
     @app.route("/db", methods=["POST"])
     def query_db():
-        form_request = parse_show_request(request)
-        stories = get_requested_stories_with_children(form_request)
-        documents = get_document_dict_from_sqlite_rows(stories)        
-        return json.dumps(documents)
+        if request.method == "POST":
+            form_request = parse_show_request(request)
+            stories = get_requested_stories_with_children(form_request)
+            documents = get_document_dict_from_sqlite_rows(stories)        
+            return json.dumps(documents)
 
     return app
