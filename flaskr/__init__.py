@@ -3,23 +3,23 @@ import os, json, datetime
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
-from flaskr.static.utils.formutils import (
+from flaskr.static.python.formutils import (
     parse_show_request,
     parse_seed_request, 
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     update_display_record
 )
-from flaskr.static.utils.dbutils import (
+from flaskr.static.python.dbutils import (
     query_api_and_add_result_to_db,
     get_requested_stories_with_children
 )
-from flaskr.static.utils.simple_clustering_utils import (    
+from flaskr.static.python.simple_clustering_utils import (    
     cluster_documents
 )
 from . import db
 
-from flaskr.static.utils.datautils import serialize_to_disc
+from flaskr.static.python.datautils import serialize_to_disc
 
 # class RecordDisplay:
 #     pass
