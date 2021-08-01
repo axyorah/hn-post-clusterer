@@ -14,7 +14,7 @@ from flaskr.static.python.dbutils import (
     query_api_and_add_result_to_db,
     get_requested_stories_with_children
 )
-from flaskr.static.python.simple_clustering_utils import (    
+from flaskr.static.python.clusterutils import (    
     cluster_documents
 )
 from . import db
