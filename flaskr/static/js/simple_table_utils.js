@@ -15,6 +15,20 @@ class Counter {
 }
 
 // Helpers
+function queryDbAndShowResult(data) {
+    // check if table exists, create new if not
+    const table = (tableRoot.children.length && tableRoot.children[0].id === 'hn-post-table') ?
+        tableRoot.children[0] : getNewHNPostTable();
+
+    // post form data to DB server, display res in a table
+    postData('/db', data)
+    .then(res => {
+        console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
+        appendDataToHNPostTable(table, res);
+    })
+    .catch((err) => console.log(err));
+}
+
 function getMorePostsBtn() {
     const counter = new Counter();
     const moreBtn = document.createElement('button');
@@ -40,19 +54,12 @@ function getMorePostsBtn() {
             'show-comm-end-range': show.comm.end.range.value,
             'show-score-begin-range': show.score.begin.range.value,
             'show-score-end-range': show.score.end.range.value,
-            // 'show-lsi-topics-num': showLsiTopicsNum.value,
-            // 'show-kmeans-clusters-num': showKmeansClustersNum.value        
         }
 
         if (idBegin === show.id.end.range.value) {
             return;
         } else {
-            postData('/db', data)
-            .then(res => {
-                console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
-                appendDataToHNPostTable(tableRoot.children[0], res);
-            })
-            .catch((err) => console.log(err));
+            queryDbAndShowResult(data);
         }        
 
     })
@@ -131,15 +138,8 @@ queryDbBtn.addEventListener('click', function (evt) {
         'show-comm-end-range': show.comm.end.range.value,
         'show-score-begin-range': show.score.begin.range.value,
         'show-score-end-range': show.score.end.range.value,
-        // 'show-lsi-topics-num': showLsiTopicsNum.value,
-        // 'show-kmeans-clusters-num': showKmeansClustersNum.value
     };
 
-    postData('/db', data)
-        .then(res => {
-            const table = getNewHNPostTable();
-            console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
-            appendDataToHNPostTable(table, res);
-        })
-        .catch((err) => console.log(err));
+    getNewHNPostTable();
+    queryDbAndShowResult(data);
 })
