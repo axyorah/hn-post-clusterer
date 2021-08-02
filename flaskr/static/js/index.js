@@ -1,23 +1,3 @@
-// DOM
-container = document.querySelector('.container');
-
-showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
-showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
-
-const show = new Object();
-for (let filterBy of ['date', 'id', 'comm', 'score']) {
-    if (show[filterBy] === undefined) {
-        show[filterBy] = new Object();
-    }
-    for (let loc of ['begin', 'end']) {
-        if (show[filterBy][loc] === undefined) {
-            show[filterBy][loc] = new Object();
-        }
-        show[filterBy][loc]['range'] = document.querySelector(`#show-${filterBy}-${loc}-range`);
-        show[filterBy][loc]['label'] = document.querySelector(`#show-${filterBy}-${loc}-label`);
-    }
-}
-
 // Vars
 const range = {
     date: {

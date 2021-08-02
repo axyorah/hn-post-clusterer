@@ -1,7 +1,3 @@
-// DOM
-tableRoot = document.querySelector('#table-root');
-queryDbBtn = document.querySelector('#post-db-btn');
-
 // Vars
 const idRange = 5000;
 class Counter {

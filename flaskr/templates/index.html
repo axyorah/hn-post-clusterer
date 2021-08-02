@@ -6,7 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,20 +20,19 @@
 
         <ul class="nav nav-tabs" id="seed-tab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="seed-tab-btn" 
-                    data-bs-toggle="tab" data-bs-target="#seed-form" aria-selected="true">
+                <button class="nav-link active" id="seed-tab-btn" data-bs-toggle="tab" data-bs-target="#seed-form"
+                    aria-selected="true">
                     <h2>Seed DataBase</h2>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="simple-cluster-tab-btn" 
-                    data-bs-toggle="tab" data-bs-target="#simple-cluster" aria-selected="false">
+                <button class="nav-link" id="simple-cluster-tab-btn" data-bs-toggle="tab"
+                    data-bs-target="#simple-cluster" aria-selected="false">
                     <h2>Simple Clustering</h2>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="test-tab-btn" 
-                    data-bs-toggle="tab" data-bs-target="#test-form" 
+                <button class="nav-link" id="test-tab-btn" data-bs-toggle="tab" data-bs-target="#test-form"
                     type="button" role="tab" aria-controls="test" aria-selected="false">
                     <h2>Testing stuff...</h2>
                 </button>
@@ -44,45 +44,50 @@
             <div class="tab-pane fade show active" id="seed-form" role="tabpanel" aria-labelledby="seed-form">
                 <form action="/seed" method="POST" class="box">
                     <p>This will take time, but you'd only need to do it once.</p>
-        
+
                     <div class="hor">
                         <div id="seed-filter-by-id">
                             <h4>Filter by Id</h4>
                             <div>
                                 <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
                                 <br>
-                                <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" , max="10" , value="1">
+                                <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" ,
+                                    max="10" , value="1">
                             </div>
                             <div>
                                 <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
                                 <br>
-                                <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" , value="10">
+                                <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" ,
+                                    value="10">
                             </div>
                         </div>
-            
+
                         <div id="seed-filter-by-date" style="visibility: hidden;">
                             <h4>Filter by Date</h4>
                             <div>
                                 <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
                                 <br>
-                                <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" , max="10" , value="1">
+                                <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" ,
+                                    max="10" , value="1">
                             </div>
                             <div>
                                 <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
                                 <br>
-                                <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" , max="10" , value="10">
+                                <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" ,
+                                    max="10" , value="10">
                             </div>
                         </div>
-                    </div>            
-        
+                    </div>
+
                     <button type="submit" id="seed-submit-btn">Submit</button>
                 </form>
             </div>
 
             <div class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
-                <div class="box">                    
+                <div class="box">
                     <p>
-                        Before we start using any "heavy artillery" to group HN posts, we might as well try out some simple clustering methods first and see how far we can go with that.
+                        Before we start using any "heavy artillery" to group HN posts, we might as well try out some
+                        simple clustering methods first and see how far we can go with that.
                     </p>
 
                     <p>
@@ -90,62 +95,73 @@
                     </p>
 
                     <p>
-                        Let's first filter out the posts that would be used for analysis by <code>id</code>, <code>score</code> and <code>number of comments</code>.
+                        Let's first filter out the posts that would be used for analysis by <code>id</code>,
+                        <code>score</code> and <code>number of comments</code>.
                         You can change these settings any time later.
                     </p>
 
                     <div class="controls">
-                    <div class="hor">
-                        <div id="show-filter-by-id">
-                            <b>Filter by Id</b>
-                            <div>
-                                <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
-                                <br>
-                                <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" , max="10" , value="1">
+                        <div class="hor">
+                            <div id="show-filter-by-id">
+                                <b>Filter by Id</b>
+                                <div>
+                                    <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
+                                    <br>
+                                    <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" ,
+                                        max="10" , value="1">
+                                </div>
+                                <div>
+                                    <label for="show-id-end-range" id="show-id-end-label">To:</label>
+                                    <br>
+                                    <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" ,
+                                        max="10" , value="10">
+                                </div>
                             </div>
-                            <div>
-                                <label for="show-id-end-range" id="show-id-end-label">To:</label>
-                                <br>
-                                <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" , max="10" , value="10">
-                            </div>
-                        </div>
-        
-                        <div id="show-filter-by-comments">
-                            <b>Filter by the Number of Comments</b>
-                            <div>
-                                <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
-                                <br>
-                                <input type="number" name="show-comm-begin-range" id="show-comm-begin-range" min="1" , max="300" , value="1">
-                            </div>
-                            <div>
-                                <label for="show-comm-end-range" id="show-comm-end-label">To:</label>
-                                <br>
-                                <input type="number" name="show-comm-end-range" id="show-comm-end-range" min="1" , max="300" , value="10">
-                            </div>
-                        </div>
-        
-                        <div id="show-filter-by-score">
-                            <b>Filter by Score</b>
-                            <div>
-                                <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
-                                <br>
-                                <input type="number" name="show-score-begin-range" id="show-score-begin-range" min="1" , max="300" , value="1">
-                            </div>
-                            <div>
-                                <label for="show-score-end-range" id="show-score-end-label">To:</label>
-                                <br>
-                                <input type="number" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" , value="10">
-                            </div>
-                        </div>  
 
-                    </div>
-                    <button id="post-db-btn">Query DB</button>
+                            <div id="show-filter-by-comments">
+                                <b>Filter by the Number of Comments</b>
+                                <div>
+                                    <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
+                                    <br>
+                                    <input type="number" name="show-comm-begin-range" id="show-comm-begin-range" min="1"
+                                        , max="300" , value="1">
+                                </div>
+                                <div>
+                                    <label for="show-comm-end-range" id="show-comm-end-label">To:</label>
+                                    <br>
+                                    <input type="number" name="show-comm-end-range" id="show-comm-end-range" min="1" ,
+                                        max="300" , value="10">
+                                </div>
+                            </div>
+
+                            <div id="show-filter-by-score">
+                                <b>Filter by Score</b>
+                                <div>
+                                    <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
+                                    <br>
+                                    <input type="number" name="show-score-begin-range" id="show-score-begin-range"
+                                        min="1" , max="300" , value="1">
+                                </div>
+                                <div>
+                                    <label for="show-score-end-range" id="show-score-end-label">To:</label>
+                                    <br>
+                                    <input type="number" name="show-score-end-range" id="show-score-end-range" min="1" ,
+                                        max="300" , value="10">
+                                </div>
+                            </div>
+
+                        </div>
+                        <button id="post-db-btn">Query DB</button>
                     </div>
 
                     <p>
-                        We'll start with Bag-of-Words representation for each document in the corpus, calculate TF-IDF weights for each token in each document, and use Latent Semantic Indexing to find document embeddings in low dimensional embedding space.
-                        Finally, we'll run simple k-Means clustering in this embedding space with reduced dimensionality.
-                        At the end we want to see if the clusters we get in this way correspond to any semantically meaningful "tags" that we can use to group the posts!
+                        We'll start with Bag-of-Words representation for each document in the corpus, calculate TF-IDF
+                        weights for each token in each document, and use Latent Semantic Indexing to find document
+                        embeddings in low dimensional embedding space.
+                        Finally, we'll run simple k-Means clustering in this embedding space with reduced
+                        dimensionality.
+                        At the end we want to see if the clusters we get in this way correspond to any semantically
+                        meaningful "tags" that we can use to group the posts!
                     </p>
 
                     <p>
@@ -154,64 +170,112 @@
                     </p>
 
                     <div class="controls">
-                    <div class="hor">
-                        <div id="show-lsi-topics">
-                            <b>Number of topics (LSI)</b>
-                            <div>
-                                <input type="number" name="show-lsi-topics-num" id="show-lsi-topics-num" min="3" , max="25" , value="20">
+                        <div class="hor">
+                            <div id="show-lsi-topics">
+                                <b>Number of topics (LSI)</b>
+                                <div>
+                                    <input type="number" name="show-lsi-topics-num" id="show-lsi-topics-num" min="3" ,
+                                        max="25" , value="20">
+                                </div>
+                            </div>
+
+                            <div id="show-kmeans-clusters">
+                                <b>Number of clusters (k-Means)</b>
+                                <div>
+                                    <input type="number" name="show-kmeans-clusters-num" id="show-kmeans-clusters-num"
+                                        min="2" , max="30" , value="6">
+                                </div>
                             </div>
                         </div>
-        
-                        <div id="show-kmeans-clusters">
-                            <b>Number of clusters (k-Means)</b>
-                            <div>
-                                <input type="number" name="show-kmeans-clusters-num" id="show-kmeans-clusters-num" min="2" , max="30" , value="6">
-                            </div>
-                        </div>
-                    </div>
-                    <button id="simple-cluster-btn">Run a Simple Clustering</button>
+                        <button id="simple-cluster-btn">Run a Simple Clustering</button>
                     </div>
 
                 </div>
-                
+
             </div>
 
             <div class="tab-pane fade" id="test-form" role="tabpanel" aria-labelledby="test-tab">
                 <form action="/" method="POST" class="box">
-            
+
                     <p>Select the range of data to display.</p>
-        
+
                     <div class="hor">
                         <div id="test-filter-by-date">
                             <h4>Filter by Date</h4>
                             <div>
                                 <label for="show-date-begin-range" id="show-date-begin-label">From:</label>
                                 <br>
-                                <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" , max="10" , value="1">
+                                <input type="range" name="show-date-begin-range" id="show-date-begin-range" min="1" ,
+                                    max="10" , value="1">
                             </div>
                             <div>
                                 <label for="show-date-end-range" id="show-date-end-label">To:</label>
                                 <br>
-                                <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" , max="10" , value="10">
+                                <input type="range" name="show-date-end-range" id="show-date-end-range" min="1" ,
+                                    max="10" , value="10">
                             </div>
-                        </div>                        
+                        </div>
                     </div>
-        
+
                     <button type="submit" id="test-submit-btn">Submit</button>
                 </form>
             </div>
 
-        </div>        
+        </div>
 
         <div class="box" id="table-root"></div>
     </main>
 
-    <script src="{{url_for('static', filename='js/tabstyle.js')}}"></script>    
-    <script src="{{url_for('static', filename='js/index.js')}}"></script>    
+    <script>      
+        const container = document.querySelector('.container');
+        const tabs = document.querySelectorAll('.nav-link');
+
+        // `Seed DB` tab
+        const seed = new Object();
+        for (let filterBy of ['date', 'id']) {
+            if (seed[filterBy] === undefined) {
+                seed[filterBy] = new Object();
+            }
+            for (let loc of ['begin', 'end']) {
+                if (seed[filterBy][loc] === undefined) {
+                    seed[filterBy][loc] = new Object();
+                }
+                seed[filterBy][loc]['range'] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
+                seed[filterBy][loc]['label'] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
+            }
+        }
+        const seedSubmitBtn = document.querySelector('#seed-submit-btn');
+
+        // `Simple Clustering` tab
+        const show = new Object();
+        for (let filterBy of ['date', 'id', 'comm', 'score']) {
+            if (show[filterBy] === undefined) {
+                show[filterBy] = new Object();
+            }
+            for (let loc of ['begin', 'end']) {
+                if (show[filterBy][loc] === undefined) {
+                    show[filterBy][loc] = new Object();
+                }
+                show[filterBy][loc]['range'] = document.querySelector(`#show-${filterBy}-${loc}-range`);
+                show[filterBy][loc]['label'] = document.querySelector(`#show-${filterBy}-${loc}-label`);
+            }
+        }
+        const queryDbBtn = document.querySelector('#post-db-btn');
+        const tableRoot = document.querySelector('#table-root');
+
+        const showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
+        const showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
+        
+    </script>
+
+    <script src="{{url_for('static', filename='js/tabstyle.js')}}"></script>
+    <script src="{{url_for('static', filename='js/index.js')}}"></script>
     <script src="{{url_for('static', filename='js/seeddb_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/simple_table_utils.js')}}"></script>"
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
 </body>
 
 </html>

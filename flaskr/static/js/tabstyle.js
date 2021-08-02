@@ -1,5 +1,3 @@
-const tabs = document.querySelectorAll('.nav-link');
-
 window.addEventListener('load', function (evt) {
     for (let t of tabs) {
         t.style.borderRadius = "3px 3px 0px 0px";
