@@ -19,7 +19,9 @@ from flaskr.static.python.clusterutils import (
 )
 from . import db
 
-from flaskr.static.python.datautils import serialize_to_disc
+from flaskr.static.python.datautils import (
+    get_stories_from_db_and_serialize_comments
+)
 
 # class RecordDisplay:
 #     pass
@@ -67,17 +69,19 @@ def create_app(test_config=None):
     def query_db():
         if request.method == "POST":
             form_request = parse_show_request(request)
-            stories = get_requested_stories_with_children(form_request)
-            documents = get_document_dict_from_sqlite_rows(stories)
-            return json.dumps(documents)
+            story_rows = get_requested_stories_with_children(form_request)
+            story_dict = get_document_dict_from_sqlite_rows(story_rows)
+            return json.dumps(story_dict)
 
     @app.route("/serialize", methods=["POST"])    
     def serialize_corpus():
         fname = "data/corpus.txt"
-        delta_id = 10000
 
         if request.method == "POST":
-            pass
-        return json.dumps({"status": "200"})
+            form_request = parse_show_request(request)
+            get_stories_from_db_and_serialize_comments(fname, form_request)
+            return {"ok": True}
+
+        return {"ok": False}
 
     return app
