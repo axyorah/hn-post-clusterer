@@ -29,6 +29,15 @@ function queryDbAndShowResult(data) {
     .catch((err) => console.log(err));
 }
 
+function queryDbAndSerializeResult(data) {
+    // post form data to DB server, display res in a table
+    postData('/serialize', data)
+    .then(res => {
+        console.log(`Serialized stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);        
+    })
+    .catch((err) => console.log(err));
+}
+
 function getMorePostsBtn() {
     const counter = new Counter();
     const moreBtn = document.createElement('button');
@@ -131,15 +140,31 @@ function appendDataToHNPostTable(table, data) {
 
 // Event Listeners
 queryDbBtn.addEventListener('click', function (evt) {
-    const data = {
+    /*
+    values currently set in the "form" will be used to query the db;
+    partial response will be shown in a table at the bottom of the page at `/`;
+    the entire response will be serialized as a txt document
+    */
+    // store params for partial and complete db query
+    const paramsComplete = {
         'show-id-begin-range': show.id.begin.range.value,
-        'show-id-end-range': Math.min(parseInt(show.id.begin.range.value) + idRange, parseInt(show.id.end.range.value)),
+        'show-id-end-range': show.id.end.range.value,
         'show-comm-begin-range': show.comm.begin.range.value,
         'show-comm-end-range': show.comm.end.range.value,
         'show-score-begin-range': show.score.begin.range.value,
         'show-score-end-range': show.score.end.range.value,
     };
 
+    const paramsPartial = Object.assign({}, paramsComplete);
+    paramsPartial['show-id-end-range'] = Math.min(
+        parseInt(show.id.begin.range.value) + idRange, 
+        parseInt(show.id.end.range.value)
+    );
+
+    // query db and display partial response in a table
     getNewHNPostTable();
-    queryDbAndShowResult(data);
+    queryDbAndShowResult(paramsPartial);
+
+    // send params for complete query and entire corpus serialization
+    queryDbAndSerializeResult(paramsComplete);
 })

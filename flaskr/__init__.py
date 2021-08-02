@@ -68,7 +68,16 @@ def create_app(test_config=None):
         if request.method == "POST":
             form_request = parse_show_request(request)
             stories = get_requested_stories_with_children(form_request)
-            documents = get_document_dict_from_sqlite_rows(stories)        
+            documents = get_document_dict_from_sqlite_rows(stories)
             return json.dumps(documents)
+
+    @app.route("/serialize", methods=["POST"])    
+    def serialize_corpus():
+        fname = "data/corpus.txt"
+        delta_id = 10000
+
+        if request.method == "POST":
+            pass
+        return json.dumps({"status": "200"})
 
     return app
