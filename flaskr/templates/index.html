@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>HN Post Clusterer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
@@ -22,7 +22,7 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="seed-tab-btn" data-bs-toggle="tab" data-bs-target="#seed-form"
                     aria-selected="true">
-                    <h2>Seed DataBase</h2>
+                    <h2>Get and Filter Data</h2>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -42,60 +42,58 @@
         <div class="tab-content" id="tab-content">
 
             <div class="tab-pane fade show active" id="seed-form" role="tabpanel" aria-labelledby="seed-form">
-                <form action="/seed" method="POST" class="box">
-                    <p>This will take time, but you'd only need to do it once.</p>
-
-                    <div class="hor">
-                        <div id="seed-filter-by-id">
-                            <h4>Filter by Id</h4>
-                            <div>
-                                <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
-                                <br>
-                                <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" ,
-                                    max="10" , value="1">
-                            </div>
-                            <div>
-                                <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
-                                <br>
-                                <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" ,
-                                    value="10">
-                            </div>
-                        </div>
-
-                        <div id="seed-filter-by-date" style="visibility: hidden;">
-                            <h4>Filter by Date</h4>
-                            <div>
-                                <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
-                                <br>
-                                <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" ,
-                                    max="10" , value="1">
-                            </div>
-                            <div>
-                                <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
-                                <br>
-                                <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" ,
-                                    max="10" , value="10">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="seed-submit-btn">Submit</button>
-                </form>
-            </div>
-
-            <div class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
                 <div class="box">
-                    <p>
-                        Before we start using any "heavy artillery" to group HN posts, we might as well try out some
-                        simple clustering methods first and see how far we can go with that.
-                    </p>
+                    <form action="/seed" method="POST">
+                        <p>
+                            First, let's get some data from HN for further analysis. 
+                            Just specify the range of <code>id</code>s and hit the <code>Get Data</code> button.
+                        </p>
+                        <p>This will take time, but you'd only need to do it once.</p>
+
+                        <div class="controls">
+                            <div class="hor">
+                                <div id="seed-filter-by-id">
+                                    <b>Filter by Id</b>
+                                    <div>
+                                        <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
+                                        <br>
+                                        <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1"
+                                            , max="10" , value="1">
+                                    </div>
+                                    <div>
+                                        <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
+                                        <br>
+                                        <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" ,
+                                            max="10" , value="10">
+                                    </div>
+                                </div>
+
+                                <div id="seed-filter-by-date" style="visibility: hidden;">
+                                    <b>Filter by Date</b>
+                                    <div>
+                                        <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
+                                        <br>
+                                        <input type="range" name="seed-date-begin-range" id="seed-date-begin-range"
+                                            min="1" , max="10" , value="1">
+                                    </div>
+                                    <div>
+                                        <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
+                                        <br>
+                                        <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1"
+                                            , max="10" , value="10">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" id="seed-submit-btn">Get Data</button>
+                        </div>
+                    </form>
 
                     <p>
                         TODO: explain which texts are used for analysis (all post comments + title)
                     </p>
 
                     <p>
-                        Let's first filter out the posts that would be used for analysis by <code>id</code>,
+                        Let's filter out the posts that would be used for analysis by <code>id</code>,
                         <code>score</code> and <code>number of comments</code>.
                         You can change these settings any time later.
                     </p>
@@ -154,6 +152,17 @@
                         <button id="post-db-btn">Query DB</button>
                     </div>
 
+                    <p>TODO: show SQL query as details???</p>
+
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
+                <div class="box">
+                    <p>
+                        Before we start using any "heavy artillery" to group HN posts, we might as well try out some
+                        simple clustering methods first and see how far we can go with that.
+                    </p>
                     <p>
                         We'll start with Bag-of-Words representation for each document in the corpus, calculate TF-IDF
                         weights for each token in each document, and use Latent Semantic Indexing to find document
@@ -226,7 +235,7 @@
         <div class="box" id="table-root"></div>
     </main>
 
-    <script>      
+    <script>
         const container = document.querySelector('.container');
         const tabs = document.querySelectorAll('.nav-link');
 
@@ -265,13 +274,13 @@
 
         const showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
         const showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
-        
+
     </script>
 
     <script src="{{url_for('static', filename='js/tabstyle.js')}}"></script>
     <script src="{{url_for('static', filename='js/index.js')}}"></script>
     <script src="{{url_for('static', filename='js/seeddb_utils.js')}}"></script>
-    <script src="{{url_for('static', filename='js/simple_table_utils.js')}}"></script>"
+    <script src="{{url_for('static', filename='js/table_utils.js')}}"></script>"
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
