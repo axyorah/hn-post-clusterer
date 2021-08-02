@@ -236,44 +236,45 @@
     </main>
 
     <script>
-        const container = document.querySelector('.container');
-        const tabs = document.querySelectorAll('.nav-link');
+        const container = document.querySelector(".container");
+        const tabs = document.querySelectorAll(".nav-link");
 
-        // `Seed DB` tab
+        // `Get and Filter Data` tab
         const seed = new Object();
-        for (let filterBy of ['date', 'id']) {
+        for (let filterBy of ["date", "id"]) {
             if (seed[filterBy] === undefined) {
                 seed[filterBy] = new Object();
             }
-            for (let loc of ['begin', 'end']) {
+            for (let loc of ["begin", "end"]) {
                 if (seed[filterBy][loc] === undefined) {
                     seed[filterBy][loc] = new Object();
                 }
-                seed[filterBy][loc]['range'] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
-                seed[filterBy][loc]['label'] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
+                seed[filterBy][loc]["range"] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
+                seed[filterBy][loc]["label"] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
             }
         }
-        const seedSubmitBtn = document.querySelector('#seed-submit-btn');
+        const seedSubmitBtn = document.querySelector("#seed-submit-btn");
 
-        // `Simple Clustering` tab
         const show = new Object();
-        for (let filterBy of ['date', 'id', 'comm', 'score']) {
+        for (let filterBy of ["date", "id", "comm", "score"]) {
             if (show[filterBy] === undefined) {
                 show[filterBy] = new Object();
             }
-            for (let loc of ['begin', 'end']) {
+            for (let loc of ["begin", "end"]) {
                 if (show[filterBy][loc] === undefined) {
                     show[filterBy][loc] = new Object();
                 }
-                show[filterBy][loc]['range'] = document.querySelector(`#show-${filterBy}-${loc}-range`);
-                show[filterBy][loc]['label'] = document.querySelector(`#show-${filterBy}-${loc}-label`);
+                show[filterBy][loc]["range"] = document.querySelector(`#show-${filterBy}-${loc}-range`);
+                show[filterBy][loc]["label"] = document.querySelector(`#show-${filterBy}-${loc}-label`);
             }
         }
-        const queryDbBtn = document.querySelector('#post-db-btn');
-        const tableRoot = document.querySelector('#table-root');
+        const queryDbBtn = document.querySelector("#post-db-btn");
+        const tableRoot = document.querySelector("#table-root");
 
-        const showLsiTopicsNum = document.querySelector('#show-lsi-topics-num');
-        const showKmeansClustersNum = document.querySelector('#show-kmeans-clusters-num');
+        // `Simple Clustering` tab
+        const simpleClusterBtn = document.querySelector("#simple-cluster-btn");
+        const showLsiTopicsNum = document.querySelector("#show-lsi-topics-num");
+        const showKmeansClustersNum = document.querySelector("#show-kmeans-clusters-num");
 
     </script>
 
