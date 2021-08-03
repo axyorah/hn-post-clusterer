@@ -3,6 +3,8 @@ import requests as rq
 import datetime
 import json
 
+#TODO: key2html should be a dict    
+
 def parse_request(request, key2html):
     req = request.form
     form = dict()
@@ -10,15 +12,14 @@ def parse_request(request, key2html):
         try:
             form[form_name] = int(req.get(html_name))
         except:
-            print(req)
             raise NameError(f'Error accessing element with id "{html_name}"')
         
     return form
 
 def parse_show_request(request):
     key2html = [
-        ('begin_id', f'show-id-begin-range'),
-        ('end_id', f'show-id-end-range'),
+        ('begin_id', 'show-id-begin-range'),
+        ('end_id', 'show-id-end-range'),
         ('begin_comm', 'show-comm-begin-range'),
         ('end_comm', 'show-comm-end-range'),
         ('begin_score', 'show-score-begin-range'),
@@ -29,8 +30,16 @@ def parse_show_request(request):
 
 def parse_seed_request(request):
     key2html = [
-        ('begin_id', f'seed-id-begin-range'),
-        ('end_id', f'seed-id-end-range'),
+        ('begin_id', 'seed-id-begin-range'),
+        ('end_id', 'seed-id-end-range'),
+    ]
+
+    return parse_request(request, key2html)
+
+def parse_simple_cluster_request(request):
+    key2html = [
+        ('num_topics', 'show-lsi-topics-num'),
+        ('n_clusters', 'show-kmeans-clusters-num')
     ]
 
     return parse_request(request, key2html)

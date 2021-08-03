@@ -4,8 +4,9 @@ from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
 from flaskr.static.python.formutils import (
-    parse_show_request,
     parse_seed_request, 
+    parse_show_request,
+    parse_simple_cluster_request,
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     update_display_record
@@ -15,18 +16,13 @@ from flaskr.static.python.dbutils import (
     get_requested_stories_with_children
 )
 from flaskr.static.python.clusterutils import (    
-    cluster_documents
+    serialized2kmeanslabels
 )
 from . import db
 
 from flaskr.static.python.datautils import (
     get_stories_from_db_and_serialize_comments
 )
-
-# class RecordDisplay:
-#     pass
-
-# display = RecordDisplay()
 
 def create_app(test_config=None):
     # create and configure the app
@@ -82,6 +78,22 @@ def create_app(test_config=None):
             get_stories_from_db_and_serialize_comments(fname, form_request)
             return {"ok": True}
 
+        return {"ok": False}
+
+    @app.route("/simplecluster", methods=["POST"])
+    def simple_cluster():
+        fname = 'data/corpus.txt'
+        if request.method == "POST":
+            form_request = parse_simple_cluster_request(request)
+            print(form_request)
+            labels = serialized2kmeanslabels(
+                fname, form_request["num_topics"], form_request["n_clusters"]
+            )
+
+            for _ in range(50):
+                print(next(labels))
+
+            return {"ok": True}
         return {"ok": False}
 
     return app
