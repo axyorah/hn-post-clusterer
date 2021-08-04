@@ -214,6 +214,7 @@ def get_requested_stories_with_children(form_request):
             s.unix_time,
             s.score,                    
             s.title, 
+            s.url,
             s.descendants,
             (
                 SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")

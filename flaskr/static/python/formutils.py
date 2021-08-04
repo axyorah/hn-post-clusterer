@@ -81,6 +81,7 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
             'unix_time': row.__getitem__('unix_time'),
             'score': row.__getitem__('score'),
             'title': row.__getitem__('title'),
+            'url': row.__getitem__('url'),
             'descendants': row.__getitem__('descendants'),
             'children': f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
         }

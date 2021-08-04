@@ -121,6 +121,9 @@ function appendDataToHNPostTable(table, data) {
             } else {
                 td.innerText = data[storyId][field];
             }
+            if (field === 'title') {
+                td.innerHTML = `<a href=${data[storyId]['url']}>${data[storyId][field]}</a>`
+            }
             tr.appendChild(td);
         }
         // add comments as details
