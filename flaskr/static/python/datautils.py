@@ -8,7 +8,7 @@ from flaskr.static.python.formutils import (
     get_document_list_from_sqlite_rows,
 )
 from flaskr.static.python.dbutils import (
-    get_requested_stories_with_children
+    get_stories_with_children_from_id_range
 )
 
 def create_file(fname):
@@ -97,7 +97,7 @@ def get_stories_from_db_and_serialize_ids_and_comments(corpus_dir, form_request,
         print(f"serializing from {b_id} to {e_id}")
 
         # query db for a portion of data and... 
-        story_rows = get_requested_stories_with_children(form_request)        
+        story_rows = get_stories_with_children_from_id_range(form_request)        
         ids = get_id_list_from_sqlite_rows(story_rows)
         comments = get_document_list_from_sqlite_rows(story_rows)
         
