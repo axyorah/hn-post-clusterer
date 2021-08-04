@@ -13,7 +13,7 @@ from flaskr.static.python.formutils import (
 )
 from flaskr.static.python.dbutils import (
     query_api_and_add_result_to_db,
-    get_requested_stories_with_children
+    get_stories_with_children_from_id_range
 )
 from flaskr.static.python.clusterutils import (    
     serialized2kmeanslabels
@@ -21,6 +21,7 @@ from flaskr.static.python.clusterutils import (
 from . import db
 
 from flaskr.static.python.datautils import (
+    serialize_raw_documents_to_disc,
     get_stories_from_db_and_serialize_ids_and_comments
 )
 
@@ -34,6 +35,7 @@ def create_app(test_config=None):
     CORPUS_DIR = 'data'
     CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
     ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
+    LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -68,7 +70,7 @@ def create_app(test_config=None):
     def query_db():
         if request.method == "POST":
             form_request = parse_show_request(request)
-            story_rows = get_requested_stories_with_children(form_request)
+            story_rows = get_stories_with_children_from_id_range(form_request)
             story_dict = get_document_dict_from_sqlite_rows(story_rows)
             return json.dumps(story_dict)
 
@@ -89,6 +91,7 @@ def create_app(test_config=None):
             labels = serialized2kmeanslabels(
                 CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
             )
+            serialize_raw_documents_to_disc(LABEL_FNAME, labels)
 
             for _ in range(50):
                 print(next(labels))

@@ -178,8 +178,25 @@ def query_api_and_add_result_to_db(form_request):
     for item_id in extra_comment_ids:
         add_or_update_item_by_id(db, item_id)
 
-def get_requested_stories_with_children(form_request):
+def get_stories_with_children_from_id_range(form_request):
     """
+    filters the stories by the id range, #comments and score;
+    form_request: dict: should contain the following fields:
+        'begin_id'   : lower bound for story id
+        'end_id'     : higher bound for story id
+        'begin_comm' : lower bound for the number of comments
+        'end_comm'   : height bound ...
+        'begin_score': lower bound for score
+        'end_score'  : higher bound ...
+    returns a list of sql Row objects with the following fields:
+        'story_id'
+        'author'
+        'unix_time'
+        'score'
+        'title'
+        'url'
+        'descendants' : number of comments
+        'children'    : all comments related to the same story (html markup)
     """
     db = get_db()
 
