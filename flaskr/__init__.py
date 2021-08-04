@@ -93,9 +93,6 @@ def create_app(test_config=None):
             )
             serialize_raw_documents_to_disc(LABEL_FNAME, labels)
 
-            for _ in range(50):
-                print(next(labels))
-
             return {"ok": True}
         return {"ok": False}
 
