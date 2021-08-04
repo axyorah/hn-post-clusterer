@@ -21,7 +21,7 @@ from flaskr.static.python.clusterutils import (
 from . import db
 
 from flaskr.static.python.datautils import (
-    get_stories_from_db_and_serialize_comments
+    get_stories_from_db_and_serialize_ids_and_comments
 )
 
 def create_app(test_config=None):
@@ -31,6 +31,9 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
+    CORPUS_DIR = 'data'
+    CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
+    ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -71,23 +74,20 @@ def create_app(test_config=None):
 
     @app.route("/serialize", methods=["POST"])    
     def serialize_corpus():
-        fname = "data/corpus.txt"
-
         if request.method == "POST":
             form_request = parse_show_request(request)
-            get_stories_from_db_and_serialize_comments(fname, form_request)
+            get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
             return {"ok": True}
 
         return {"ok": False}
 
     @app.route("/simplecluster", methods=["POST"])
     def simple_cluster():
-        fname = 'data/corpus.txt'
         if request.method == "POST":
             form_request = parse_simple_cluster_request(request)
             print(form_request)
             labels = serialized2kmeanslabels(
-                fname, form_request["num_topics"], form_request["n_clusters"]
+                CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
             )
 
             for _ in range(50):

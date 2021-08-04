@@ -44,6 +44,12 @@ def parse_simple_cluster_request(request):
 
     return parse_request(request, key2html)
 
+def get_id_list_from_sqlite_rows(rows) -> 'List[str]':
+    """
+    Extract post 'id's from HN posts
+    """
+    return [str(row.__getitem__("story_id")) for row in rows]
+
 def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     """
     Extract 'texts' from HN posts - SQLite Row objects corresponding to HN stories
