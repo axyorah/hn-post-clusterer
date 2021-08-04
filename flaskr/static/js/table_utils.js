@@ -53,6 +53,7 @@ function getMorePostsBtn() {
         );
 
         const data = {
+            'sender': 'show',
             'show-id-begin-range': idBegin,
             'show-id-end-range': idEnd,
             'show-comm-begin-range': show.comm.begin.range.value,
@@ -146,6 +147,7 @@ queryDbBtn.addEventListener('click', function (evt) {
     */
     // store params for partial and complete db query
     const paramsComplete = {
+        'sender': 'show',
         'show-id-begin-range': show.id.begin.range.value,
         'show-id-end-range': show.id.end.range.value,
         'show-comm-begin-range': show.comm.begin.range.value,

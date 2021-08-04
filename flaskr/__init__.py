@@ -4,16 +4,15 @@ from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
 from flaskr.static.python.formutils import (
-    parse_seed_request, 
-    parse_show_request,
-    parse_simple_cluster_request,
+    RequestParser,
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     update_display_record
 )
 from flaskr.static.python.dbutils import (
     query_api_and_add_result_to_db,
-    get_stories_with_children_from_id_range
+    get_stories_with_children_from_id_range,
+    get_stories_with_children_from_id_list
 )
 from flaskr.static.python.clusterutils import (    
     serialized2kmeanslabels
@@ -53,6 +52,9 @@ def create_app(test_config=None):
     # register db with the app
     db.init_app(app)
 
+    # get request parser
+    rqparser = RequestParser() 
+
     # main page
     @app.route("/", methods=["GET"])
     def index():
@@ -61,7 +63,7 @@ def create_app(test_config=None):
     @app.route("/seed", methods=["POST"])
     def seed_db():
         if request.method == "POST":
-            form_request = parse_seed_request(request)
+            form_request = rqparser.parse(request)
             query_api_and_add_result_to_db(form_request)
 
         return redirect("/")
@@ -69,15 +71,16 @@ def create_app(test_config=None):
     @app.route("/db", methods=["POST"])
     def query_db():
         if request.method == "POST":
-            form_request = parse_show_request(request)
+            form_request = rqparser.parse(request)
             story_rows = get_stories_with_children_from_id_range(form_request)
             story_dict = get_document_dict_from_sqlite_rows(story_rows)
+            
             return json.dumps(story_dict)
 
     @app.route("/serialize", methods=["POST"])    
     def serialize_corpus():
         if request.method == "POST":
-            form_request = parse_show_request(request)
+            form_request = rqparser.parse(request)
             get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
             return {"ok": True}
 
@@ -86,8 +89,7 @@ def create_app(test_config=None):
     @app.route("/simplecluster", methods=["POST"])
     def simple_cluster():
         if request.method == "POST":
-            form_request = parse_simple_cluster_request(request)
-            print(form_request)
+            form_request = rqparser.parse(request)
             labels = serialized2kmeanslabels(
                 CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
             )

@@ -3,7 +3,83 @@ import requests as rq
 import datetime
 import json
 
-#TODO: key2html should be a dict    
+class RequestParser:
+    def __init__(self):
+        # map raw form field name (html ele id) to corresponding short name (key)
+        self.html2key = {
+            'seed-id-begin-range': 'begin_id',
+            'seed-id-end-range': 'end_id',
+            'show-id-begin-range': 'begin_id',
+            'show-id-end-range': 'end_id',
+            'show-comm-begin-range': 'begin_comm',
+            'show-comm-end-range': 'end_comm',
+            'show-score-begin-range': 'begin_score',
+            'show-score-end-range': 'end_score',
+            'show-lsi-topics-num': 'num_topics',
+            'show-kmeans-clusters-num': 'n_clusters',
+            'story_ids': 'story_ids'
+        }
+        # specify the list of html eles for each sender type
+        self.sender2html = {
+            'seed': ['seed-id-begin-range', 'seed-id-end-range'],
+            'show': [
+                'show-id-begin-range', 'show-id-end-range', 
+                'show-comm-begin-range', 'show-comm-end-range', 
+                'show-score-begin-range', 'show-score-end-range'
+            ],
+            'kmeans': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
+        }
+        # specify how each key should be parsed
+        self.key2type = {
+            **{key: 'int' for key in [
+                'begin_id', 'end_id', 
+                'begin_comm', 'end_comm', 
+                'begin_score', 'end_score', 
+                'num_topics', 'n_clusters'
+            ]},
+            'story_ids': 'list[str]'
+        }
+
+    def _parse_field(self, key, field):
+        keytype = self.key2type[key]
+        if keytype == 'int':
+            return int(field)
+        elif keytype == 'list[str]':
+            return [item for item in field.split(',')]
+        return field
+
+    def _parse_request(self, request, htmls):
+        form = request.form
+        parsed = dict()
+        for html in htmls:
+            key = self.html2key.get(html)
+            if form.get(html) is None and form.get(key) is None:
+                raise NameError(f'Error accessing element with id "{html}" ({key})')
+
+            parsed[key] = self._parse_field(key, form.get(html) or form.get(key))
+                
+        return parsed
+
+    def parse(self, request):
+        """
+        parse form request
+        request should have a field `sender` (`seed`, `show`, `kmeans`, ...)
+        which will be used to correctly parse the request
+        """
+        sender = request.form.get('sender')
+
+        if sender is None:
+            raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}'))
+
+        if self.sender2html.get(sender) is None:
+            raise(KeyError(
+                f'"Sender" not recognized! '+\
+                f'Should be one of {list(self.sender2html.keys())}.\n'+\
+                f'Got {sender}\n'+\
+                f'Received form: {request.form}\n'
+            ))
+            
+        return self._parse_request(request, self.sender2html[sender])
 
 def parse_request(request, key2html):
     req = request.form

@@ -1,6 +1,7 @@
 simpleClusterBtn.addEventListener('click', function (evt) {
     console.log('clicked simple cluster button!');
     const params = {
+        'sender': 'kmeans',
         'show-lsi-topics-num': showLsiTopicsNum.value,
         'show-kmeans-clusters-num': showKmeansClustersNum.value
     }
