@@ -6,6 +6,10 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+a {
+    color:rgb(3, 205, 255);
+}
+
 .box {
     border-radius: 2px;
     background-color: rgb(76, 73, 82);
