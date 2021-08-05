@@ -73,7 +73,7 @@ function getMorePostsBtn() {
     return moreBtn;
 }
 
-function getNewHNPostTable(withMoreBtn=true) {
+function getNewHNPostTable(morePostBtn) {
     // clear table
     tableRoot.innerHTML = '';
     const table = document.createElement('table');
@@ -89,10 +89,9 @@ function getNewHNPostTable(withMoreBtn=true) {
     }
     table.appendChild(trHead);
 
-    // create `more` button if required
-    if (withMoreBtn) {
-        moreBtn = getMorePostsBtn();
-        tableRoot.appendChild(moreBtn);
+    // [optional] add a button to show more posts
+    if (morePostBtn) {
+        tableRoot.appendChild(morePostBtn);
     }    
 
     return table;
@@ -165,7 +164,8 @@ queryDbBtn.addEventListener('click', function (evt) {
     );
 
     // query db and display partial response in a table
-    getNewHNPostTable();
+    const morePostBtn = getMorePostsBtn();
+    getNewHNPostTable(morePostBtn);
     queryDbAndShowResult(paramsPartial);
 
     // send params for complete query and entire corpus serialization
