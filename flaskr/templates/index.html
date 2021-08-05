@@ -202,6 +202,20 @@
                         <button id="simple-cluster-btn">Run a Simple Clustering</button>
                     </div>
 
+                    <p>Select all posts in cluster...</p>
+                    <div class="controls">
+                        <div class="hor">
+                            <div id="show-kmeans-clustered-posts">
+                                <b>Cluster Index</b>
+                                <div>
+                                    <input type="number" name="show-kmeans-clustered-posts-num" id="show-kmeans-clustered-posts-num"
+                                        min="0", value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <button id="kmeans-clustered-posts-btn">Show Posts</button>
+                    </div>
+
                 </div>
 
             </section>
@@ -278,6 +292,8 @@
         const simpleClusterBtn = document.querySelector("#simple-cluster-btn");
         const showLsiTopicsNum = document.querySelector("#show-lsi-topics-num");
         const showKmeansClustersNum = document.querySelector("#show-kmeans-clusters-num");
+        const kmeansClusteredPostsBtn = document.querySelector("#kmeans-clustered-posts-btn");
+        const showKmeansClusteredPostsNum = document.querySelector("#show-kmeans-clustered-posts-num")
 
     </script>
 

@@ -17,7 +17,8 @@ class RequestParser:
             'show-score-end-range': 'end_score',
             'show-lsi-topics-num': 'num_topics',
             'show-kmeans-clusters-num': 'n_clusters',
-            'story_ids': 'story_ids'
+            'story_ids': 'story_ids',
+            'fname': 'fname',
         }
         # specify the list of html eles for each sender type
         self.sender2html = {
@@ -27,7 +28,9 @@ class RequestParser:
                 'show-comm-begin-range', 'show-comm-end-range', 
                 'show-score-begin-range', 'show-score-end-range'
             ],
-            'kmeans': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
+            'kmeans-run': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
+            'kmeans-show': ['story_ids'],
+            'reader': ['fname']
         }
         # specify how each key should be parsed
         self.key2type = {
@@ -37,6 +40,7 @@ class RequestParser:
                 'begin_score', 'end_score', 
                 'num_topics', 'n_clusters'
             ]},
+            'fname': 'str',
             'story_ids': 'list[str]'
         }
 
@@ -44,6 +48,8 @@ class RequestParser:
         keytype = self.key2type[key]
         if keytype == 'int':
             return int(field)
+        if keytype == 'str':
+            return field
         elif keytype == 'list[str]':
             return [item for item in field.split(',')]
         return field

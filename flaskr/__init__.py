@@ -20,6 +20,7 @@ from flaskr.static.python.clusterutils import (
 from . import db
 
 from flaskr.static.python.datautils import (
+    create_file,
     serialize_raw_documents_to_disc,
     get_stories_from_db_and_serialize_ids_and_comments
 )
@@ -72,7 +73,14 @@ def create_app(test_config=None):
     def query_db():
         if request.method == "POST":
             form_request = rqparser.parse(request)
-            story_rows = get_stories_with_children_from_id_range(form_request)
+            
+            if request.form.get('sender') == 'show':
+                story_rows = get_stories_with_children_from_id_range(form_request)
+            elif request.form.get('sender') == 'kmeans-show':
+                story_rows = get_stories_with_children_from_id_list(form_request)
+            else:
+                story_rows = []
+            
             story_dict = get_document_dict_from_sqlite_rows(story_rows)
             
             return json.dumps(story_dict)
@@ -93,9 +101,18 @@ def create_app(test_config=None):
             labels = serialized2kmeanslabels(
                 CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
             )
+            create_file(LABEL_FNAME)
             serialize_raw_documents_to_disc(LABEL_FNAME, labels)
 
             return {"ok": True}
         return {"ok": False}
+
+    @app.route("/readfile", methods=["POST"])
+    def file_reader():
+        if request.method == "POST":
+            form_request = rqparser.parse(request)
+            with open(form_request["fname"], "r") as f:
+                lines = f.read().splitlines()
+            return {"contents": lines, "ok": True}
 
     return app
