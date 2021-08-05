@@ -21,6 +21,8 @@ const range = {
     }
 }
 
+const spinnerAmination = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
 // Helpers
 const config = {
     date: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {

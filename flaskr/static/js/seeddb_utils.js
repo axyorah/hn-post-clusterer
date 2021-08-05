@@ -1,6 +1,5 @@
-seedSubmitBtn.addEventListener('click', (evt) => {
-    seedSubmitBtn.innerHTML = 
-    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Data from HN...'
+seedSubmitBtn.addEventListener('click', function (evt) {
+    this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
 })
 
 for (let filterBy of ['date', 'id']) {
