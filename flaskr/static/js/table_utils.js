@@ -73,7 +73,7 @@ function getMorePostsBtn() {
     return moreBtn;
 }
 
-function getNewHNPostTable() {
+function getNewHNPostTable(withMoreBtn=true) {
     // clear table
     tableRoot.innerHTML = '';
     const table = document.createElement('table');
@@ -89,9 +89,11 @@ function getNewHNPostTable() {
     }
     table.appendChild(trHead);
 
-    // create `more` button
-    moreBtn = getMorePostsBtn();
-    tableRoot.appendChild(moreBtn);
+    // create `more` button if required
+    if (withMoreBtn) {
+        moreBtn = getMorePostsBtn();
+        tableRoot.appendChild(moreBtn);
+    }    
 
     return table;
 }
