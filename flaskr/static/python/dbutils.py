@@ -164,19 +164,86 @@ def query_api_and_add_result_to_db(form_request):
     """
     db = get_db()
     extra_comment_ids = []
-
+    
     # add/update all items in the requested range
+    print(f'<<< REQUESTING ITEMS FROM {form_request["begin_id"]} TO {form_request["end_id"]} >>>')
     for item_id in range(form_request['begin_id'], form_request['end_id']+1):
         item = add_or_update_item_by_id(db, item_id)
 
         # for stories only: record comments (kids) outside requested range
         if item is not None and item.get('kids', None) is not None:
             extra_comment_ids.extend(item['kids'])
-
+    
     # add comments outside the requested range
     # if they are parented by the stories withing the requested range
+    print('<<< REQUESTING MORE ITEMS! >>>')
     for item_id in extra_comment_ids:
         add_or_update_item_by_id(db, item_id)
+
+def get_stories_with_children_from_id_list(form_request):
+    """
+    fetches the stories with specified id list;
+    form_request: dict: should contain the following fields:
+        'story_ids'   : list of story ids
+    returns a list of sql Row objects with the following fields:
+        'story_id'
+        'author'
+        'unix_time'
+        'score'
+        'title'
+        'url'
+        'descendants' : number of comments
+        'children'    : all comments related to the same story (html markup)
+    """
+    db = get_db()
+    
+    return  db.execute(        
+        f'''
+        WITH RECURSIVE tab(id, parent_id, root_id, level, title, body) AS (
+            SELECT 
+                s.story_id, 
+                s.story_id,
+                s.story_id,
+                1,
+                s.title,
+                s.url
+            FROM story AS s
+            
+            UNION
+
+            SELECT
+                c.comment_id, 
+                c.parent_id,
+                tab.root_id,
+                tab.level + 1,
+                c.author,
+                c.body
+            FROM tab, comment as c WHERE c.parent_id = tab.id
+        ) 
+
+        SELECT 
+            s.story_id,
+            s.author, 
+            s.unix_time,
+            s.score,
+            s.title, 
+            s.url,
+            s.descendants,
+            (
+                SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
+                FROM tab
+                WHERE root_id = s.story_id
+                GROUP BY root_id
+            ) AS children            
+        FROM story AS s
+        WHERE 
+            s.story_id IN ({", ".join("?" for _ in form_request["story_ids"])})
+        ;
+        ''', 
+        tuple(form_request['story_ids'])
+    ).fetchall()
+    #", ".join("?" for _ in form_request["story_ids"])
+    #"?, " * len(form_request["story_ids"])
 
 def get_stories_with_children_from_id_range(form_request):
     """
@@ -229,7 +296,7 @@ def get_stories_with_children_from_id_range(form_request):
             s.story_id,
             s.author, 
             s.unix_time,
-            s.score,                    
+            s.score,
             s.title, 
             s.url,
             s.descendants,
