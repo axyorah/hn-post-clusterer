@@ -5,7 +5,7 @@ function filterAbyBwhereBisC(a, b, c) {
     }).filter(val => val !== undefined);
 }
 
-simpleClusterBtn.addEventListener('click', function (evt) {
+runSimpleClusterBtn.addEventListener('click', function (evt) {
     console.log('clicked simple cluster button!');
     const params = {
         'sender': 'kmeans-run',
@@ -20,7 +20,7 @@ simpleClusterBtn.addEventListener('click', function (evt) {
         .catch(err => console.log(err));
 })
 
-kmeansClusteredPostsBtn.addEventListener('click', function (evt) {
+showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
     console.log('clicked show posts btn');
     const targetLabel = showKmeansClusteredPostsNum.value;
 
