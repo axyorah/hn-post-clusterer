@@ -278,7 +278,7 @@ def get_stories_with_children_from_id_range(form_request):
                 s.title,
                 s.url
             FROM story AS s
-            WHERE s.story_id BETWEEN ? AND ?
+            -- WHERE s.story_id BETWEEN ? AND ?
 
             UNION
 
@@ -314,7 +314,7 @@ def get_stories_with_children_from_id_range(form_request):
         ;
         ''', 
         (
-            form_request['begin_id'], form_request['end_id'], 
+            #form_request['begin_id'], form_request['end_id'], 
             form_request['begin_id'], form_request['end_id'],
             form_request['begin_comm'], form_request['end_comm'],
             form_request['begin_score'], form_request['end_score']
