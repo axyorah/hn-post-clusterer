@@ -12,12 +12,21 @@ runSimpleClusterBtn.addEventListener('click', function (evt) {
         'show-lsi-topics-num': showLsiTopicsNum.value,
         'show-kmeans-clusters-num': showKmeansClustersNum.value
     }
+    
+    // add in-progress animation
+    this.innerHTML = 
+        `${spinnerAmination} Running BoW &rarr; TF-IDF &rarr; LSI &rarr; k-Means...`;
 
+    // run clustering, change button text when done
     postData('/simplecluster', params)
         .then(res => {
             console.log(res);
+            this.innerHTML = 'Run Simple Clustering';
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.log(err);
+            this.innerHTML = 'Run Simple Clustering';
+        });
 })
 
 showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
@@ -25,6 +34,9 @@ showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
     const targetLabel = showKmeansClusteredPostsNum.value;
 
     let labels, all_ids, filtered_ids;
+
+    // add in-progress animation
+    this.innerHTML = `${spinnerAmination} Querying DB...`;
 
     // read all labels
     postData('/readfile', {
@@ -49,6 +61,10 @@ showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
         // display filtered posts in a new table
         console.log(res);
         const table = getNewHNPostTable(); // no morePostsBtn!
-        appendDataToHNPostTable(table, res);        
-    }).catch(err => console.log(err))
+        appendDataToHNPostTable(table, res);
+        this.innerHTML = 'Show Posts';      
+    }).catch(err => {
+        console.log(err)
+        this.innerHTML = 'Show Posts';
+    })
 })
