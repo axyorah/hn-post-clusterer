@@ -3,11 +3,11 @@ import json
 import bs4 as bs
 from gensim.parsing.preprocessing import preprocess_documents
 
-from flaskr.static.python.formutils import (
+from flaskr.utils.formutils import (
     get_id_list_from_sqlite_rows,
     get_document_list_from_sqlite_rows,
 )
-from flaskr.static.python.dbutils import (
+from flaskr.utils.dbutils import (
     get_stories_with_children_from_id_range
 )
 
