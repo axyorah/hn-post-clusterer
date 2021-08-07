@@ -53,7 +53,7 @@ showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
         // filter ids based on the target label and query db
         all_ids = res.contents;
         filtered_ids = filterAbyBwhereBisC(all_ids, labels, targetLabel);
-        return postData('/db', {
+        return postData('/db/get', {
             'sender': 'kmeans-show',
             'story_ids': filtered_ids,
         })

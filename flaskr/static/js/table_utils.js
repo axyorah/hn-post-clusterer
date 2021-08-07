@@ -17,7 +17,7 @@ function queryDbAndShowResult(data) {
         tableRoot.children[0] : getNewHNPostTable();
 
     // post form data to DB server, display res in a table
-    postData('/db', data)
+    postData('/db/get', data)
     .then(res => {
         console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
         appendDataToHNPostTable(table, res);

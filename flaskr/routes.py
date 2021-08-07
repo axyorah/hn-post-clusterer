@@ -40,7 +40,7 @@ LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
 def index():
     return render_template("index.html")
 
-@app.route("/seed", methods=["POST"])
+@app.route("/db/add", methods=["POST"])
 def seed_db():
     if request.method == "POST":
         form_request = rqparser.parse(request)
@@ -48,7 +48,7 @@ def seed_db():
 
     return {"ok": True}
 
-@app.route("/db", methods=["POST"])
+@app.route("/db/get", methods=["POST"])
 def query_db():
     if request.method == "POST":
         form_request = rqparser.parse(request)

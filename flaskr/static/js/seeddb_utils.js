@@ -8,7 +8,7 @@ seedSubmitBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
 
     // seed db with entries withing specified id range
-    postData('/seed', params)
+    postData('/db/add', params)
         .then(res => {
             // stop spinner animation
             this.innerHTML = 'Get Data';
