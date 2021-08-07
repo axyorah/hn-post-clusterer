@@ -3,23 +3,23 @@ import os, json, datetime
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
-from flaskr.static.python.formutils import (
+from flaskr.utils.formutils import (
     RequestParser,
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     update_display_record
 )
-from flaskr.static.python.dbutils import (
+from flaskr.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_stories_with_children_from_id_range,
     get_stories_with_children_from_id_list
 )
-from flaskr.static.python.clusterutils import (    
+from flaskr.utils.clusterutils import (    
     serialized2kmeanslabels
 )
 from . import db
 
-from flaskr.static.python.datautils import (
+from flaskr.utils.datautils import (
     create_file,
     serialize_raw_documents_to_disc,
     get_stories_from_db_and_serialize_ids_and_comments
@@ -67,7 +67,7 @@ def create_app(test_config=None):
             form_request = rqparser.parse(request)
             query_api_and_add_result_to_db(form_request)
 
-        return redirect("/")
+        return {"ok": True}
 
     @app.route("/db", methods=["POST"])
     def query_db():
