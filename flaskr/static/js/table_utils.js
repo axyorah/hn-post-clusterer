@@ -27,7 +27,7 @@ function queryDbAndShowResult(data) {
 
 function queryDbAndSerializeResult(data) {
     // post form data to DB server, display res in a table
-    postData('/serialize', data)
+    postData('/file/write', data)
     .then(res => {
         console.log(`Serialized stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);        
     })

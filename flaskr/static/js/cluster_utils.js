@@ -39,13 +39,13 @@ showSimpleClusterPostsBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Querying DB...`;
 
     // read all labels
-    postData('/readfile', {
+    postData('/file/read', {
         'sender': 'reader',
         'fname': 'data/labels.txt'
     }).then(res => {
         // read all ids
         labels = res.contents;
-        return postData('/readfile', {
+        return postData('/file/read', {
             'sender': 'reader',
             'fname': 'data/ids.txt'
         })

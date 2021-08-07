@@ -64,8 +64,17 @@ def query_db():
             
         return json.dumps(story_dict)
 
-@app.route("/serialize", methods=["POST"])    
+@app.route("/file/read", methods=["POST"])
+def file_reader():
+    if request.method == "POST":
+        form_request = rqparser.parse(request)
+        with open(form_request["fname"], "r") as f:
+            lines = f.read().splitlines()
+        return {"contents": lines, "ok": True}
+
+@app.route("/file/write", methods=["POST"])    
 def serialize_corpus():
+    #TODO: split it into two: js -> py: get data -> js -> py: write res1, write res2
     if request.method == "POST":
         form_request = rqparser.parse(request)
         get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
@@ -85,11 +94,3 @@ def simple_cluster():
 
         return {"ok": True}
     return {"ok": False}
-
-@app.route("/readfile", methods=["POST"])
-def file_reader():
-    if request.method == "POST":
-        form_request = rqparser.parse(request)
-        with open(form_request["fname"], "r") as f:
-            lines = f.read().splitlines()
-        return {"contents": lines, "ok": True}
