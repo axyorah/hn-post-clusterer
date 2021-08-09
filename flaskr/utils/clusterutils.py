@@ -7,9 +7,9 @@ from numpy.lib.function_base import copy
 import gensim
 from gensim import corpora, models
 from gensim.parsing.preprocessing import preprocess_documents
-import sklearn
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+#import sklearn
+#from sklearn.cluster import KMeans
+#from sklearn.metrics import silhouette_score
 from smart_open import open  # for transparently opening remote files
 from itertools import cycle, tee
 

@@ -28,5 +28,6 @@ def create_app(test_config=None):
 
     with app.app_context():
         from . import routes
+        from .dashapp import init_dashboard
+        app = init_dashboard(app)
         return app
-        
