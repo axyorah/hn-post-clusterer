@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/figures.css')}}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
@@ -197,7 +198,7 @@
                         <button id="run-simple-cluster-btn">Run a Simple Clustering</button>
                     </div>
 
-                    <iframe class="w-100" src="/dashapp"></iframe>
+                    <div id="bar-plot-root"></div>
 
                     <p>Select all posts in cluster...</p>
                     <div class="controls">
@@ -291,6 +292,7 @@
         const showKmeansClustersNum = document.querySelector("#show-kmeans-clusters-num");
         const showSimpleClusterPostsBtn = document.querySelector("#show-simple-cluster-posts-btn");
         const showKmeansClusteredPostsNum = document.querySelector("#show-kmeans-clustered-posts-num")
+        const barPlotRoot = document.querySelector('#bar-plot-root')
 
     </script>
 

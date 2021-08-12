@@ -14,6 +14,12 @@ CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
 ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
 
+STYLE = {
+    'background_color': 'rgba(255,255,255,0.1)',
+    'paper_color': 'rgb(76, 73, 82)',
+    'text_color': 'white'
+}
+
 def create_dataframe():
     with open(ID_FNAME, 'r') as f:
         ids = f.read().splitlines()
@@ -38,7 +44,12 @@ def get_barplot(df):
 
     fig.update_xaxes(title='Cluster Indices')
     fig.update_yaxes(title='Number of Posts')
-    fig.update_layout(transition_duration=500)
+    fig.update_layout(
+        transition_duration=500,
+        plot_bgcolor=STYLE['background_color'],
+        paper_bgcolor=STYLE['paper_color'],
+        font_color=STYLE['text_color']
+    )
 
     return fig
     
@@ -49,7 +60,10 @@ def init_dashboard(server):
     dash_app = dash.Dash(
         server=server,
         routes_pathname_prefix='/dashapp/',
-        external_stylesheets=['../static/css/style.css']
+        external_stylesheets=[
+            '../static/css/style.css', 
+            '../static/css/figures.css',
+        ]
     )
 
     dash_app.layout = html.Div(
@@ -59,9 +73,9 @@ def init_dashboard(server):
                 className='graph',
                 figure=get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
             ),
-            html.Button('Update', id='bar-chart-update-btn', n_clicks=0),
+            html.Button('Update', id='bar-chart-update-btn', className='graph-btn', n_clicks=0),
         ],
-        id='dash-container'
+        id='dash-container',
     )
 
     @dash_app.callback(

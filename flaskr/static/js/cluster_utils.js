@@ -20,8 +20,20 @@ runSimpleClusterBtn.addEventListener('click', function (evt) {
     // run clustering, change button text when done
     postData('/simplecluster', params)
         .then(res => {
+            // change button text
             console.log(res);
             this.innerHTML = 'Run Simple Clustering';
+
+            // display bar plot with cluster sizes:
+            // create bar plot and store it in barPlotRef
+            const barPlotRef = document.createElement('iframe');
+            barPlotRef.setAttribute('class', 'graph-container');
+            barPlotRef.setAttribute('src', '/dashapp');
+            // make sure that barPlotRef is the only child of barPlotRoot
+            while (barPlotRoot.children.length) {
+                barPlotRoot.removeChild(barPlotRoot.children[barPlotRoot.children.length - 1]);
+            }
+            barPlotRoot.appendChild(barPlotRef);
         })
         .catch(err => {
             console.log(err);
