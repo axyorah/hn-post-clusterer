@@ -34,16 +34,19 @@ def create_dataframe():
 
 def get_barplot(df):
     # Custom HTML layout
-    fig = px.bar(
-        x=np.unique(df['label']),
-        y=[
+    df_bar = {
+        'Cluster#': np.unique(df['label']),
+        'Number of Posts': [
             sum(1 for lbl in df['label'] if lbl == tar) 
             for tar in np.unique(df['label'])
         ]
+    }
+    fig = px.bar(
+        df_bar,
+        x='Cluster#',
+        y='Number of Posts'
     )
 
-    fig.update_xaxes(title='Cluster Indices')
-    fig.update_yaxes(title='Number of Posts')
     fig.update_layout(
         transition_duration=500,
         plot_bgcolor=STYLE['background_color'],
