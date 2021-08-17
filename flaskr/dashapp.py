@@ -79,6 +79,7 @@ def get_scatterplot(df):
         x='Axis-A', 
         y='Axis-B', 
         color='Cluster#', 
+        opacity=0.5,
         hover_data=['id'],
         category_orders={'Cluster#': list(np.unique(df['label']))}
     )
