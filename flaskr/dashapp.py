@@ -13,12 +13,22 @@ CORPUS_DIR = 'data'
 CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
 ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
+LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
 
 STYLE = {
     'background_color': 'rgba(255,255,255,0.1)',
     'paper_color': 'rgb(76, 73, 82)',
     'text_color': 'white'
 }
+
+def update_fig_layout(fig):
+    # update style to match the rest of the flask app style
+    fig.update_layout(
+        transition_duration=500,
+        plot_bgcolor=STYLE['background_color'],
+        paper_bgcolor=STYLE['paper_color'],
+        font_color=STYLE['text_color']
+    )
 
 def create_dataframe():
     with open(ID_FNAME, 'r') as f:
@@ -27,9 +37,13 @@ def create_dataframe():
     with open(LABEL_FNAME, 'r') as f:
         labels = f.read().splitlines()
 
+    with open(LSI_FNAME, 'r') as f:
+        lsi = np.array([[float(val) for val in line.split(' ')] for line in f.read().splitlines()])
+
     return pd.DataFrame(data={
         'id': ids,
-        'label': labels
+        'label': labels,
+        **{f'lsi-{i}': lsi[:,i] for i in range(lsi.shape[1])}
     })
 
 def get_barplot(df):
@@ -48,13 +62,40 @@ def get_barplot(df):
         y='Number of Posts'
     )
 
+    update_fig_layout(fig)
     # update style to match the rest of the flask app style
-    fig.update_layout(
-        transition_duration=500,
-        plot_bgcolor=STYLE['background_color'],
-        paper_bgcolor=STYLE['paper_color'],
-        font_color=STYLE['text_color']
+    # fig.update_layout(
+    #     transition_duration=500,
+    #     plot_bgcolor=STYLE['background_color'],
+    #     paper_bgcolor=STYLE['paper_color'],
+    #     font_color=STYLE['text_color']
+    # )
+
+    return fig
+
+def get_scatterplot(df):
+    df_scat = {
+        'Axis-A': df['lsi-0'],
+        'Axis-B': df['lsi-1'],
+        'id': df['id'],
+        'Cluster#': df['label'],
+    }
+    fig = px.scatter(
+        df_scat, 
+        x='Axis-A', 
+        y='Axis-B', 
+        color='Cluster#', 
+        hover_data=['id']
     )
+
+    update_fig_layout(fig)
+    # update style to match the rest of the flask app style
+    # fig.update_layout(
+    #     transition_duration=500,
+    #     plot_bgcolor=STYLE['background_color'],
+    #     paper_bgcolor=STYLE['paper_color'],
+    #     font_color=STYLE['text_color']
+    # )
 
     return fig
     
@@ -77,6 +118,7 @@ def init_dashboard(server):
     ])
 
     # --- Simple Clustering ---
+    df = create_dataframe()
     # bar plot
     simple_cluster_bar_plot = html.Div(
         children=[
@@ -94,9 +136,29 @@ def init_dashboard(server):
         Output(component_id='bar-plot', component_property='figure'),
         Input(component_id='bar-plot-update-btn', component_property='n_clicks')
     )
-    def update(n_clicks):
-        df = create_dataframe()
+    def update_bar_plot(n_clicks):
         return get_barplot(df)
+
+    # 2d cluster scatter plot
+    simple_cluster_scatter_plot = html.Div(
+        children=[
+            dcc.Graph(
+                id='simple-cluster-2d',
+                className='graph',
+                figure=get_scatterplot(
+                    pd.DataFrame(data={'id': [], 'label': [], 'lsi-0': [], 'lsi-1': []})
+                )
+            ),
+            html.Button('Update', id='scatter-plot-update-btn', className='graph-btn', n_clicks=0),
+        ]
+    )
+
+    @dash_app.callback(
+        Output(component_id='simple-cluster-2d', component_property='figure'),
+        Input(component_id='scatter-plot-update-btn', component_property='n_clicks')
+    )
+    def update_scatter_plot(n_clicks):
+        return get_scatterplot(df)
 
     # --- Put Everything Together ---
     # NOTE ON CALLBACKS:
@@ -113,6 +175,8 @@ def init_dashboard(server):
     def display_page(pathname):
         if pathname == '/dashapp/simple-cluster-bar-plot':
             return simple_cluster_bar_plot
+        elif pathname == '/dashapp/simple-cluster-scatter-plot':
+            return simple_cluster_scatter_plot
         else:
             return #TODO: error page
 

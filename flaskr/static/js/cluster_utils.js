@@ -24,16 +24,23 @@ runSimpleClusterBtn.addEventListener('click', function (evt) {
             console.log(res);
             this.innerHTML = 'Run Simple Clustering';
 
-            // display bar plot with cluster sizes:
+            // display plots:
             // create bar plot and store it in barPlotRef
             const barPlotRef = document.createElement('iframe');
             barPlotRef.setAttribute('class', 'graph-container');
             barPlotRef.setAttribute('src', '/dashapp/simple-cluster-bar-plot');
-            // make sure that barPlotRef is the only child of barPlotRoot
-            while (barPlotRoot.children.length) {
-                barPlotRoot.removeChild(barPlotRoot.children[barPlotRoot.children.length - 1]);
+
+            // create 2d scatter plot with two axes = first two LSI coordinates
+            const scatter2DPlotRef = document.createElement('iframe');
+            scatter2DPlotRef.setAttribute('class', 'graph-container');
+            scatter2DPlotRef.setAttribute('src', '/dashapp/simple-cluster-scatter-plot');
+            
+            // make sure that the new plots are the only children of barPlotRoot
+            while (simpleClusterPlotRoot.children.length) {
+                simpleClusterPlotRoot.removeChild(simpleClusterPlotRoot.children[simpleClusterPlotRoot.children.length - 1]);
             }
-            barPlotRoot.appendChild(barPlotRef);
+            simpleClusterPlotRoot.appendChild(barPlotRef);
+            simpleClusterPlotRoot.appendChild(scatter2DPlotRef);
         })
         .catch(err => {
             console.log(err);
