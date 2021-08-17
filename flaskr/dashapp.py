@@ -59,17 +59,11 @@ def get_barplot(df):
     fig = px.bar(
         df_bar,
         x='Cluster#',
-        y='Number of Posts'
+        y='Number of Posts',
+        color='Cluster#'
     )
 
     update_fig_layout(fig)
-    # update style to match the rest of the flask app style
-    # fig.update_layout(
-    #     transition_duration=500,
-    #     plot_bgcolor=STYLE['background_color'],
-    #     paper_bgcolor=STYLE['paper_color'],
-    #     font_color=STYLE['text_color']
-    # )
 
     return fig
 
@@ -85,17 +79,11 @@ def get_scatterplot(df):
         x='Axis-A', 
         y='Axis-B', 
         color='Cluster#', 
-        hover_data=['id']
+        hover_data=['id'],
+        category_orders={'Cluster#': list(np.unique(df['label']))}
     )
 
     update_fig_layout(fig)
-    # update style to match the rest of the flask app style
-    # fig.update_layout(
-    #     transition_duration=500,
-    #     plot_bgcolor=STYLE['background_color'],
-    #     paper_bgcolor=STYLE['paper_color'],
-    #     font_color=STYLE['text_color']
-    # )
 
     return fig
     

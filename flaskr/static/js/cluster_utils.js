@@ -35,7 +35,7 @@ runSimpleClusterBtn.addEventListener('click', function (evt) {
             scatter2DPlotRef.setAttribute('class', 'graph-container');
             scatter2DPlotRef.setAttribute('src', '/dashapp/simple-cluster-scatter-plot');
             
-            // make sure that the new plots are the only children of barPlotRoot
+            // make sure that the new plots are the only children of simpleClusterPlotRoot
             while (simpleClusterPlotRoot.children.length) {
                 simpleClusterPlotRoot.removeChild(simpleClusterPlotRoot.children[simpleClusterPlotRoot.children.length - 1]);
             }
