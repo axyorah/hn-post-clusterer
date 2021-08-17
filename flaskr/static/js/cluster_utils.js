@@ -28,7 +28,7 @@ runSimpleClusterBtn.addEventListener('click', function (evt) {
             // create bar plot and store it in barPlotRef
             const barPlotRef = document.createElement('iframe');
             barPlotRef.setAttribute('class', 'graph-container');
-            barPlotRef.setAttribute('src', '/dashapp');
+            barPlotRef.setAttribute('src', '/dashapp/simple-cluster-bar-plot');
             // make sure that barPlotRef is the only child of barPlotRoot
             while (barPlotRoot.children.length) {
                 barPlotRoot.removeChild(barPlotRoot.children[barPlotRoot.children.length - 1]);

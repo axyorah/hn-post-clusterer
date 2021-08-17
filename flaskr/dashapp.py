@@ -33,7 +33,7 @@ def create_dataframe():
     })
 
 def get_barplot(df):
-    # Custom HTML layout
+    # get relevant data
     df_bar = {
         'Cluster#': np.unique(df['label']),
         'Number of Posts': [
@@ -41,12 +41,14 @@ def get_barplot(df):
             for tar in np.unique(df['label'])
         ]
     }
+
     fig = px.bar(
         df_bar,
         x='Cluster#',
         y='Number of Posts'
     )
 
+    # update style to match the rest of the flask app style
     fig.update_layout(
         transition_duration=500,
         plot_bgcolor=STYLE['background_color'],
@@ -69,24 +71,49 @@ def init_dashboard(server):
         ]
     )
 
-    dash_app.layout = html.Div(
+    dash_app.layout = html.Div([
+        dcc.Location(id='url', refresh=False),
+        html.Div(id='page-content')
+    ])
+
+    # --- Simple Clustering ---
+    # bar plot
+    simple_cluster_bar_plot = html.Div(
         children=[
             dcc.Graph(
-                id='bar-chart',
+                id='bar-plot',
                 className='graph',
                 figure=get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
             ),
-            html.Button('Update', id='bar-chart-update-btn', className='graph-btn', n_clicks=0),
+            html.Button('Update', id='bar-plot-update-btn', className='graph-btn', n_clicks=0),
         ],
         id='dash-container',
     )
 
     @dash_app.callback(
-        Output(component_id='bar-chart', component_property='figure'),
-        Input(component_id='bar-chart-update-btn', component_property='n_clicks')
+        Output(component_id='bar-plot', component_property='figure'),
+        Input(component_id='bar-plot-update-btn', component_property='n_clicks')
     )
     def update(n_clicks):
         df = create_dataframe()
         return get_barplot(df)
+
+    # --- Put Everything Together ---
+    # NOTE ON CALLBACKS:
+    # since in the callbacks we're refering to elements that are not added to layout 
+    # Dash will show a warning in console;
+    # these warnings can be ignored, since we are actually adding these elements indirectly in `display_page(.)`
+    # (e.g., div with id='bar-plot' is not added to layout directly, 
+    # it belongs to `simple_cluster_bar_plot` html.Div object, which we return in the callback below;
+    # see: https://dash.plotly.com/urls)
+    @dash_app.callback(
+        Output('page-content', 'children'),
+        Input('url', 'pathname')
+    )
+    def display_page(pathname):
+        if pathname == '/dashapp/simple-cluster-bar-plot':
+            return simple_cluster_bar_plot
+        else:
+            return #TODO: error page
 
     return dash_app.server
