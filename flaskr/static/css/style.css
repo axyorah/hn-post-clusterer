@@ -53,3 +53,13 @@ button:hover {
     cursor: pointer;
     background-color: rgba(0,0,0,0.1)
 }
+
+@media all and (max-width: 959px) {
+    .col_0, .col_1, .col_2, .col_6 {
+        display: none;
+        width:0;
+        height:0;
+        opacity:0;
+        visibility: collapse;       
+    } 
+}

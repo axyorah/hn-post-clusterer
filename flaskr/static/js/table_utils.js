@@ -88,10 +88,12 @@ function getNewHNPostTable(morePostBtn) {
     tableRoot.appendChild(table);
 
     // create header
+    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', '#comments', 'comments'];
     const trHead = document.createElement('tr');
-    for (let field of ['story_id', 'author', 'unix_time', 'score', 'title', '#comments', 'comments']) {
-        const th = document.createElement('th')
-        th.innerText = field;
+    for (let i = 0; i < fields.length; i++ ) {
+        const th = document.createElement('th');
+        th.innerText = fields[i];
+        th.setAttribute('class', `col_${i}`);
         trHead.appendChild(th);
     }
     table.appendChild(trHead);
@@ -120,23 +122,28 @@ function getHTMLDetails(title, innerHTML) {
 
 function appendDataToHNPostTable(table, data) {
     // add data
-    for (let storyId of Object.keys(data)) {
+    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', 'descendants'];
+    for (let storyId of Object.keys(data)) {        
         const tr = document.createElement('tr');
-        for (let field of ['story_id', 'author', 'unix_time', 'score', 'title', 'descendants']) {
-            const td = document.createElement('td') 
-            if (field === 'unix_time') {
-                const date = new Date(data[storyId][field] * 1000);
+        
+        for (let i = 0; i < fields.length; i++ ) {
+            const td = document.createElement('td');
+            td.setAttribute('class', `col_${i}`);
+
+            if (fields[i] === 'unix_time') {
+                const date = new Date(data[storyId][fields[i]] * 1000);
                 td.innerText = `${date.getFullYear()}/${date.getMonth()}/${date.getDate()}`;
             } else {
-                td.innerText = data[storyId][field];
+                td.innerText = data[storyId][fields[i]];
             }
-            if (field === 'title') {
-                td.innerHTML = `<a href=${data[storyId]['url']}>${data[storyId][field]}</a>`
+            if (fields[i] === 'title') {
+                td.innerHTML = `<a href=${data[storyId]['url']}>${data[storyId][fields[i]]}</a>`
             }
             tr.appendChild(td);
         }
         // add comments as details
         const td = document.createElement('td');
+        td.setAttribute('class', `col_${fields.length}`);
         const details = getHTMLDetails('show', data[storyId]['children']);
         td.appendChild(details);
         tr.appendChild(td);
