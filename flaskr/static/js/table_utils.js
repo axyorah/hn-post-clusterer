@@ -15,7 +15,7 @@ function queryDbAndShowResult(data) {
     // check if table exists, create new if not
     const table = (tableRoot.children.length && tableRoot.children[0].id === 'hn-post-table') ?
         tableRoot.children[0] : getNewHNPostTable();
-
+    
     // post form data to DB server, display res in a table
     postData('/db/get', data)
     .then(res => {
@@ -26,12 +26,19 @@ function queryDbAndShowResult(data) {
 }
 
 function queryDbAndSerializeResult(data) {
+    // add in-progress animation
+    queryDbBtn.innerHTML = `${spinnerAmination} Writing result to disk...`;
+    
     // post form data to DB server, display res in a table
     postData('/file/write', data)
     .then(res => {
+        queryDbBtn.innerText = 'Query DB';
         console.log(`Serialized stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);        
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+        queryDbBtn.innerText = 'Whoopsie!';
+        console.log(err)
+    });
 }
 
 function getMorePostsBtn() {

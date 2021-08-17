@@ -14,7 +14,7 @@ seedSubmitBtn.addEventListener('click', function (evt) {
             this.innerHTML = 'Get Data';
         })
         .catch(err => {
-            this.innerHTML = 'Woopsy!';
+            this.innerHTML = 'Whoopsy!';
             console.log(err);
         })
 })
