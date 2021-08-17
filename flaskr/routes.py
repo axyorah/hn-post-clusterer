@@ -23,6 +23,7 @@ from flaskr.utils.clusterutils import (
 from flaskr.utils.datautils import (
     create_file,
     serialize_raw_documents_to_disc,
+    serialize_vectors_to_disc,
     get_stories_from_db_and_serialize_ids_and_comments
 )
 
@@ -34,6 +35,7 @@ CORPUS_DIR = 'data'
 CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
 ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
+LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
 
 # main page
 @app.route("/", methods=["GET"])
@@ -71,6 +73,8 @@ def file_reader():
         with open(form_request["fname"], "r") as f:
             lines = f.read().splitlines()
         return {"contents": lines, "ok": True}
+    
+    return {"ok": False}
 
 @app.route("/file/write", methods=["POST"])    
 def serialize_corpus():
@@ -86,11 +90,15 @@ def serialize_corpus():
 def simple_cluster():
     if request.method == "POST":
         form_request = rqparser.parse(request)
-        labels = serialized2kmeanslabels(
+        result = serialized2kmeanslabels(
             CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
         )
+
         create_file(LABEL_FNAME)
-        serialize_raw_documents_to_disc(LABEL_FNAME, labels)
+        create_file(LSI_FNAME)
+
+        serialize_raw_documents_to_disc(LABEL_FNAME, result['labels'])
+        serialize_vectors_to_disc(LSI_FNAME, result['lsi'])
 
         return {"ok": True}
     return {"ok": False}

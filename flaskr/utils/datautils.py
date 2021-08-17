@@ -1,6 +1,7 @@
 import os
 import json
 import bs4 as bs
+from numpy.lib.function_base import append
 from gensim.parsing.preprocessing import preprocess_documents
 
 from flaskr.utils.formutils import (
@@ -37,11 +38,17 @@ def append_preprocessed_document_to_file(fname, document):
     with open(fname, append_write) as f:
         f.write(f'{" ".join(document)}\n')
 
+def serialize_vectors_to_disc(fname, vectors):
+    for vector in vectors:
+        append_raw_document_to_file(
+            fname, ' '.join(str(val) for val in vector)
+        )
+
+    return True
+
 def serialize_raw_documents_to_disc(fname, documents):
-    _ = [
-        append_raw_document_to_file(fname, document) 
-        for document in documents
-    ]
+    for document in documents:
+        append_raw_document_to_file(fname, document)
 
     return True
 

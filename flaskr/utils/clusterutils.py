@@ -197,12 +197,16 @@ def serialized2kmeanslabels(fname, num_topics, n_clusters):
     dictionary = corpora.Dictionary(filtered2)
     lsi_corpus = tfidf2lsi(tfidf_corpus, dictionary, num_topics)
     lsi_vectorized = vectorize_lsi_corpus(lsi_corpus)
+    (lsi_vectorized1, lsi_vectorized2), (_,_) = copy_and_measure_generator(lsi_vectorized, 2)
 
     normalizer = GeneratorNormalizer()
-    normalized_corpus = normalizer.fit_transform(lsi_vectorized)
+    normalized_corpus = normalizer.fit_transform(lsi_vectorized1)
     (samples1, samples2), (_,_) = copy_and_measure_generator(normalized_corpus, 2)
 
     clusters = kmeans_for_generator(samples1, n_clusters=n_clusters)
     labels = assign_clusters_to_samples(samples2, clusters)
 
-    return labels
+    return {
+        'labels': labels,
+        'lsi': lsi_vectorized2
+    }
