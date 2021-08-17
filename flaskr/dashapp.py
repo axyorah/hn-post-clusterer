@@ -106,7 +106,7 @@ def init_dashboard(server):
     ])
 
     # --- Simple Clustering ---
-    df = create_dataframe()
+    #df = create_dataframe()
     # bar plot
     simple_cluster_bar_plot = html.Div(
         children=[
@@ -125,6 +125,7 @@ def init_dashboard(server):
         Input(component_id='bar-plot-update-btn', component_property='n_clicks')
     )
     def update_bar_plot(n_clicks):
+        df = create_dataframe()
         return get_barplot(df)
 
     # 2d cluster scatter plot
@@ -146,6 +147,7 @@ def init_dashboard(server):
         Input(component_id='scatter-plot-update-btn', component_property='n_clicks')
     )
     def update_scatter_plot(n_clicks):
+        df = create_dataframe()
         return get_scatterplot(df)
 
     # --- Put Everything Together ---
