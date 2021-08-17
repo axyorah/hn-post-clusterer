@@ -22,7 +22,7 @@ a {
 
 .hor {
     display: flex;
-    direction: horizontal;
+    flex-direction: row;
     justify-content: space-between;
 }
 
@@ -62,4 +62,21 @@ button:hover {
         opacity:0;
         visibility: collapse;       
     } 
+}
+
+@media (max-width: 499px) {
+    .hor {
+        flex-direction: column;
+    }
+    .hor-item {
+        display: flex;
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 368px) {
+    .hor-item {
+        display: flex;
+        flex-direction: column;
+    }
 }
