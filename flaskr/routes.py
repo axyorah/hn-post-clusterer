@@ -7,14 +7,14 @@ from flask import request, make_response, Response
 
 from flaskr.utils.formutils import (
     RequestParser,
-    get_document_list_from_sqlite_rows,
-    get_document_dict_from_sqlite_rows,
     update_display_record
 )
 from flaskr.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_stories_with_children_from_id_range,
-    get_stories_with_children_from_id_list
+    get_stories_with_children_from_id_list,
+    get_document_list_from_sqlite_rows,
+    get_document_dict_from_sqlite_rows,
 )
 from flaskr.utils.clusterutils import (    
     serialized2kmeanslabels
