@@ -323,7 +323,8 @@ def get_stories_with_children_from_id_range(form_request):
 
 def get_id_list_from_sqlite_rows(rows) -> 'List[str]':
     """
-    Extract post 'id's from HN posts
+    Extract post 'id's from HN posts;
+    Returns a list of ids
     """
     return [str(row.__getitem__("story_id")) for row in rows]
 
@@ -333,7 +334,8 @@ def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     with an extra field 'children' corresponding to all comments 
     concatenated into a single string;
     These concatenated comments constitute corpus documents - 
-    single document contains all comments parented by the same HN story
+    single document contains all comments parented by the same HN story;
+    Returns a list of comments 
     """
     documents = []
     for row in rows:
@@ -348,7 +350,8 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
     with an extra field 'children' corresponding to all comments 
     concatenated into a single string;
     These concatenated comments constitute corpus documents - 
-    single document contains all comments parented by the same HN story
+    single document contains all comments parented by the same HN story;
+    Returns dict with keys = story ids and values = story dicts (parsed sql row objs)
     """
     documents = dict()
     for row in rows:
@@ -365,3 +368,35 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
         
     return documents
 
+def get_stories_from_db(form_request, delta_id=10000):
+    """
+    generator - returns stories from the id range specified in form_request;
+    each story is given as a python dict with keys:
+        story_id
+        author
+        unix_time
+        score
+        title
+        url
+        descendants
+        children <- all comments corresponding to a given story
+    Under the hood uses `get_stories_with_children_from_id_range(.)`,
+    but never loads all the data from the entire queried range to mem    
+    """
+    begin_id = int(form_request["begin_id"])
+    end_id = int(form_request["end_id"])
+    for b_id in range(begin_id, end_id, delta_id):
+        # get current(!) begin_id and end_id range (b_id and e_id)
+        e_id = min(b_id + delta_id - 1, end_id)
+        form_request["begin_id"] = b_id
+        form_request["end_id"] = e_id
+        print(f"fetching posts from {b_id} to {e_id}")
+
+        # query db for a portion of data and... 
+        story_rows = get_stories_with_children_from_id_range(form_request)
+        
+        # ... yield intividual posts as dicts
+        for row in story_rows:
+            dct = get_document_dict_from_sqlite_rows([row])
+            for key, val in dct.items():
+                yield val

@@ -8,6 +8,7 @@ from flaskr.utils.dbutils import (
     get_stories_with_children_from_id_range,
     get_id_list_from_sqlite_rows,
     get_document_list_from_sqlite_rows,
+    get_document_dict_from_sqlite_rows
 )
 
 def create_file(fname):
@@ -70,6 +71,19 @@ def serialize_tokenized_documents_to_disc(fname, documents):
     
     return True
 
+def serialize_dict_keys(dict_iterator, keys=[], key2fname=dict()):
+
+    for dct in dict_iterator:
+        for key in keys or dct.keys():
+            fname = key2fname.get(key) or f'{key}.txt'
+            if key == 'children':
+                serialize_tokenized_documents_to_disc(fname, [dct[key]])
+            else:
+                serialize_raw_documents_to_disc(fname, [dct[key]])
+
+    return True
+
+
 def get_stories_from_db_and_serialize_ids_and_comments(corpus_dir, form_request, delta_id=10000):
     """
     query db in portions(!) to get stories with all child comments,
@@ -107,42 +121,3 @@ def get_stories_from_db_and_serialize_ids_and_comments(corpus_dir, form_request,
         # ... store all ids and comments in specified files
         serialize_raw_documents_to_disc(fname_ids, ids)
         serialize_tokenized_documents_to_disc(fname_comments, comments)
-
-# def get_stories_from_db(form_request, delta_id=10000):
-#     # query db in portions - `delta_id` entries at a time
-#     begin_id = int(form_request["begin_id"])
-#     end_id = int(form_request["end_id"])
-
-#     def get_story_batch_generator():
-#         for b_id in range(begin_id, end_id, delta_id):
-#             # get current(!) begin_id and end_id range (b_id and e_id)
-#             e_id = min(b_id + delta_id - 1, end_id)
-#             form_request["begin_id"] = b_id
-#             form_request["end_id"] = e_id
-
-#             # query db for a portion of data and... 
-#             story_rows = get_stories_with_children_from_id_range(form_request)        
-#             # ids = get_id_list_from_sqlite_rows(story_rows)
-#             # comments = get_document_list_from_sqlite_rows(story_rows) 
-#             yield story_rows
-
-#         # for id, icomments in zip(ids, comments):
-#         #     yield {
-#         #         'id': id,
-#         #         'comments': icomments
-#         #     }
-
-#     def get_id_generator(story_batch_generator):
-#         for rows in story_batch_generator:
-#             for id in get_id_list_from_sqlite_rows(rows):
-#                 yield id
-
-#     def get_comment_generator(story_batch_generator):
-#         for rows in story_batch_generator:
-#             for comment in get_document_list_from_sqlite_rows(rows):
-#                 yield comment
-
-#     return {
-#         'ids': get_id_generator(get_story_batch_generator()),
-#         'comments': get_comment_generator(get_story_batch_generator())
-#     }

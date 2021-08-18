@@ -15,6 +15,7 @@ from flaskr.utils.dbutils import (
     get_stories_with_children_from_id_list,
     get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
+    get_stories_from_db,
 )
 from flaskr.utils.clusterutils import (    
     serialized2kmeanslabels
@@ -24,7 +25,8 @@ from flaskr.utils.datautils import (
     create_file,
     serialize_raw_documents_to_disc,
     serialize_vectors_to_disc,
-    get_stories_from_db_and_serialize_ids_and_comments
+    serialize_dict_keys,
+    get_stories_from_db_and_serialize_ids_and_comments,
 )
 
 # get request parser
@@ -78,10 +80,19 @@ def file_reader():
 
 @app.route("/file/write", methods=["POST"])    
 def serialize_corpus():
-    #TODO: split it into two: js -> py: get data -> js -> py: write res1, write res2
     if request.method == "POST":
         form_request = rqparser.parse(request)
-        get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
+        #get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
+        
+        stories = get_stories_from_db(form_request) # generator of story dicts
+
+        create_file(ID_FNAME)
+        create_file(CORPUS_FNAME)
+
+        serialize_dict_keys(
+            stories, keys=['story_id', 'children'], 
+            key2fname={'story_id': ID_FNAME, 'children': CORPUS_FNAME}
+        )
         return {"ok": True}
 
     return {"ok": False}
