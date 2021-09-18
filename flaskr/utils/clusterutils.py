@@ -1,15 +1,15 @@
 import os
-import errno
 import numpy as np
 from collections import defaultdict
 
-from numpy.lib.function_base import copy
 import gensim
 from gensim import corpora, models
 from gensim.parsing.preprocessing import preprocess_documents
-#import sklearn
-#from sklearn.cluster import KMeans
-#from sklearn.metrics import silhouette_score
+
+# import sklearn
+# from sklearn.cluster import KMeans
+# from sklearn.metrics import silhouette_score
+
 from smart_open import open  # for transparently opening remote files
 from itertools import cycle, tee
 
@@ -17,14 +17,23 @@ from itertools import cycle, tee
 # https://radimrehurek.com/gensim/auto_examples/core/run_corpora_and_vector_spaces.html#sphx-glr-auto-examples-core-run-corpora-and-vector-spaces-py
 
 def copy_and_measure_generator(generator, num_copies=1):
-    # assumes that generator contains same-sized elements
-    # returns: ((copies of orig generator), (#samples, len(sample)))
-    # consumes original generator in the process
+    """
+    makes a specified number of generator copies
+    and measures the number of elements in generator
+    and the number of items in element;
+    assumes that each generator's element is an iterable (list, array)
+    and that all elements have the same number of items
+    INPUTS:
+        generator: generator to be copied and measured (will be consumed)
+        num_copies: number of generator copies that need to be returned
+    OUTPUTS:
+        (list_of_generator_copies, (#elements in generator, #items in element))
+    """
     gs = tee(generator, max(1,num_copies)+1)
     rows = 0
     for sample in gs[0]:
         rows += 1
-    return gs[1:], (rows, len(sample))
+    return gs[1:], (rows, len(sample) if hasattr(sample, '__iter__') else 1)
 
 class RareWordFinder:
     def __init__(self, minfreq):
@@ -33,6 +42,9 @@ class RareWordFinder:
         self.rare = set()
 
     def count_tokens(self, tokens):
+        """
+        count frequencies of each token and store it in `self.counter` dict
+        """
         for token in tokens:
             self.counter[token] += 1
             if self.counter[token] < self.minfreq:
@@ -41,6 +53,9 @@ class RareWordFinder:
                 self.rare.remove(token)
 
     def get_rare_words(self):
+        """
+        returns the set of tokens whose frequency is lower than `self.minfreq`
+        """
         return self.rare
 
 class SerialReader:
