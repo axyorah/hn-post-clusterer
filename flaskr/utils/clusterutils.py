@@ -10,11 +10,10 @@ from gensim.parsing.preprocessing import preprocess_documents
 # from sklearn.cluster import KMeans
 # from sklearn.metrics import silhouette_score
 
+import errno
 from smart_open import open  # for transparently opening remote files
 from itertools import cycle, tee
 
-#TODO: implement streaming to avoid too much memory use:
-# https://radimrehurek.com/gensim/auto_examples/core/run_corpora_and_vector_spaces.html#sphx-glr-auto-examples-core-run-corpora-and-vector-spaces-py
 
 def copy_and_measure_generator(generator, num_copies=1):
     """
@@ -108,6 +107,86 @@ class GeneratorNormalizer:
     def transform_sample(self, sample):
         return self._normalize_sample(sample)
 
+class KMeansForGenerator:
+    def __init__(self, n_clusters, iters=300, tol=1e-5):
+        self.n_clusters = n_clusters
+        self.iters = iters
+        self.tol = tol
+        self.centroids = None
+        
+    def fit(self, X_generator):
+        """
+        finds centroids, consumes input generator
+        """
+        (g1,), (num_samples, sample_sz) = copy_and_measure_generator(X_generator, 1)
+        cycled_samples = cycle(g1)
+        self.centroids = np.random.rand(self.n_clusters, sample_sz)
+    
+        for _ in range(self.iters):
+            cluster_sum = np.zeros((self.n_clusters, sample_sz))
+            cluster_cnt = np.zeros((self.n_clusters, 1))
+            for _ in range(num_samples):
+                # assign cluster to sample
+                sample = next(cycled_samples) # should be 1d np.array
+                sq_dists = np.zeros((self.n_clusters,)) # square distances for speed
+                for c in range(self.n_clusters):
+                    sq_dists[c] = np.dot(
+                        sample - self.centroids[c], 
+                        sample - self.centroids[c]
+                    )
+                idx = np.argmin(sq_dists)
+                cluster_sum[idx, :] += sample
+                cluster_cnt[idx, 0] += 1
+
+            # update clusters
+            centroids = cluster_sum / cluster_cnt
+            if max([np.abs(pt1 - pt2) 
+                    for c1,c2 in zip(centroids, self.centroids)
+                    for pt1, pt2 in zip(c1,c2)
+                   ]) < self.tol:
+                self.centroids = centroids
+                break
+            self.centroids = centroids
+
+        return self.centroids
+    
+    def transform(self, X_generator):
+        """
+        assigns each sample of the input generator to the closest centroid;
+        returns euclidean distances from each sample to the closest centroid;
+        consumes input generator
+        """
+        if self.centroids is None:
+            raise RuntimeError(
+                'KMeans centroids are not defined! Run `fit` method first.'
+            )
+            
+        return (
+            np.array([
+                np.linalg.norm(sample - self.centroids[c])
+                for c in range(self.n_clusters)
+            ])
+            for sample in X_generator            
+        )
+    def predict(self, X_generator):
+        """
+        assigns each sample of the input generator to the closest centroid;
+        returns generator of class predictions for each sample;
+        consumes input generator
+        """
+        if self.centroids is None:
+            raise RuntimeError(
+                'KMeans centroids are not defined! Run `fit` method first.'
+            )
+            
+        return (
+            np.argmin([
+                np.dot(sample - self.centroids[c],sample - self.centroids[c])
+                for c in range(self.n_clusters)
+            ])
+            for sample in X_generator            
+        )
+
 def get_rare_words_in_serialized_corpus(fname, min_freq=2):
     rwf = RareWordFinder(min_freq)
     reader = SerialReader(fname)
@@ -154,46 +233,7 @@ def tfidf2lsi(tfidf_corpus, dictionary, num_topics):
         num_topics=num_topics
     )
     return lsi_model[tfidf_corpus2]
-
-def kmeans_for_generator(samples, n_clusters=10, iters=300):
-    """
-    samples should be normalized!
-    """
-    (s1, s2), (num_samples, sample_sz) = copy_and_measure_generator(samples, 2)
-    cycled_samples = cycle(s1)
-    clusters = np.random.rand(n_clusters, sample_sz)
-    
-    for _ in range(iters):
-        cluster_sum = np.zeros((n_clusters, sample_sz))
-        cluster_cnt = np.zeros((n_clusters, 1))
-        for _ in range(num_samples):
-            # assign cluster to sample
-            sample = next(cycled_samples) # should be 1d np.array
-            dists = np.zeros((n_clusters,))
-            for c in range(n_clusters):
-                dists[c] = np.linalg.norm(sample - clusters[c])
-            idx = np.argmin(dists)
-            cluster_sum[idx, :] += sample
-            cluster_cnt[idx, 0] += 1
-
-        # update clusters
-        clusters = cluster_sum / cluster_cnt
-
-    return clusters
-
-def assign_cluster_to_sample(sample, clusters):
-    n_clusters, _ = clusters.shape
-    dists = np.zeros((n_clusters,))
-    for c in range(n_clusters):
-        dists[c] = np.linalg.norm(sample - clusters[c])
-    return np.argmin(dists)
-
-def assign_clusters_to_samples(samples, clusters):
-    return (
-        assign_cluster_to_sample(sample, clusters)
-        for sample in samples
-    )
-
+        
 def vectorize_lsi_corpus(lsi_corpus):
     return (        
         np.array([tpl[1] for tpl in document]) for document in lsi_corpus
@@ -201,7 +241,7 @@ def vectorize_lsi_corpus(lsi_corpus):
 
 def serialized2kmeanslabels(fname, num_topics, n_clusters):
     if not os.path.exists(fname):
-        raise(FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),fname))
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),fname)
     
     filtered = serialized2filtered(fname)
     (filtered1, filtered2), (_,_) = copy_and_measure_generator(filtered, 2)
@@ -218,8 +258,9 @@ def serialized2kmeanslabels(fname, num_topics, n_clusters):
     normalized_corpus = normalizer.fit_transform(lsi_vectorized1)
     (samples1, samples2), (_,_) = copy_and_measure_generator(normalized_corpus, 2)
 
-    clusters = kmeans_for_generator(samples1, n_clusters=n_clusters)
-    labels = assign_clusters_to_samples(samples2, clusters)
+    kmeans = KMeansForGenerator(n_clusters=n_clusters)
+    kmeans.fit(samples1)
+    labels = kmeans.predict(samples2)
 
     return {
         'labels': labels,
