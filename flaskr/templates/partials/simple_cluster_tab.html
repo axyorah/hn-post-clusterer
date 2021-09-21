@@ -1,0 +1,58 @@
+<div class="box">
+    <p>
+        Before we start using any "heavy artillery" to group HN posts, we might as well try out some
+        simple clustering methods first and see how far we can go with that.
+    </p>
+    <p>
+        We'll start with Bag-of-Words representation for each document in the corpus, calculate TF-IDF
+        weights for each token in each document, and use Latent Semantic Indexing to find document
+        embeddings in low dimensional embedding space.
+        Finally, we'll run simple k-Means clustering in this embedding space with reduced
+        dimensionality.
+        At the end we want to see if the clusters we get in this way correspond to any semantically
+        meaningful "tags" that we can use to group the posts!
+    </p>
+
+    <p>
+        TODO: Explain what do parameters below mean<br>
+        TODO: show python code???
+    </p>
+
+    <div class="controls">
+        <div class="hor">
+            <div id="show-lsi-topics">
+                <b>Number of topics (LSI)</b>
+                <div>
+                    <input type="number" name="show-lsi-topics-num" id="show-lsi-topics-num" min="3" ,
+                        max="25" , value="20">
+                </div>
+            </div>
+
+            <div id="show-kmeans-clusters">
+                <b>Number of clusters (k-Means)</b>
+                <div>
+                    <input type="number" name="show-kmeans-clusters-num" id="show-kmeans-clusters-num"
+                        min="2" , max="30" , value="6">
+                </div>
+            </div>
+        </div>
+        <button id="run-simple-cluster-btn">Run a Simple Clustering</button>
+    </div>
+
+    <div id="simple-cluster-plot-root"></div>
+
+    <p>Select all posts in cluster...</p>
+    <div class="controls">
+        <div class="hor">
+            <div id="show-kmeans-clustered-posts">
+                <b>Cluster Index</b>
+                <div>
+                    <input type="number" name="show-kmeans-clustered-posts-num"
+                        id="show-kmeans-clustered-posts-num" min="0" , value="0">
+                </div>
+            </div>
+        </div>
+        <button id="show-simple-cluster-posts-btn">Show Posts</button>
+    </div>
+
+</div>

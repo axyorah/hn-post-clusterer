@@ -1,0 +1,59 @@
+<div class="controls">
+    <div class="hor">
+        <div id="show-filter-by-id">
+            <b>Filter by Id</b>
+            <div class="hor-item">
+                <div>
+                    <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
+                    <br>
+                    <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" , max="10" ,
+                        value="1">
+                </div>
+                <div>
+                    <label for="show-id-end-range" id="show-id-end-label">To:</label>
+                    <br>
+                    <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" , max="10" ,
+                        value="10">
+                </div>
+            </div>
+        </div>
+
+        <div id="show-filter-by-comments">
+            <b>Filter by the Number of Comments</b>
+            <div class="hor-item">
+                <div>
+                    <label for="show-comm-begin-range" id="show-comm-begin-label">From:</label>
+                    <br>
+                    <input type="number" name="show-comm-begin-range" id="show-comm-begin-range" min="1" , max="300"
+                        , value="1">
+                </div>
+                <div>
+                    <label for="show-comm-end-range" id="show-comm-end-label">To:</label>
+                    <br>
+                    <input type="number" name="show-comm-end-range" id="show-comm-end-range" min="1" , max="300" ,
+                        value="10">
+                </div>
+            </div>
+        </div>
+
+        <div id="show-filter-by-score">
+            <b>Filter by Score</b>
+            <div class="hor-item">
+                <div>
+                    <label for="show-score-begin-range" id="show-score-begin-label">From:</label>
+                    <br>
+                    <input type="number" name="show-score-begin-range" id="show-score-begin-range" min="1" ,
+                        max="300" , value="1">
+                </div>
+                <div>
+                    <label for="show-score-end-range" id="show-score-end-label">To:</label>
+                    <br>
+                    <input type="number" name="show-score-end-range" id="show-score-end-range" min="1" , max="300" ,
+                        value="10">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <button id="post-db-btn">Query DB</button>
+</div>
