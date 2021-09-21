@@ -21,7 +21,7 @@ def add_story_to_db(db, story):
     db.execute(
         '''
         INSERT INTO story
-        (story_id, author, unix_time, body, url, score, title, descendants)
+        (story_id, author, unix_time, body, url, score, title, num_comments)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         (
@@ -54,7 +54,7 @@ def update_story_in_db(db, story):
         '''
         UPDATE story
         SET 
-        author = ?, unix_time = ?, body = ?, url = ?, score = ?, title = ?, descendants = ?
+        author = ?, unix_time = ?, body = ?, url = ?, score = ?, title = ?, num_comments = ?
         WHERE story_id = ?
         ''',
         (
@@ -192,7 +192,7 @@ def get_stories_with_children_from_id_list(form_request):
         'score'
         'title'
         'url'
-        'descendants' : number of comments
+        'num_comments': number of comments
         'children'    : all comments related to the same story (html markup)
     """
     db = get_db()
@@ -228,7 +228,7 @@ def get_stories_with_children_from_id_list(form_request):
             s.score,
             s.title, 
             s.url,
-            s.descendants,
+            s.num_comments,
             (
                 SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
                 FROM tab
@@ -262,7 +262,7 @@ def get_stories_with_children_from_id_range(form_request):
         'score'
         'title'
         'url'
-        'descendants' : number of comments
+        'num_comments': number of comments
         'children'    : all comments related to the same story (html markup)
     """
     db = get_db()
@@ -299,7 +299,7 @@ def get_stories_with_children_from_id_range(form_request):
             s.score,
             s.title, 
             s.url,
-            s.descendants,
+            s.num_comments,
             (
                 SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
                 FROM tab
@@ -309,7 +309,7 @@ def get_stories_with_children_from_id_range(form_request):
         FROM story AS s
         WHERE 
             s.story_id BETWEEN ? AND ? AND
-            s.descendants BETWEEN ? AND ? AND
+            s.num_comments BETWEEN ? AND ? AND
             s.score BETWEEN ? AND ?
         ;
         ''', 
@@ -362,7 +362,7 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
             'score': row.__getitem__('score'),
             'title': row.__getitem__('title'),
             'url': row.__getitem__('url'),
-            'descendants': row.__getitem__('descendants'),
+            'num_comments': row.__getitem__('num_comments'),
             'children': f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
         }
         
@@ -378,7 +378,7 @@ def get_stories_from_db(form_request, delta_id=10000):
         score
         title
         url
-        descendants
+        num_comments
         children <- all comments corresponding to a given story
     Under the hood uses `get_stories_with_children_from_id_range(.)`,
     but never loads all the data from the entire queried range to mem    

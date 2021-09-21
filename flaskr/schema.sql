@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS story (
     url VARCHAR,
     score INTEGER,
     title VARCHAR,
-    descendants INTEGER,
+    num_comments INTEGER,
     comment_embedding VARCHAR,
     body_embedding VARCHAR
 );

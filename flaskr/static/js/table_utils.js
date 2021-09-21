@@ -122,7 +122,7 @@ function getHTMLDetails(title, innerHTML) {
 
 function appendDataToHNPostTable(table, data) {
     // add data
-    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', 'descendants'];
+    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', 'num_comments'];
     for (let storyId of Object.keys(data)) {        
         const tr = document.createElement('tr');
         
