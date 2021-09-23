@@ -1,0 +1,26 @@
+<div class="box">
+
+    <details style="margin-bottom: 20px;">
+        <summary>Fetch data from HN</summary>
+        <p>
+            First, let's get some data from HN for further analysis.
+            Just specify the range of <code>id</code>s and hit the <code>Get Data</code> button.
+        </p>
+        <p>This will take time, but you'd only need to do it once.</p>
+
+        {% include "partials/get_data_from_hn.html" %}
+
+    </details>
+
+    <p>
+        Let's filter out the posts that would be used for analysis by <code>id</code>,
+        <code>score</code> and <code>number of comments</code>.
+        You can change these settings any time later.
+    </p>
+
+    <!-- "partials/get_data_from_db.html" -->
+    {% include "partials/get_data_for_semantic_clustering.html"%}
+
+    <p>TODO: show SQL query as details???</p>
+
+</div>
