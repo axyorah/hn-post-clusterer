@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 import bs4 as bs
 from flask import app
 from gensim.parsing.preprocessing import preprocess_documents
@@ -80,6 +81,27 @@ def serialize_dict_keys(dict_iterator, keys=[], key2fname=dict()):
                 serialize_tokenized_documents_to_disc(fname, [dct[key]])
             else:
                 serialize_raw_documents_to_disc(fname, [dct[key]])
+
+    return True
+
+def serialize_dict_of_dicts(dct, fname='./data/dict.csv'):
+
+    fields = []
+    for i,key in enumerate(dct.keys()):
+        # add heading
+        if not i:
+            fields = list(dct[key].keys())
+            with open(fname, 'w') as f:
+                f.write('\t'.join(fields) + '\n')
+
+        # append row
+        with open(fname, 'a') as f:
+            f.write('\t'.join(
+                ','.join(str(val) for val in dct[key][field])
+                    if field == 'embedding'
+                    else str(dct[key].get(field) or '') 
+                for field in fields
+            ) + '\n')
 
     return True
 
