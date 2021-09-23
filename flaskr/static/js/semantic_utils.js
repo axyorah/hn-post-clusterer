@@ -1,4 +1,4 @@
-trainFaissBtn.addEventListener('click', function (evt) {
+semanticClusterBtn.addEventListener('click', function (evt) {
     // store params for db query
     const params = {
         'sender': 'show',
@@ -10,12 +10,12 @@ trainFaissBtn.addEventListener('click', function (evt) {
         'show-score-end-range': show.score.end.range.value,
     };
     
-    trainFaissBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
+    semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
 
     postData('/semanticcluster', params)
     .then(res => {
         console.log(res);
-        trainFaissBtn.innerHTML = `Cluster Posts`;
+        semanticClusterBtn.innerHTML = `Cluster Posts`;
     })
     .catch(err => {
         console.log(err);
