@@ -16,6 +16,24 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     .then(res => {
         console.log(res);
         semanticClusterBtn.innerHTML = `Cluster Posts`;
+
+        // display plots:
+        // create bar plot and store it in barPlotRef
+        const barPlotRef = document.createElement('iframe');
+        barPlotRef.setAttribute('class', 'graph-container');
+        barPlotRef.setAttribute('src', '/dashapp/semantic-cluster-bar-plot');
+
+        // create 2d scatter plot with two axes = first two PCA coordinates
+        const scatter2DPlotRef = document.createElement('iframe');
+        scatter2DPlotRef.setAttribute('class', 'graph-container');
+        scatter2DPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
+            
+        // make sure that the new plots are the only children of simpleClusterPlotRoot
+        while (semanticClusterPlotRoot.children.length) {
+            semanticClusterPlotRoot.removeChild(semanticClusterPlotRoot.children[simpleClusterPlotRoot.children.length - 1]);
+        }
+        semanticClusterPlotRoot.appendChild(barPlotRef);
+        semanticClusterPlotRoot.appendChild(scatter2DPlotRef);
     })
     .catch(err => {
         console.log(err);

@@ -14,6 +14,7 @@ CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
 ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
 LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
+DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
 
 STYLE = {
     'background_color': 'rgba(255,255,255,0.1)',
@@ -46,15 +47,17 @@ def create_dataframe():
         **{f'lsi-{i}': lsi[:,i] for i in range(lsi.shape[1])}
     })
 
+def read_semantic_df():
+    df = pd.read_csv(DF_FNAME, sep='\t')
+    df['lsi-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
+    df['lsi-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
+    return df
+
+
 def get_barplot(df):
-    # get relevant data
-    df_bar = {
-        'Cluster#': np.unique(df['label']),
-        'Number of Posts': [
-            sum(1 for lbl in df['label'] if lbl == tar) 
-            for tar in np.unique(df['label'])
-        ]
-    }
+    df_bar = df.groupby('label').count()
+    df_bar['Cluster#'] = df_bar.index
+    df_bar['Number of Posts'] = df_bar['id']
 
     fig = px.bar(
         df_bar,
@@ -87,7 +90,7 @@ def get_scatterplot(df):
     update_fig_layout(fig)
 
     return fig
-    
+  
     
 
 def init_dashboard(server):
@@ -151,6 +154,51 @@ def init_dashboard(server):
         df = create_dataframe()
         return get_scatterplot(df)
 
+    # --- Semantic Clustering ---
+    # bar plot
+    semantic_cluster_bar_plot = html.Div(
+        children=[
+            dcc.Graph(
+                id='semantic-bar-plot',
+                className='graph',
+                figure=get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
+            ),
+            html.Button('Update', id='semantic-bar-plot-update-btn', className='graph-btn', n_clicks=0),
+        ],
+        id='dash-container',
+    )
+
+    @dash_app.callback(
+        Output(component_id='semantic-bar-plot', component_property='figure'),
+        Input(component_id='semantic-bar-plot-update-btn', component_property='n_clicks')
+    )
+    def update_semantic_bar_plot(n_clicks):
+        df = pd.read_csv(DF_FNAME, sep='\t')
+        return get_barplot(df)
+
+    # 2d cluster scatter plot
+    semantic_cluster_scatter_plot = html.Div(
+        children=[
+            dcc.Graph(
+                id='semantic-cluster-2d',
+                className='graph',
+                figure=get_scatterplot(
+                    pd.DataFrame(data={'id': [], 'label': [], 'lsi-0': [], 'lsi-1': []})
+                )
+            ),
+            html.Button('Update', id='semantic-scatter-plot-update-btn', className='graph-btn', n_clicks=0),
+        ]
+    )
+
+    @dash_app.callback(
+        Output(component_id='semantic-cluster-2d', component_property='figure'),
+        Input(component_id='semantic-scatter-plot-update-btn', component_property='n_clicks')
+    )
+    def update_semantic_scatter_plot(n_clicks):
+        df = read_semantic_df()
+        return get_scatterplot(df)
+
+
     # --- Put Everything Together ---
     # NOTE ON CALLBACKS:
     # since in the callbacks we're refering to elements that are not added to layout 
@@ -168,6 +216,10 @@ def init_dashboard(server):
             return simple_cluster_bar_plot
         elif pathname == '/dashapp/simple-cluster-scatter-plot':
             return simple_cluster_scatter_plot
+        elif pathname == '/dashapp/semantic-cluster-bar-plot':
+            return semantic_cluster_bar_plot
+        elif pathname == '/dashapp/semantic-cluster-scatter-plot':
+            return semantic_cluster_scatter_plot
         else:
             return #TODO: error page
 
