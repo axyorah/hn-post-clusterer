@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import dash
 from dash.dependencies import Input, Output
-import dash_table
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import dash_table
+from dash import html
+from dash import dcc
 import plotly.express as px
 
 # set globals
