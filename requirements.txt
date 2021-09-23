@@ -1,0 +1,26 @@
+"""
+# create virtual env for flask app
+$ python3 -m venv flask_venv
+
+# activate virtual env
+$ source flask_venv/vin/activate
+
+# install packages listed in this file
+$ flask_venv/bin/pip3 install -r requirements.txt
+"""
+
+requests
+bs4
+numpy
+flask
+lxml
+pandas
+dash
+plotly
+requests
+smart-open
+click
+gensim
+scikit-learn
+sentence-transformers
+faiss
