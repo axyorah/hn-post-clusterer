@@ -206,7 +206,7 @@ def get_stories_with_children_from_id_list(form_request):
                 s.story_id,
                 1,
                 s.title,
-                s.url
+                s.title
             FROM story AS s
             
             UNION
@@ -276,7 +276,7 @@ def get_stories_with_children_from_id_range(form_request):
                 s.story_id,
                 1,
                 s.title,
-                s.url
+                s.title
             FROM story AS s
             -- WHERE s.story_id BETWEEN ? AND ?
 
@@ -340,7 +340,8 @@ def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     documents = []
     for row in rows:
         documents.append(
-            f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+            row.__getitem__("children")
+            #f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
         )
     return documents
 
@@ -363,7 +364,7 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
             'title': row.__getitem__('title'),
             'url': row.__getitem__('url'),
             'num_comments': row.__getitem__('num_comments'),
-            'children': f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
+            'children': row.__getitem__("children")#f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
         }
         
     return documents
