@@ -337,13 +337,7 @@ def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     single document contains all comments parented by the same HN story;
     Returns a list of comments 
     """
-    documents = []
-    for row in rows:
-        documents.append(
-            row.__getitem__("children")
-            #f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
-        )
-    return documents
+    return [row.__getitem__("children") for row in rows]
 
 def get_document_dict_from_sqlite_rows(rows) -> 'dict':
     """
@@ -354,20 +348,16 @@ def get_document_dict_from_sqlite_rows(rows) -> 'dict':
     single document contains all comments parented by the same HN story;
     Returns dict with keys = story ids and values = story dicts (parsed sql row objs)
     """
-    documents = dict()
-    for row in rows:
-        documents[row.__getitem__('story_id')] = {
-            'story_id': row.__getitem__('story_id'),
-            'author': row.__getitem__('author'),
-            'unix_time': row.__getitem__('unix_time'),
-            'score': row.__getitem__('score'),
-            'title': row.__getitem__('title'),
-            'url': row.__getitem__('url'),
-            'num_comments': row.__getitem__('num_comments'),
-            'children': row.__getitem__("children")#f'{row.__getitem__("title")}\t{row.__getitem__("children")}'
-        }
+    fields = [
+        'story_id', 'author', 'unix_time', 'score', 
+        'title', 'url', 'num_comments', 'children'
+    ]
+    return {
+        row.__getitem__('story_id'): {
+            field: row.__getitem__(field) for field in fields
+        } for row in rows
+    }
         
-    return documents
 
 def get_stories_from_db(form_request, delta_id=10000):
     """
