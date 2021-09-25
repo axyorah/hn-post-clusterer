@@ -37,6 +37,6 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     })
     .catch(err => {
         console.log(err);
-        trainFaissBtn.innerHTML = `Cluster Posts`;
+        semanticClusterBtn.innerHTML = `Cluster Posts`;
     });
 })
