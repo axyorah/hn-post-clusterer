@@ -339,24 +339,34 @@ def get_document_list_from_sqlite_rows(rows) -> 'List[str]':
     """
     return [row.__getitem__("children") for row in rows]
 
-def get_document_dict_from_sqlite_rows(rows) -> 'dict':
+def get_document_dict_from_sqlite_rows(rows, aslist=False) -> 'dict':
     """
     Extract 'texts' from HN posts - SQLite Row objects corresponding to HN stories
     with an extra field 'children' corresponding to all comments 
     concatenated into a single string;
     These concatenated comments constitute corpus documents - 
     single document contains all comments parented by the same HN story;
-    Returns dict with keys = story ids and values = story dicts (parsed sql row objs)
+    Returns:
+    if `aslist=False` (default): dict with keys = story ids and 
+        values = story dicts (parsed sql row objs)
+    else: list of story dicts (parsed sql row objs)
     """
     fields = [
         'story_id', 'author', 'unix_time', 'score', 
         'title', 'url', 'num_comments', 'children'
     ]
-    return {
-        row.__getitem__('story_id'): {
-            field: row.__getitem__(field) for field in fields
-        } for row in rows
-    }
+
+    if aslist:
+        return [
+            {field: row.__getitem__(field) for field in fields} 
+            for row in rows
+        ]
+    else:
+        return {
+            row.__getitem__('story_id'): {
+                field: row.__getitem__(field) for field in fields
+            } for row in rows
+        }
         
 
 def get_stories_from_db(form_request, delta_id=10000):
