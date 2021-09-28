@@ -47,33 +47,30 @@ def html2sentences(html):
         for sentence in txt.split('.')
     ]
 
-def get_story_embeddings(data: dict):
+def get_story_embeddings(data: list):
     """
     INPUTS:
-       data: dict: maps story ids to dict characterizing story with keys: 
+       data: list: each element is a story dict with keys:
            story_id, author, unix_time, score, title, url, num_comments, children
            e.g.:
-           {
-               123: {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
-               456: {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
-               ...
-           }
+           [
+               {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
+               {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
+           ]
     OUTPUTS:
-        dict: maps each story id to BERT embedding based on story comments
-        {
-            123: ndarray of floats with shape (768,), 
-            456: ...,
-        }
+        list: each element is a BERT embedding based on story comments
+        [
+            ndarray of floats with shape (768,), 
+            ...
+        ]
     """
-    id2embed = dict()
     embedder = StoryEmbedder()
-    for story_id in data.keys():
-        html = data[story_id]['children']
-        sentences = html2sentences(html)
-        embed = embedder.embed_and_average_sentences(sentences)
-        id2embed[story_id] = embed
 
-    return list(id2embed.keys()), np.stack(id2embed.values())
+    return [
+        embedder.embed_and_average_sentences(
+            html2sentences(story['children'])
+        ) for story in data
+    ]
 
 def cluster_stories_with_faiss(embeds, nclusters=15):
     d = embeds.shape[1]
@@ -91,8 +88,3 @@ def project_embeddings(embeds, n=2):
     # TODO: make class that would cluster and project...
     pca = PCA(n_components=n)
     return pca.fit_transform(embeds)
-    
-
-    
-
-
