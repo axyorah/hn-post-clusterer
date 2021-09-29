@@ -97,7 +97,7 @@ class BatchedPipeliner:
             num = 0
             for batch in story_batches:
                 num += len(batch)
-                yield get_story_embeddings(batch)
+                yield np.stack(get_story_embeddings(batch))
             print(f'[INFO] got {num} embeddings!')
         
         # copy genrator: save one copy, return another
