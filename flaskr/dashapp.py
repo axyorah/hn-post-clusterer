@@ -10,10 +10,6 @@ import plotly.express as px
 
 # set globals
 CORPUS_DIR = 'data'
-CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
-ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
-LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
-LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
 DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
 
 STYLE = {
@@ -31,26 +27,10 @@ def update_fig_layout(fig):
         font_color=STYLE['text_color']
     )
 
-def create_dataframe():
-    with open(ID_FNAME, 'r') as f:
-        ids = f.read().splitlines()
-
-    with open(LABEL_FNAME, 'r') as f:
-        labels = f.read().splitlines()
-
-    with open(LSI_FNAME, 'r') as f:
-        lsi = np.array([[float(val) for val in line.split(' ')] for line in f.read().splitlines()])
-
-    return pd.DataFrame(data={
-        'id': ids,
-        'label': labels,
-        **{f'lsi-{i}': lsi[:,i] for i in range(lsi.shape[1])}
-    })
-
 def read_semantic_df():
     df = pd.read_csv(DF_FNAME, sep='\t')
-    df['lsi-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
-    df['lsi-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
+    df['ax-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
+    df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
     return df
 
 
@@ -72,10 +52,11 @@ def get_barplot(df):
 
 def get_scatterplot(df):
     df_scat = {
-        'Axis-A': df['lsi-0'],
-        'Axis-B': df['lsi-1'],
+        'Axis-A': df['ax-0'],
+        'Axis-B': df['ax-1'],
         'id': df['id'],
         'Cluster#': df['label'],
+        'title': df['title']
     }
     fig = px.scatter(
         df_scat, 
@@ -83,8 +64,7 @@ def get_scatterplot(df):
         y='Axis-B', 
         color='Cluster#', 
         opacity=0.5,
-        hover_data=['id'],
-        category_orders={'Cluster#': list(np.unique(df['label']))}
+        hover_data=['id', 'title']
     )
 
     update_fig_layout(fig)
@@ -108,51 +88,6 @@ def init_dashboard(server):
         dcc.Location(id='url', refresh=False),
         html.Div(id='page-content')
     ])
-
-    # --- Simple Clustering ---
-    #df = create_dataframe()
-    # bar plot
-    simple_cluster_bar_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='bar-plot',
-                className='graph',
-                figure=get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
-            ),
-            html.Button('Update', id='bar-plot-update-btn', className='graph-btn', n_clicks=0),
-        ],
-        id='dash-container',
-    )
-
-    @dash_app.callback(
-        Output(component_id='bar-plot', component_property='figure'),
-        Input(component_id='bar-plot-update-btn', component_property='n_clicks')
-    )
-    def update_bar_plot(n_clicks):
-        df = create_dataframe()
-        return get_barplot(df)
-
-    # 2d cluster scatter plot
-    simple_cluster_scatter_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='simple-cluster-2d',
-                className='graph',
-                figure=get_scatterplot(
-                    pd.DataFrame(data={'id': [], 'label': [], 'lsi-0': [], 'lsi-1': []})
-                )
-            ),
-            html.Button('Update', id='scatter-plot-update-btn', className='graph-btn', n_clicks=0),
-        ]
-    )
-
-    @dash_app.callback(
-        Output(component_id='simple-cluster-2d', component_property='figure'),
-        Input(component_id='scatter-plot-update-btn', component_property='n_clicks')
-    )
-    def update_scatter_plot(n_clicks):
-        df = create_dataframe()
-        return get_scatterplot(df)
 
     # --- Semantic Clustering ---
     # bar plot
@@ -183,7 +118,7 @@ def init_dashboard(server):
                 id='semantic-cluster-2d',
                 className='graph',
                 figure=get_scatterplot(
-                    pd.DataFrame(data={'id': [], 'label': [], 'lsi-0': [], 'lsi-1': []})
+                    pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
                 )
             ),
             html.Button('Update', id='semantic-scatter-plot-update-btn', className='graph-btn', n_clicks=0),
@@ -212,11 +147,7 @@ def init_dashboard(server):
         Input('url', 'pathname')
     )
     def display_page(pathname):
-        if pathname == '/dashapp/simple-cluster-bar-plot':
-            return simple_cluster_bar_plot
-        elif pathname == '/dashapp/simple-cluster-scatter-plot':
-            return simple_cluster_scatter_plot
-        elif pathname == '/dashapp/semantic-cluster-bar-plot':
+        if pathname == '/dashapp/semantic-cluster-bar-plot':
             return semantic_cluster_bar_plot
         elif pathname == '/dashapp/semantic-cluster-scatter-plot':
             return semantic_cluster_scatter_plot
