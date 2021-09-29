@@ -132,7 +132,7 @@ def semantic_cluster():
         pipe = BatchedPipeliner(request)
         stories = pipe.get_story_batches()
         embeddings = pipe.get_embedding_batches(stories)
-        embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dim=100)
+        embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
         pipe.cluster_story_batches(embeddings, n_clusters=10)
         pipe.serialize_result(fname='./data/df.csv')
 
