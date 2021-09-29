@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 from itertools import tee
 from gensim.parsing.preprocessing import RE_NONALPHA
 import requests as rq
@@ -23,7 +24,8 @@ from flaskr.utils.dbutils import (
 )
 
 from flaskr.utils.clusterutils import (
-    copy_and_measure_generator
+    copy_and_measure_generator,
+    copy_and_measure_batch_generator
 )
 
 # TODO: use `cycle` instead of `tee` for copying generators...
@@ -34,6 +36,9 @@ class BatchedPipeliner:
         self.rqparser = RequestParser()
         self.request_raw = request
         self.request_form = self.rqparser.parse(request)
+        
+        self._num_batches = 0
+        self._num_stories = 0
 
         self._stories = None
         self._embeddings = None
@@ -79,7 +84,9 @@ class BatchedPipeliner:
         # copy genrator: save one copy, return another
         gen = batch_generator(begin_id, end_id, delta_id)
         print('[INFO] copying story generator...')
-        batches = tee(gen, 2)
+        batches, (num_batches, num_items, _) = copy_and_measure_batch_generator(gen, num_copies=2)
+        self._num_batches = num_batches
+        self._num_stories = num_items
         self._stories = batches[0]
 
         return batches[1]
@@ -100,6 +107,41 @@ class BatchedPipeliner:
         self._embeddings = batches[0]
 
         return batches[1]
+
+    def reduce_embedding_dimensionality(self, embedding_batches=None, n_dims=100):
+        if embedding_batches is None and self._embeddings is None:
+            raise RuntimeError(
+                'There is nothing to reduce yet! ' +\
+                'You must obtain and story embeddings first! ' +\
+                'Consider running `get_embedding_batches()` or `set_embedding_batches()`'
+            )
+
+        if self._num_stories < n_dims:
+            warnings.warn(
+                'Can not reduce the dimensionality of the embeddings!\n' +\
+                'Dimensionality should be less or equal to the number of samples, ' +\
+                f'got n_samples={self._num_stories} and n_dims={n_dims}!\n' +\
+                'Returning original embeddings without changes.'
+            )
+            return embedding_batches or self._embeddings
+
+        # copy high dim embeddings
+        highdim_batches = tee(embedding_batches or self._embeddings)
+
+        # train pca
+        print(f'[INFO] reducing embedding dimensionality to {n_dims}...')
+        pca = IncrementalPCA(n_components=n_dims)
+        for batch in highdim_batches[0]:
+            pca.partial_fit(batch)
+        
+        # reduce
+        def batch_generator(batches):
+            for batch in batches:
+                yield pca.transform(batch)
+
+        lowdim_batches = tee(batch_generator(highdim_batches[1]), 2)
+        self._embeddings = lowdim_batches[0]
+        return lowdim_batches[1]
     
     def cluster_story_batches(self, embedding_batches=None, n_clusters=10):
         if embedding_batches is None and self._embeddings is None:
@@ -111,11 +153,7 @@ class BatchedPipeliner:
 
         # TODO: n_clusters should be accessed from form request
         print('[INFO] copying embeddings')
-        batches, (_,_) = copy_and_measure_generator(
-            embedding_batches or self._embeddings, 
-            num_copies=2
-        )
-        #batches = tee(embedding_batches or self._embeddings, 2)
+        batches = tee(embedding_batches or self._embeddings, 2)
         
         print(f'[INFO] clustering stories to {n_clusters} clusters...')
         self.kmeans = MiniBatchKMeans(n_clusters=n_clusters)        
@@ -177,7 +215,9 @@ class BatchedPipeliner:
             f.write('\t'.join(fields) + '\n')
 
         for st_batch, emb_batch, lbl_batch in zip(story_batches[1], emb_batches[1], self._labels):
-            emb_proj = pca.transform(emb_batch)
+            # reduce dimensionality with pca if it hasn't already been done
+            # otehrwise take n_dims first eigenvecs
+            emb_proj = pca.transform(emb_batch) if emb_batch.shape[1] == 768 else emb_batch[:,:n_dims]
             for st, emb, lbl in zip(st_batch, emb_proj, lbl_batch):
                 with open(fname, 'a') as f:
                     f.write(
