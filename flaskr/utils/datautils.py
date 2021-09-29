@@ -127,7 +127,7 @@ def get_stories_from_db_and_serialize_ids_and_comments(corpus_dir, form_request,
 
     # query db in portions - `delta_id` entries at a time
     begin_id = int(form_request["begin_id"])
-    end_id = int(form_request["end_id"])              
+    end_id = int(form_request["end_id"])
     for b_id in range(begin_id, end_id, delta_id):
         # get current(!) begin_id and end_id range (b_id and e_id)
         e_id = min(b_id + delta_id - 1, end_id)

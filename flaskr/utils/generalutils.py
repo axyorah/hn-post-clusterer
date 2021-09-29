@@ -2,7 +2,6 @@ import os
 import sys
 import warnings
 from itertools import tee
-from gensim.parsing.preprocessing import RE_NONALPHA
 import requests as rq
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
