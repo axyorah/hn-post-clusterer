@@ -25,9 +25,9 @@
 
         <ul class="nav nav-tabs" id="seed-tab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="seed-tab-btn" data-bs-toggle="tab" data-bs-target="#seed-form"
+                <button class="nav-link active" id="same-label-tab-btn" data-bs-toggle="tab" data-bs-target="#same-label-form"
                     aria-selected="true">
-                    <h2>Get and Filter Data</h2>
+                    <h2>Get Posts from Cluster</h2>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -46,8 +46,8 @@
 
         <div class="tab-content" id="tab-content">
 
-            <section class="tab-pane fade show active" id="seed-form" role="tabpanel" aria-labelledby="seed-form">
-                
+            <section class="tab-pane fade show active" id="same-label-form" role="tabpanel" aria-labelledby="same-label-form">
+                {% include "partials/get_posts_from_same_cluster.html" %}
             </section>
 
             <section class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
@@ -104,12 +104,14 @@
         const showLsiTopicsNum = document.querySelector("#show-lsi-topics-num");
         const showKmeansClustersNum = document.querySelector("#show-kmeans-clusters-num");
         const showSimpleClusterPostsBtn = document.querySelector("#show-simple-cluster-posts-btn");
-        const showKmeansClusteredPostsNum = document.querySelector("#show-kmeans-clustered-posts-num")
-        const simpleClusterPlotRoot = document.querySelector('#simple-cluster-plot-root')
+        const showKmeansClusteredPostsNum = document.querySelector("#show-kmeans-clustered-posts-num");
+        const simpleClusterPlotRoot = document.querySelector('#simple-cluster-plot-root');
 
         // Semantic Clustering 
         const semanticClusterBtn = document.querySelector('#semantic-cluster-btn');
-        const semanticClusterPlotRoot = document.querySelector('#semantic-cluster-plot-root')
+        const semanticClusterPlotRoot = document.querySelector('#semantic-cluster-plot-root');
+        const showSemanticClusterPostsNum = document.querySelector("#show-semantic-cluster-posts-num");
+        const showSemanticClusterPostsBtn = document.querySelector("#show-semantic-cluster-posts-btn");
 
     </script>
 
