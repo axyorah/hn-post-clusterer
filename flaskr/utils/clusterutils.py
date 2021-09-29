@@ -29,10 +29,33 @@ def copy_and_measure_generator(generator, num_copies=1):
         (list_of_generator_copies, (#elements in generator, #items in element))
     """
     gs = tee(generator, max(1,num_copies)+1)
-    rows = 0
+    rows, sample = 0, []
     for sample in gs[0]:
         rows += 1
     return gs[1:], (rows, len(sample) if hasattr(sample, '__iter__') else 1)
+
+def copy_and_measure_batch_generator(generator, num_copies=1):
+    """
+    makes a specified number of generator copies
+    and measures the number of elements/batches in generator,
+    the number of samples in all the batches,
+    and the number of items in elements;
+    assumes that each generator's element is an batch of iterables 
+    (list of lists, list of arrays),
+    each element/batch has different number of samples,
+    but all samples have the same number of items
+    INPUTS:
+        generator: generator to be copied and measured (will be consumed)
+        num_copies: number of generator copies that need to be returned
+    OUTPUTS:
+        (list_of_generator_copies, (#batches in generator, #samples in all batches, #items in sample))
+    """
+    gs = tee(generator, max(1,num_copies)+1)
+    num_batches, num_items, item = 0, 0, []
+    for batch in gs[0]:
+        num_batches += 1
+        num_items += len(batch)
+    return gs[1:], (num_batches, num_items, len(item) if hasattr(item, '__iter__') else 1)
 
 class RareWordFinder:
     def __init__(self, minfreq):
