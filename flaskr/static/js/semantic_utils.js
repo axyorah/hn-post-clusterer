@@ -30,7 +30,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
             
         // make sure that the new plots are the only children of simpleClusterPlotRoot
         while (semanticClusterPlotRoot.children.length) {
-            semanticClusterPlotRoot.removeChild(semanticClusterPlotRoot.children[simpleClusterPlotRoot.children.length - 1]);
+            semanticClusterPlotRoot.removeChild(semanticClusterPlotRoot.children[semanticClusterPlotRoot.children.length - 1]);
         }
         semanticClusterPlotRoot.appendChild(barPlotRef);
         semanticClusterPlotRoot.appendChild(scatter2DPlotRef);
