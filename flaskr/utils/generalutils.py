@@ -1,5 +1,6 @@
 import os
 import sys
+from itertools import tee
 from gensim.parsing.preprocessing import RE_NONALPHA
 import requests as rq
 import numpy as np
@@ -60,6 +61,7 @@ class BatchedPipeliner:
         end_id = int(self.request_form["end_id"])
 
         def batch_generator(begin_id, end_id, delta_id):
+            num = 0
             for b_id in range(begin_id, end_id, delta_id):
                 request_form = self.request_form
                 request_form['begin_id'] = b_id
@@ -70,78 +72,35 @@ class BatchedPipeliner:
 
                 # TODO: make it a list of dicts and adjust helpers in semanticutils.py
                 if len(story_dicts):
+                    num += len(story_dicts)
                     yield story_dicts
+            print(f'[INFO] got {num} stories!')
         
         # copy genrator: save one copy, return another
         gen = batch_generator(begin_id, end_id, delta_id)
         print('[INFO] copying story generator...')
-        batches, (_,_) = copy_and_measure_generator(gen, num_copies=2)
+        batches = tee(gen, 2)
         self._stories = batches[0]
 
         return batches[1]
-
-    def set_story_batches(self, delta_id=10000):
-        """
-        doesn't return anything, but internally sets a generator, where each element 
-        is a list ("batch") of story dicts with the following fields:
-            'story_id', 'author', 'unix_time', 'score', 
-            'title', 'url', 'num_comments', 'children'
-        """
-        print('[INFO] fetching data from db...')
-        begin_id = int(self.request_form["begin_id"])
-        end_id = int(self.request_form["end_id"])
-
-        def batch_generator(begin_id, end_id, delta_id):
-            for b_id in range(begin_id, end_id, delta_id):
-                request_form = self.request_form
-                request_form['begin_id'] = b_id
-                request_form['end_id'] = min(b_id + delta_id, end_id)
-
-                story_rows = get_stories_with_children_from_id_range(request_form) # list of sql rows
-                story_dicts = get_document_dict_from_sqlite_rows(story_rows, aslist=True) # list of dicts
-
-                # TODO: make it a list of dicts and adjust helpers in semanticutils.py
-                if len(story_dicts):
-                    yield story_dicts
-        
-        # set genrator
-        self._stories = batch_generator(begin_id, end_id, delta_id)
-
+    
     def get_embedding_batches(self, story_batches):
         print('[INFO] generating embeddings...')
         def batch_generator(story_batches):
+            num = 0
             for batch in story_batches:
+                num += len(batch)
                 yield get_story_embeddings(batch)
+            print(f'[INFO] got {num} embeddings!')
         
         # copy genrator: save one copy, return another
         gen = batch_generator(story_batches)
         print('[INFO] copying embedding generator...')
-        batches, (_,_) = copy_and_measure_generator(gen, num_copies=2)
+        batches = tee(gen, 2)
         self._embeddings = batches[0]
 
         return batches[1]
-
-    def set_embedding_batches(self, story_batches=None):
-        """
-        doesn't return anything, but internally sets a generator,
-        where each element is a list of story embeddings
-        """
-        if story_batches is None and self._stories is None:
-            raise RuntimeError(
-                'There is nothing to embed yet! ' +\
-                'You must fetch stories from the database first! ' +\
-                'Consider running `get_story_batches()` or `set_story_batches()`'
-            )
-
-        print('[INFO] generating embeddings...')
-        def batch_generator(story_batches):
-            for batch in story_batches:
-                embeds = get_story_embeddings(batch)
-                yield embeds    
-        
-        # set genrator
-        self._embeddings = batch_generator(story_batches or self._stories)
-
+    
     def cluster_story_batches(self, embedding_batches=None, n_clusters=10):
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
@@ -156,6 +115,7 @@ class BatchedPipeliner:
             embedding_batches or self._embeddings, 
             num_copies=2
         )
+        #batches = tee(embedding_batches or self._embeddings, 2)
         
         print(f'[INFO] clustering stories to {n_clusters} clusters...')
         self.kmeans = MiniBatchKMeans(n_clusters=n_clusters)        
@@ -171,7 +131,7 @@ class BatchedPipeliner:
                 yield self.kmeans.predict(batch)
 
         self._labels = cluster(batches[1])
-
+    
     def serialize_result(self, fname='./data/df.csv'):
         # check if all the necessary data is available
         if self.kmeans is None or self._embeddings is None:
@@ -190,7 +150,7 @@ class BatchedPipeliner:
             )
         
         print('[INFO] copying embeddings...')
-        emb_batches, (l,_) = copy_and_measure_generator(self._embeddings, num_copies=3)
+        emb_batches, (l,_) = copy_and_measure_generator(self._embeddings, num_copies=2)
         self._embeddings = emb_batches[0]
         if not l:
             raise RuntimeError(
@@ -205,18 +165,10 @@ class BatchedPipeliner:
             )     
 
         # --- project to low-dim space ---
-        n_dims = 10 # num dimensions to project embeddings onto 
-        # if there are are more clusters that n_dims we can "cheat"
-        # and use centroids to find projection axes (PCA);
-        # otherwise use partial PCA
+        n_dims = min(10, len(self.kmeans.cluster_centers_)) # num dimensions to project embeddings onto 
         print(f'[INFO] projecting embeddings to {n_dims}-dim space...')
-        if len(self.kmeans.cluster_centers_) > n_dims:
-            pca = PCA(n_components=n_dims)
-            pca.fit(self.kmeans.cluster_centers_)
-        else:
-            pca = IncrementalPCA(n_components=n_dims)
-            for emb_batch in emb_batches[1]:
-                pca.partial_fit(emb_batch)
+        pca = PCA(n_components=n_dims)
+        pca.fit(self.kmeans.cluster_centers_)
 
         # --- serialize ---
         print(f'[INFO] serializing result to {fname}...')
@@ -224,7 +176,7 @@ class BatchedPipeliner:
         with open(fname, 'w') as f:
             f.write('\t'.join(fields) + '\n')
 
-        for st_batch, emb_batch, lbl_batch in zip(story_batches[1], emb_batches[2], self._labels):
+        for st_batch, emb_batch, lbl_batch in zip(story_batches[1], emb_batches[1], self._labels):
             emb_proj = pca.transform(emb_batch)
             for st, emb, lbl in zip(st_batch, emb_proj, lbl_batch):
                 with open(fname, 'a') as f:
