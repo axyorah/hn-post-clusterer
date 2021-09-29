@@ -31,12 +31,30 @@ from flaskr.utils.clusterutils import (
 # TODO: use `cycle` instead of `tee` for copying generators...
 # TODO: make 'measure' in 'copy_and_measure_generator' optional
 
+def rebatch_generator(batches, min_batch_size):
+    """
+    resamples generator of batches so that 
+    new batches have atleast `min_batch_size` elements
+    """
+    prev, curr = [], []
+    for batch in batches:
+        curr += batch
+        if len(curr) >= min_batch_size:
+            if prev:
+                yield prev
+            prev = curr.copy()
+            curr = []
+
+    # last batch
+    yield prev + curr
+
 class BatchedPipeliner:
     def __init__(self, request):
         self.rqparser = RequestParser()
         self.request_raw = request
         self.request_form = self.rqparser.parse(request)
         
+        self._min_batch_size = 100
         self._num_batches = 0
         self._num_stories = 0
 
@@ -81,8 +99,13 @@ class BatchedPipeliner:
                     yield story_dicts
             print(f'[INFO] got {num} stories!')
         
-        # copy genrator: save one copy, return another
+        # get stories
         gen = batch_generator(begin_id, end_id, delta_id)
+
+        # rebatch stories
+        gen = rebatch_generator(gen, self._min_batch_size)
+
+        # copy genrator: save one copy, return another
         print('[INFO] copying story generator...')
         batches, (num_batches, num_items, _) = copy_and_measure_batch_generator(gen, num_copies=2)
         self._num_batches = num_batches
