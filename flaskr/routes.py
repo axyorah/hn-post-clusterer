@@ -36,7 +36,6 @@ from flaskr.utils.semanticutils import (
     #train_and_serialize_faiss_index,
     cluster_stories_with_faiss,
     project_embeddings,
-
 )
 
 # get request parser
@@ -124,32 +123,18 @@ def simple_cluster():
         return {"ok": True}
     return {"ok": False}
 
+from flaskr.utils.generalutils import BatchedPipeliner
+
 @app.route("/semanticcluster", methods=["POST"])
 def semantic_cluster():
     if request.method == "POST":
-        # get stories data
-        print('[INFO] Fetching Post Data from DB...')
-        story_dict = rq.post('http://localhost:5000/db/get',data=request.form).json()
 
-        # cluster stories
-        print('[INFO] Generating Post Embeddings...')
-        ids, embeds = get_story_embeddings(story_dict)
-        print('[INFO] Clustering Posts...')
-        lbls = cluster_stories_with_faiss(embeds, nclusters=15)
-
-        # serialize result
-        print('[INFO] Projecting Embeddings on 2D Plane...')
-        embeds_nd = project_embeddings(embeds, n=2)
-        print('[INFO] Serializing Data to Disk...')
-        serialize_dict_of_dicts({
-            ids[i]: {
-                'id': ids[i],
-                'title': story_dict[ids[i]]['title'],
-                'url': story_dict[ids[i]]['url'],
-                'label': lbls[i],
-                'embedding': embeds_nd[i]
-            } for i in range(len(ids))
-        }, fname='./data/df.csv')
+        pipe = BatchedPipeliner(request)
+        stories = pipe.get_story_batches()
+        embeddings = pipe.get_embedding_batches(stories)
+        embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dim=100)
+        pipe.cluster_story_batches(embeddings, n_clusters=10)
+        pipe.serialize_result(fname='./data/df.csv')
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
