@@ -10,7 +10,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 
 class StoryEmbedder:
-    def __init__(self, model_name='bert-base-nli-mean-tokens'):
+    def __init__(self, model_name='sentence-transformers/all-distilroberta-v1'):
         self.model = SentenceTransformer(model_name)
 
     def embed_sentences(self, sentences: 'List[str]'):
