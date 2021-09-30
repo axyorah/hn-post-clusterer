@@ -1,27 +1,48 @@
 <div class="box">
 
-    <details style="margin-bottom: 20px;">
-        <summary>Fetch data from HN</summary>
+    <section id="api-filters">
+        <details style="margin-bottom: 20px;">
+            <summary>Fetch data from HN</summary>
+            <p>
+                First, let's get some data from HN for further analysis.
+                Just specify the range of <code>id</code>s and hit the <code>Get Data</code> button.
+            </p>
+
+            <p>
+                This will take time, but you'd only need to do it once.
+            </p>
+    
+            {% include "partials/get_data_from_hn.html" %}
+    
+        </details>
+    </section>
+    
+
+    <section id="db-filters">
         <p>
-            First, let's get some data from HN for further analysis.
-            Just specify the range of <code>id</code>s and hit the <code>Get Data</code> button.
+            Let's filter out the posts that would be used for analysis by <code>id</code>,
+            <code>score</code> and <code>number of comments</code>.
+            You can change these settings any time later.
         </p>
-        <p>This will take time, but you'd only need to do it once.</p>
+    
+        {% include "partials/set_db_filters.html"%}
+    
+    </section>
 
-        {% include "partials/get_data_from_hn.html" %}
+    <section id="cluster-filters">
+        <p>
+            Specify clustering-related parameters, 
+            like <code>number of clusters</code>
+            and BERT <code>model</code> to be uses for embeddings.
+        </p>
 
-    </details>
+        {% include "partials/set_clustering_filters.html" %}
 
-    <p>
-        Let's filter out the posts that would be used for analysis by <code>id</code>,
-        <code>score</code> and <code>number of comments</code>.
-        You can change these settings any time later.
-    </p>
+    </section>
 
-    <!-- "partials/get_data_from_db.html" -->
-    {% include "partials/get_data_for_semantic_clustering.html"%}
-
-    <p>TODO: show SQL query as details???</p>
+    <button id="semantic-cluster-btn">Cluster Posts</button>
+    <button id="post-db-btn" style="visibility: hidden;">Query DB</button>
+    
 
     <div id="semantic-cluster-plot-root"></div>
 

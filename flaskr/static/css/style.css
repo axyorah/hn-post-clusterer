@@ -8,16 +8,24 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 a {
     color:rgb(3, 205, 255);
 }
 
 .box {
-    border-radius: 2px;
     background-color: rgb(76, 73, 82);
+    border-radius: 2px;
+    border-color: none;
+    border-width: 0px;
+    padding: 5%;
     margin-top: 5%;
     margin-bottom: 5%;
-    padding: 5%;
+    color: white;
 }
 
 .hor {
@@ -28,8 +36,11 @@ a {
 
 .controls {
     background-color: rgba(255,255,255,0.1);
-    padding: 20px;
     border-radius: 2px;
+    border-color: none;
+    border-width: 0px;
+    padding: 20px;
+    color: white;
 }
 
 tr, td {
