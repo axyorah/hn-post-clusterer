@@ -21,23 +21,16 @@
 
         <h1 class="mt-5">TITLE</h1>
 
-        {% include "partials/get_data.html" %}
+        <div id="filter-root">
+            {% include "partials/get_data.html" %}
+        </div>
 
-        <ul class="nav nav-tabs" id="seed-tab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="same-label-tab-btn" data-bs-toggle="tab" 
-                    data-bs-target="#same-label-tab" aria-selected="true">
-                    <h2>Get Posts from Cluster</h2>
-                </button>
-            </li>
-        </ul>
+        <div id="figure-root">
+            {% include "partials/figures.html" %}
+        </div>
 
-        <div class="tab-content" id="tab-content">
-
-            <section class="tab-pane fade show active" id="same-label-tab" role="tabpanel" aria-labelledby="same-label-tab">
-                {% include "partials/get_posts_from_same_cluster.html" %}
-            </section>
-
+        <div id="select-root">
+            {% include "partials/select_cluster.html" %}
         </div>
 
         <div class="box" id="table-root"></div>
