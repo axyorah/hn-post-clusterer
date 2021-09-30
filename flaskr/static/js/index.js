@@ -132,8 +132,15 @@ async function postData(url, data) {
     return response.json(); 
 }
 
+function filterAbyBwhereBisC(a, b, c) {
+    const indices = [...Array(a.length).keys()];
+    return indices.map(i => {
+        if (b[i] === c) {return a[i];}
+    }).filter(val => val !== undefined);
+}
+
 // Event Listeners    
-for (let filterBy of ['date', 'id', 'comm', 'score']) {
+for (let filterBy of ['id', 'comm', 'score']) {
     for (let loc of ['begin', 'end']) {
         show[filterBy][loc].range.addEventListener('change', (evt) => {
             update[filterBy][loc](
@@ -145,7 +152,7 @@ for (let filterBy of ['date', 'id', 'comm', 'score']) {
 }
 
 window.addEventListener('load', (evt) => {
-    for (let filterBy of ['date', 'id', 'comm', 'score']) {            
+    for (let filterBy of ['id', 'comm', 'score']) {            
         config[filterBy](
             show[filterBy].begin.range, show[filterBy].end.range, 
             show[filterBy].begin.label, show[filterBy].end.label,

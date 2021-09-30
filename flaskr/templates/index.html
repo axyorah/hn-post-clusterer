@@ -30,32 +30,12 @@
                     <h2>Get Posts from Cluster</h2>
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="simple-cluster-tab-btn" data-bs-toggle="tab"
-                    data-bs-target="#simple-cluster" aria-selected="false">
-                    <h2>Simple Clustering</h2>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="test-tab-btn" data-bs-toggle="tab" data-bs-target="#test-form"
-                    type="button" role="tab" aria-controls="test" aria-selected="false">
-                    <h2>Testing stuff...</h2>
-                </button>
-            </li>
         </ul>
 
         <div class="tab-content" id="tab-content">
 
             <section class="tab-pane fade show active" id="same-label-tab" role="tabpanel" aria-labelledby="same-label-tab">
                 {% include "partials/get_posts_from_same_cluster.html" %}
-            </section>
-
-            <section class="tab-pane fade" id="simple-cluster" role="tabpanel" aria-labelledby="simple-cluster">
-                {% include "partials/simple_cluster_tab.html" %}
-            </section>
-
-            <section class="tab-pane fade" id="test-form" role="tabpanel" aria-labelledby="test-tab">
-                {% include "partials/test_tab.html" %}
             </section>
 
         </div>
@@ -96,16 +76,7 @@
                 show[filterBy][loc]["label"] = document.querySelector(`#show-${filterBy}-${loc}-label`);
             }
         }
-        const queryDbBtn = document.querySelector("#post-db-btn");
         const tableRoot = document.querySelector("#table-root");
-
-        // `Simple Clustering` tab
-        const runSimpleClusterBtn = document.querySelector("#run-simple-cluster-btn");
-        const showLsiTopicsNum = document.querySelector("#show-lsi-topics-num");
-        const showKmeansClustersNum = document.querySelector("#show-kmeans-clusters-num");
-        const showSimpleClusterPostsBtn = document.querySelector("#show-simple-cluster-posts-btn");
-        const showKmeansClusteredPostsNum = document.querySelector("#show-kmeans-clustered-posts-num");
-        const simpleClusterPlotRoot = document.querySelector('#simple-cluster-plot-root');
 
         // Semantic Clustering 
         const semanticClusterBtn = document.querySelector('#semantic-cluster-btn');
@@ -119,7 +90,6 @@
     <script src="{{url_for('static', filename='js/index.js')}}"></script>
     <script src="{{url_for('static', filename='js/seeddb_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/table_utils.js')}}"></script>
-    <script src="{{url_for('static', filename='js/cluster_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/semantic_utils.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"

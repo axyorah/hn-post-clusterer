@@ -153,8 +153,7 @@ function appendDataToHNPostTable(table, data) {
     }
 }
 
-// Event Listeners
-queryDbBtn.addEventListener('click', function (evt) {
+function showAllPosts() {
     /*
     values currently set in the "form" will be used to query the db;
     partial response will be shown in a table at the bottom of the page at `/`;
@@ -184,4 +183,4 @@ queryDbBtn.addEventListener('click', function (evt) {
 
     // send params for complete query and entire corpus serialization
     queryDbAndSerializeResult(paramsComplete);
-})
+}
