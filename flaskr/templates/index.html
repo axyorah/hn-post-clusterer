@@ -25,15 +25,15 @@
             {% include "partials/get_data.html" %}
         </div>
 
-        <div id="figure-root">
+        <div id="figure-root" style="visibility: hidden;">
             {% include "partials/show_figures.html" %}
         </div>
 
-        <div id="select-root">
+        <div id="select-root" style="visibility: hidden;">
             {% include "partials/select_cluster.html" %}
         </div>
 
-        <div class="box" id="table-root"></div>
+        <div class="box" id="table-root" style="visibility: hidden;"></div>
     </main>
 
     <script>
@@ -78,12 +78,14 @@
         const semanticClusterBtn = document.querySelector("#semantic-cluster-btn");
         
         // Figures
+        const figureRoot = document.querySelector("#figure-root");
         const semanticClusterPlotRoot = document.querySelector("#semantic-cluster-plot-root");
         const countsBarPlotRoot = document.querySelector("#counts-bar-plot-root");
         const embedPcaPlotRoot = document.querySelector("#embed-pca-plot-root");
         const embedTsnePlotRoot = document.querySelector("#embed-tsne-plot-root");
 
         // Select Cluster
+        const selectRoot = document.querySelector("#select-root");
         const showSemanticClusterPostsNum = document.querySelector("#show-semantic-cluster-posts-num");
         const showSemanticClusterPostsBtn = document.querySelector("#show-semantic-cluster-posts-btn");
         

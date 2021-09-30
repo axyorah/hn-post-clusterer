@@ -23,9 +23,18 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         embedPcaPlotRoot.removeChild(embedPcaPlotRoot.lastChild);
     }
 
+    // make figures, select, and table invisible
+    figureRoot.style.visibility = "hidden";
+    selectRoot.style.visibility = "hidden";
+    tableRoot.style.visibility = "hidden";
+
     postData('/semanticcluster', params)
     .then(res => {
         semanticClusterBtn.innerHTML = `Cluster Posts`;
+
+        // make figures and select visible
+        figureRoot.style.visibility = "visible";
+        selectRoot.style.visibility = "visible";
 
         // // display plots:
         // // create bar plot and store it in barPlotRef
@@ -55,6 +64,9 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
 
     // add in-progress animation
     this.innerHTML = `${spinnerAmination} Querying DB...`;
+
+    // make table visible
+    tableRoot.style.visibility = "visible";
 
     // read all labels
     postData('/file/readcsv', {
