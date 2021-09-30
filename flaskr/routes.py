@@ -150,7 +150,7 @@ def semantic_cluster():
         stories = pipe.get_story_batches()
         embeddings = pipe.get_embedding_batches(stories)
         embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
-        pipe.cluster_story_batches(embeddings, n_clusters=10)
+        pipe.cluster_story_batches(embeddings)
         pipe.serialize_result(fname='./data/df.csv')
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)

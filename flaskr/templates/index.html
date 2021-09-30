@@ -41,7 +41,7 @@
         const container = document.querySelector(".container");
         const tabs = document.querySelectorAll(".nav-link");
 
-        // Filters
+        // Filter - HN api
         const seed = new Object();
         for (let filterBy of ["date", "id"]) {
             if (seed[filterBy] === undefined) {
@@ -57,6 +57,7 @@
         }
         const seedSubmitBtn = document.querySelector("#seed-submit-btn");
 
+        // Filters - DB
         const show = new Object();
         for (let filterBy of ["date", "id", "comm", "score"]) {
             if (show[filterBy] === undefined) {
@@ -70,6 +71,10 @@
                 show[filterBy][loc]["label"] = document.querySelector(`#show-${filterBy}-${loc}-label`);
             }
         }
+
+        // Filters - clustering
+        const clustersNum = document.querySelector("#num-clusters-num");
+        const transformerModelName = document.querySelector("#model-name-txt");
         const semanticClusterBtn = document.querySelector("#semantic-cluster-btn");
         
         // Figures
@@ -81,7 +86,7 @@
         // Select Cluster
         const showSemanticClusterPostsNum = document.querySelector("#show-semantic-cluster-posts-num");
         const showSemanticClusterPostsBtn = document.querySelector("#show-semantic-cluster-posts-btn");
-
+        
         // Table
         const tableRoot = document.querySelector("#table-root");
         

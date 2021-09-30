@@ -1,13 +1,15 @@
 semanticClusterBtn.addEventListener('click', function (evt) {
     // store params for db query
     const params = {
-        'sender': 'show',
+        'sender': 'semantic',
         'show-id-begin-range': show.id.begin.range.value,
         'show-id-end-range': show.id.end.range.value,
         'show-comm-begin-range': show.comm.begin.range.value,
         'show-comm-end-range': show.comm.end.range.value,
         'show-score-begin-range': show.score.begin.range.value,
         'show-score-end-range': show.score.end.range.value,
+        'num-clusters': clustersNum.value,
+        'model-name': transformerModelName.value,
     };
     
     // show `in-progress`
@@ -17,8 +19,8 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     while (countsBarPlotRoot.children.length) {
         countsBarPlotRoot.removeChild(countsBarPlotRoot.lastChild);
     }
-    while (embedScatterPlotRoot.children.length) {
-        embedScatterPlotRoot.removeChild(embedScatterPlotRoot.lastChild);
+    while (embedPcaPlotRoot.children.length) {
+        embedPcaPlotRoot.removeChild(embedPcaPlotRoot.lastChild);
     }
 
     postData('/semanticcluster', params)
