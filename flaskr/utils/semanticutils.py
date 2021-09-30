@@ -47,7 +47,7 @@ def html2sentences(html):
         for sentence in txt.split('.')
     ]
 
-def get_story_embeddings(data: list):
+def get_story_embeddings(data: list, model_name='sentence-transformers/all-distilroberta-v1'):
     """
     INPUTS:
        data: list: each element is a story dict with keys:
@@ -57,14 +57,15 @@ def get_story_embeddings(data: list):
                {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
                {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
            ]
+        model_name: str: name of the sentence transformer from list https://www.sbert.net/docs/pretrained_models.html
     OUTPUTS:
         list: each element is a BERT embedding based on story comments
         [
-            ndarray of floats with shape (768,), 
+            ndarray of floats with shape (768,), or (384,)
             ...
         ]
     """
-    embedder = StoryEmbedder()
+    embedder = StoryEmbedder(model_name=model_name)
 
     return [
         embedder.embed_and_average_sentences(
