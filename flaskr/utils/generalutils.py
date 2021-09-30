@@ -13,6 +13,8 @@ from flaskr.utils.formutils import (
 )
 
 from flaskr.utils.semanticutils import (
+    StoryEmbedder,
+    html2sentences,
     get_story_embeddings,
 
 )
@@ -50,9 +52,11 @@ def rebatch_generator(batches, min_batch_size):
 class BatchedPipeliner:
     def __init__(self, request):
         self.rqparser = RequestParser()
-        self.request_raw = request
         self.request_form = self.rqparser.parse(request)
-        
+
+        self._n_clusters = self.request_form['n_clusters']
+        self._model_name = self.request_form['model_name']
+
         self._min_batch_size = 100
         self._num_batches = 0
         self._num_stories = 0
@@ -61,7 +65,8 @@ class BatchedPipeliner:
         self._embeddings = None
         self._labels = None
 
-        self.kmeans = None
+        self.embedder = StoryEmbedder(model_name=self._model_name)
+        self.kmeans = MiniBatchKMeans(n_clusters=self._n_clusters)
         self.centroids = None
         """
         pipe:
@@ -112,6 +117,29 @@ class BatchedPipeliner:
         self._stories = batches[0]
 
         return batches[1]
+
+    def get_story_embeddings(self, data):
+        """
+        INPUTS:
+           data: list: each element is a story dict with keys:
+               story_id, author, unix_time, score, title, url, num_comments, children
+               e.g.:
+               [
+                   {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
+                   {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
+               ]
+        OUTPUTS:
+            list: each element is a BERT embedding based on story comments
+            [
+                ndarray of floats with shape (768,), or (384,)
+                ...
+            ]
+        """
+        return [
+            self.embedder.embed_and_average_sentences(
+                html2sentences(story['children'])
+            ) for story in data
+        ]
     
     def get_embedding_batches(self, story_batches):
         print('[INFO] generating embeddings...')
@@ -165,7 +193,7 @@ class BatchedPipeliner:
         self._embeddings = lowdim_batches[0]
         return lowdim_batches[1]
     
-    def cluster_story_batches(self, embedding_batches=None, n_clusters=10):
+    def cluster_story_batches(self, embedding_batches=None):#, n_clusters=10):
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to cluster yet! ' +\
@@ -177,8 +205,8 @@ class BatchedPipeliner:
         print('[INFO] copying embeddings')
         batches = tee(embedding_batches or self._embeddings, 2)
         
-        print(f'[INFO] clustering stories to {n_clusters} clusters...')
-        self.kmeans = MiniBatchKMeans(n_clusters=n_clusters)        
+        print(f'[INFO] clustering stories to {self._n_clusters} clusters...')
+        #self.kmeans = MiniBatchKMeans(n_clusters=n_clusters)
         # train kmeans
         for batch in batches[0]:
             self.kmeans.partial_fit(batch)
@@ -239,7 +267,7 @@ class BatchedPipeliner:
         for st_batch, emb_batch, lbl_batch in zip(story_batches[1], emb_batches[1], self._labels):
             # reduce dimensionality with pca if it hasn't already been done
             # otehrwise take n_dims first eigenvecs
-            emb_proj = pca.transform(emb_batch) if emb_batch.shape[1] == 768 else emb_batch[:,:n_dims]
+            emb_proj = pca.transform(emb_batch) if emb_batch.shape[1] > n_dims else emb_batch[:,:n_dims]
             for st, emb, lbl in zip(st_batch, emb_proj, lbl_batch):
                 with open(fname, 'a') as f:
                     f.write(
