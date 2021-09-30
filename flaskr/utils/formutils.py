@@ -19,6 +19,8 @@ class RequestParser:
             'show-kmeans-clusters-num': 'n_clusters',
             'story_ids': 'story_ids',
             'fname': 'fname',
+            'num-clusters': 'n_clusters',
+            'model-name': 'model_name',
         }
         # specify the list of html eles for each sender type
         self.sender2html = {
@@ -27,6 +29,12 @@ class RequestParser:
                 'show-id-begin-range', 'show-id-end-range', 
                 'show-comm-begin-range', 'show-comm-end-range', 
                 'show-score-begin-range', 'show-score-end-range'
+            ],
+            'semantic': [
+                'show-id-begin-range', 'show-id-end-range', 
+                'show-comm-begin-range', 'show-comm-end-range', 
+                'show-score-begin-range', 'show-score-end-range',
+                'num-clusters', 'model-name'
             ],
             'kmeans-run': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
             'kmeans-show': ['story_ids'],
@@ -41,6 +49,7 @@ class RequestParser:
                 'num_topics', 'n_clusters'
             ]},
             'fname': 'str',
+            'model_name': 'str',
             'story_ids': 'list[str]'
         }
 
