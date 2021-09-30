@@ -87,6 +87,23 @@ def file_reader():
     
     return {"ok": False}
 
+@app.route("/file/readcsv", methods=["POST"])
+def csv_reader():
+    if request.method == "POST":
+        form_request = rqparser.parse(request)
+        with open(form_request["fname"], "r") as f:
+            lines = f.read().splitlines()
+        
+        idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
+        contents = {field: [] for field in idx2field.values()}
+        for line in lines[1:]:
+            for i,val in enumerate(line.split("\t")):
+                contents[idx2field[i]].append(val)
+        
+        return { "contents": contents, "ok": True } 
+
+    return {"ok": False}
+
 @app.route("/file/write", methods=["POST"])    
 def serialize_corpus():
     if request.method == "POST":
