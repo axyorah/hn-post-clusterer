@@ -10,30 +10,33 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         'show-score-end-range': show.score.end.range.value,
     };
     
+    // show `in-progress`
     semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
+
+    // clear figures
+    while (countsBarPlotRoot.children.length) {
+        countsBarPlotRoot.removeChild(countsBarPlotRoot.lastChild);
+    }
+    while (embedScatterPlotRoot.children.length) {
+        embedScatterPlotRoot.removeChild(embedScatterPlotRoot.lastChild);
+    }
 
     postData('/semanticcluster', params)
     .then(res => {
-        console.log(res);
         semanticClusterBtn.innerHTML = `Cluster Posts`;
 
-        // display plots:
-        // create bar plot and store it in barPlotRef
-        const barPlotRef = document.createElement('iframe');
-        barPlotRef.setAttribute('class', 'graph-container');
-        barPlotRef.setAttribute('src', '/dashapp/semantic-cluster-bar-plot');
+        // // display plots:
+        // // create bar plot and store it in barPlotRef
+        const countsBarPlotRef = document.createElement('iframe');
+        countsBarPlotRef.setAttribute('class', 'graph-container');
+        countsBarPlotRef.setAttribute('src', '/dashapp/semantic-cluster-bar-plot');
+        countsBarPlotRoot.appendChild(countsBarPlotRef);
 
-        // create 2d scatter plot with two axes = first two PCA coordinates
-        const scatter2DPlotRef = document.createElement('iframe');
-        scatter2DPlotRef.setAttribute('class', 'graph-container');
-        scatter2DPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
-            
-        // make sure that the new plots are the only children of simpleClusterPlotRoot
-        while (semanticClusterPlotRoot.children.length) {
-            semanticClusterPlotRoot.removeChild(semanticClusterPlotRoot.children[semanticClusterPlotRoot.children.length - 1]);
-        }
-        semanticClusterPlotRoot.appendChild(barPlotRef);
-        semanticClusterPlotRoot.appendChild(scatter2DPlotRef);
+        // // create 2d scatter plot with two axes = first two PCA coordinates
+        const embedPcaPlotRef = document.createElement('iframe');
+        embedPcaPlotRef.setAttribute('class', 'graph-container');
+        embedPcaPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
+        embedPcaPlotRoot.append(embedPcaPlotRef);      
     })
     .catch(err => {
         console.log(err);
@@ -68,7 +71,6 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
         })
     }).then(res => {
         // display filtered posts in a new table
-        console.log(res);
         const table = getNewHNPostTable(); // no morePostsBtn!
         appendDataToHNPostTable(table, res);
         this.innerHTML = 'Show Posts';      

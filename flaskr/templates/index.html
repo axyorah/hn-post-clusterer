@@ -26,7 +26,7 @@
         </div>
 
         <div id="figure-root">
-            {% include "partials/figures.html" %}
+            {% include "partials/show_figures.html" %}
         </div>
 
         <div id="select-root">
@@ -37,10 +37,11 @@
     </main>
 
     <script>
+        // General
         const container = document.querySelector(".container");
         const tabs = document.querySelectorAll(".nav-link");
 
-        // `Get and Filter Data` tab
+        // Filters
         const seed = new Object();
         for (let filterBy of ["date", "id"]) {
             if (seed[filterBy] === undefined) {
@@ -69,13 +70,20 @@
                 show[filterBy][loc]["label"] = document.querySelector(`#show-${filterBy}-${loc}-label`);
             }
         }
-        const tableRoot = document.querySelector("#table-root");
+        const semanticClusterBtn = document.querySelector("#semantic-cluster-btn");
+        
+        // Figures
+        const semanticClusterPlotRoot = document.querySelector("#semantic-cluster-plot-root");
+        const countsBarPlotRoot = document.querySelector("#counts-bar-plot-root");
+        const embedPcaPlotRoot = document.querySelector("#embed-pca-plot-root");
+        const embedTsnePlotRoot = document.querySelector("#embed-tsne-plot-root");
 
-        // Semantic Clustering 
-        const semanticClusterBtn = document.querySelector('#semantic-cluster-btn');
-        const semanticClusterPlotRoot = document.querySelector('#semantic-cluster-plot-root');
+        // Select Cluster
         const showSemanticClusterPostsNum = document.querySelector("#show-semantic-cluster-posts-num");
         const showSemanticClusterPostsBtn = document.querySelector("#show-semantic-cluster-posts-btn");
+
+        // Table
+        const tableRoot = document.querySelector("#table-root");
         
     </script>
 
