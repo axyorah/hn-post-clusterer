@@ -1,0 +1,48 @@
+<ul class="nav nav-tabs" id="figures-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="same-label-tab-btn" data-bs-toggle="tab" 
+            data-bs-target="#all-figs-tab" aria-selected="true">
+            <h2>All figures</h2>
+        </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="same-label-tab-btn" data-bs-toggle="tab" 
+            data-bs-target="#counts-bar-tab" aria-selected="false">
+            <h2>Post Count</h2>
+        </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="same-label-tab-btn" data-bs-toggle="tab" 
+            data-bs-target="#embed-scatter-tab" aria-selected="false">
+            <h2>2D Embeddings</h2>
+        </button>
+    </li>
+
+</ul>
+
+<div class="tab-content" id="tab-content">
+
+    <section class="tab-pane fade show active" id="all-figs-tab" role="tabpanel" aria-labelledby="all-figs-tab">
+        <div class="box">
+            <p>all figs</p>
+            <div id="semantic-cluster-plot-root"></div>
+        </div>
+    </section>
+
+    <section class="tab-pane fade" id="counts-bar-tab" role="tabpanel" aria-labelledby="counts-bar-tab">
+        <div class="box">
+            <p>bar plot</p>
+            <div id="counts-bar-plot-root"></div>
+        </div>
+    </section>
+
+    <section class="tab-pane fade" id="embed-scatter-tab" role="tabpanel" aria-labelledby="embed-scatter-tab">
+        <div class="box">
+            <p>embeds scatter</p>
+            <div id="embed-scatter-plot-root"></div>
+        </div>
+    </section>
+
+</div>
