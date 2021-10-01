@@ -122,6 +122,116 @@ class GeneratorNormalizer:
     def transform_sample(self, sample):
         return self._normalize_sample(sample)
 
+class GeneratorStandardizer:
+    def __init__(self):
+        self.gen = None
+        self.mean = None
+        self.var = None
+        
+    def get_mean(self):
+        (g1,g2) = tee(self.gen)
+        
+        sm = None
+        for i,sample in enumerate(g1):
+            if not i:
+                sm = np.zeros(sample.shape)
+            sm += sample
+            
+        self.gen = g2
+        self.mean = sm / (i + 1)
+        
+        return self.mean
+        
+    def get_var(self):
+        (g1,g2) = tee(self.gen)
+        
+        sm = None
+        for i,sample in enumerate(g1):
+            if not i:
+                sm = np.zeros(sample.shape)
+            sm += (sample - self.mean)**2
+            
+        self.var = np.sqrt(sm / (i + 1)) if i else 0
+        self.gen = g2
+        return self.var
+    
+    def fit(self, gen):
+        self.gen = gen        
+        mean = self.get_mean()
+        var = self.get_var()
+        
+        return True
+        
+    def transform(self, gen):
+        def helper(gen):
+            for sample in gen:
+                yield (sample - self.mean) / self.var
+                
+        return helper(gen)
+    
+    def fit_transform(self, gen):
+        self.fit(gen)
+        return self.transform(self.gen)
+
+class BatchedGeneratorStandardizer:
+    def __init__(self):
+        """
+        assumes that each batch in a 2d numpy array
+        """
+        self.gen = None
+        self.mean = None
+        self.var = None
+        
+    def get_mean(self):
+        (g1,g2) = tee(self.gen)
+        
+        sm,num = None,0
+        for i,batch in enumerate(g1):
+            if not i:
+                sm = np.zeros(batch[0].shape)
+            sm += batch.sum(axis=0)
+            num += batch.shape[0]
+            
+        self.gen = g2
+        self.mean = sm / num
+        
+        return self.mean
+        
+    def get_var(self):
+        (g1,g2) = tee(self.gen)
+        
+        sm, num = None, 0
+        for i,batch in enumerate(g1):
+            if not i:
+                sm = np.zeros(batch[0].shape)
+            for sample in batch:
+                sm += (sample - self.mean)**2
+            num += batch.shape[0]
+            
+        self.var = np.sqrt(sm / num) if i else 0
+        self.gen = g2
+        return self.var
+    
+    def fit(self, gen):
+        self.gen = gen        
+        self.get_mean()
+        self.get_var()
+        
+        return True
+        
+    def transform(self, gen):
+        def helper(gen):
+            mean = self.mean.reshape(1,-1)
+            var = self.var.reshape(1,-1)
+            for batch in gen:
+                yield (batch - mean) / var
+                
+        return helper(gen)
+    
+    def fit_transform(self, gen):
+        self.fit(gen)
+        return self.transform(self.gen)
+        
 class KMeansForGenerator:
     def __init__(self, n_clusters, iters=300, tol=1e-5):
         self.n_clusters = n_clusters
