@@ -2,14 +2,6 @@ import os
 import numpy as np
 from collections import defaultdict
 
-import gensim
-from gensim import corpora, models
-from gensim.parsing.preprocessing import preprocess_documents
-
-# import sklearn
-# from sklearn.cluster import KMeans
-# from sklearn.metrics import silhouette_score
-
 import errno
 from smart_open import open  # for transparently opening remote files
 from itertools import cycle, tee
@@ -209,83 +201,3 @@ class KMeansForGenerator:
             ])
             for sample in X_generator            
         )
-
-def get_rare_words_in_serialized_corpus(fname, min_freq=2):
-    rwf = RareWordFinder(min_freq)
-    reader = SerialReader(fname)
-
-    for document in reader:
-        rwf.count_tokens(document)
-
-    return rwf.get_rare_words()
-
-def serialized2filtered(fname):
-    """
-    reads serialized documents from specified file 
-    and filters the rare words;
-    file should contain already tokenized documents: 
-    documents should be separated by a new line, 
-    tokens corresponding to a single document should be separated by space;
-    returns the generator that yields one filtered document at a time
-    (list of all tokens corresponding to the original document,
-    except for stopwords ['a', 'the', 'in'...] and rare words)
-    """
-    # read the serialized corpus once to find the rare words 
-    # that should be filtered during the actual analysis
-    min_freq = 2
-    rare_words = get_rare_words_in_serialized_corpus(fname, min_freq=min_freq)
-
-    # get filtered tokenized documents 
-    return SerialReader(fname, blacklist=rare_words) # generator!
-
-def filtered2bow(documents):
-    (documents1, documents2), (_,_) = copy_and_measure_generator(documents, 2)
-    dictionary = corpora.Dictionary(documents1)
-    return (dictionary.doc2bow(document) for document in documents2) # generator!
-
-def bow2tfidx(bow_corpus):
-    (bow_corpus1, bow_corpus2), (_,_) = copy_and_measure_generator(bow_corpus, 2)
-    tfidf_model = models.TfidfModel(bow_corpus1)
-    return tfidf_model[bow_corpus2]
-
-def tfidf2lsi(tfidf_corpus, dictionary, num_topics):
-    (tfidf_corpus1, tfidf_corpus2),(_,_) = copy_and_measure_generator(tfidf_corpus, 2)
-    lsi_model = models.LsiModel(
-        tfidf_corpus1, 
-        id2word=dictionary, 
-        num_topics=num_topics
-    )
-    return lsi_model[tfidf_corpus2]
-        
-def vectorize_lsi_corpus(lsi_corpus):
-    return (        
-        np.array([tpl[1] for tpl in document]) for document in lsi_corpus
-    )
-
-def serialized2kmeanslabels(fname, num_topics, n_clusters):
-    if not os.path.exists(fname):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),fname)
-    
-    filtered = serialized2filtered(fname)
-    (filtered1, filtered2), (_,_) = copy_and_measure_generator(filtered, 2)
-    
-    bow_corpus = filtered2bow(filtered1)
-    tfidf_corpus = bow2tfidx(bow_corpus)
-
-    dictionary = corpora.Dictionary(filtered2)
-    lsi_corpus = tfidf2lsi(tfidf_corpus, dictionary, num_topics)
-    lsi_vectorized = vectorize_lsi_corpus(lsi_corpus)
-    (lsi_vectorized1, lsi_vectorized2), (_,_) = copy_and_measure_generator(lsi_vectorized, 2)
-
-    normalizer = GeneratorNormalizer()
-    normalized_corpus = normalizer.fit_transform(lsi_vectorized1)
-    (samples1, samples2), (_,_) = copy_and_measure_generator(normalized_corpus, 2)
-
-    kmeans = KMeansForGenerator(n_clusters=n_clusters)
-    kmeans.fit(samples1)
-    labels = kmeans.predict(samples2)
-
-    return {
-        'labels': labels,
-        'lsi': lsi_vectorized2
-    }
