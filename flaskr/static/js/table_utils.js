@@ -141,12 +141,12 @@ function appendDataToHNPostTable(table, data) {
             }
             tr.appendChild(td);
         }
-        // add comments as details
+        // add comments as details or popup
         const td = document.createElement('td');
         td.setAttribute('class', `col_${fields.length}`);
-        const details = getHTMLDetails('show', data[storyId]['children']);
-        td.appendChild(details);
-        tr.appendChild(td);
+        // td.appendChild(getHTMLDetails('show', data[storyId]['children']));
+        td.appendChild(getPopup(data[storyId]['children']));
+        tr.appendChild(td);        
         
         // add row to table
         table.appendChild(tr);
@@ -183,4 +183,28 @@ function showAllPosts() {
 
     // send params for complete query and entire corpus serialization
     queryDbAndSerializeResult(paramsComplete);
+}
+
+function getPopup(txt) {
+    const popupBox = document.createElement('span');
+    popupBox.setAttribute('class', 'popup');
+    
+    const clickable = document.createElement('code');
+    clickable.setAttribute('class', 'mark');
+    clickable.style.cursor = 'pointer';
+    clickable.innerText = 'show';
+
+    const popupText = document.createElement('span');
+    popupText.setAttribute('class', 'popuptext');
+    popupText.innerHTML = txt;
+
+    popupBox.appendChild(clickable);
+    popupBox.appendChild(popupText);
+
+    popupBox.addEventListener('click', function (evt) {
+        popupText.classList.toggle('show');
+        console.log('popup clicked!');
+    })
+
+    return popupBox;
 }

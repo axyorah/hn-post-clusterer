@@ -54,6 +54,10 @@ code {
     color: rgb(3, 205, 255);
 }
 
+table {
+    width: 100%;
+}
+
 tr, td {
     text-align: left;
     border-top: 1px solid white;
@@ -101,4 +105,35 @@ button:hover {
         display: flex;
         flex-direction: column;
     }
+}
+
+.popup .popuptext {
+    position: absolute;
+    display: none;
+    width: 80%;
+    left: 10%;
+    margin-left: 0px;
+    padding: 20px;
+    background-color: rgba(25, 24, 27, 0.8);
+    color: white;
+    text-align: left;
+    border-radius: 2px;
+}
+
+/* Toggle this class when clicking on the popup container (hide and show the popup) */
+.popup .show {
+    display: block;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s
+}
+  
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+  
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
 }
