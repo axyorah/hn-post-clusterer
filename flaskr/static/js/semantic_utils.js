@@ -24,17 +24,17 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     }
 
     // make figures, select, and table invisible
-    figureRoot.style.visibility = "hidden";
-    selectRoot.style.visibility = "hidden";
-    tableRoot.style.visibility = "hidden";
+    figureRoot.style.display = "none";
+    selectRoot.style.display = "none";
+    tableRoot.style.display = "none";
 
     postData('/semanticcluster', params)
     .then(res => {
         semanticClusterBtn.innerHTML = `Cluster Posts`;
 
         // make figures and select visible
-        figureRoot.style.visibility = "visible";
-        selectRoot.style.visibility = "visible";
+        figureRoot.style.display = "";
+        selectRoot.style.display = "";
 
         // // display plots:
         // // create bar plot and store it in barPlotRef
@@ -66,14 +66,14 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Querying DB...`;
 
     // make table visible
-    tableRoot.style.visibility = "visible";
+    tableRoot.style.display = "";
 
     // read all labels
     postData('/file/readcsv', {
         'sender': 'reader',
         'fname': 'data/df.csv'    
     }).then(res => {
-        // filter ids based on the target label and query db
+        // filters post ids based on the target label
         filtered_ids = filterAbyBwhereBisC(
             res.contents['id'], 
             res.contents['label'], 
