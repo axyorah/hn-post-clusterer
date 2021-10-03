@@ -15,7 +15,7 @@ from flaskr.utils.formutils import (
 from flaskr.utils.semanticutils import (
     StoryEmbedder,
     html2sentences,
-    get_story_embeddings,
+    #get_story_embeddings,
 
 )
 
@@ -163,7 +163,7 @@ class BatchedPipeliner:
             num = 0
             for batch in story_batches:
                 num += len(batch)
-                yield np.stack(get_story_embeddings(batch))
+                yield np.stack(self.get_story_embeddings(batch))
             print(f'[INFO] got {num} embeddings!')
         
         # copy genrator: save one copy, return another
