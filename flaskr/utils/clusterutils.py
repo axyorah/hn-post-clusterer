@@ -198,6 +198,7 @@ class BatchedGeneratorStandardizer:
         return self.mean
         
     def get_var(self):
+        # check if self.gen is not None
         (g1,g2) = tee(self.gen)
         
         sm, num = None, 0
@@ -208,8 +209,9 @@ class BatchedGeneratorStandardizer:
                 sm += (sample - self.mean)**2
             num += batch.shape[0]
             
-        self.var = np.sqrt(sm / num) if i else 0
+        self.var = np.sqrt(sm / num) if num else np.zeros(sample.shape)
         self.gen = g2
+
         return self.var
     
     def fit(self, gen):
