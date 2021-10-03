@@ -26,7 +26,8 @@ from flaskr.utils.dbutils import (
 
 from flaskr.utils.clusterutils import (
     copy_and_measure_generator,
-    copy_and_measure_batch_generator
+    copy_and_measure_batch_generator,
+    BatchedGeneratorStandardizer
 )
 
 # TODO: use `cycle` instead of `tee` for copying generators...
@@ -66,18 +67,22 @@ class BatchedPipeliner:
         self._labels = None
 
         self.embedder = StoryEmbedder(model_name=self._model_name)
+        self.scaler = BatchedGeneratorStandardizer()
         self.kmeans = MiniBatchKMeans(n_clusters=self._n_clusters)
         self.centroids = None
         """
         pipe:
         - get stories from db
         - get story embeddings (requires removing markup and splitting into sentences)
+        - standardize/normalize embeddings
         - cluster stories with batched kmeans        
         - serialize result
         """
 
     def get_story_batches(self, delta_id=10000):
         """
+        queries db based on form request,
+        recursively collects all comments for each story,
         returns a generator, where each element 
         is a list ("batch") of story dicts with the following fields:
             'story_id', 'author', 'unix_time', 'score', 
@@ -141,7 +146,18 @@ class BatchedPipeliner:
             ) for story in data
         ]
     
-    def get_embedding_batches(self, story_batches):
+    def get_embedding_batches(self, story_batches=None):
+        """
+        each element of a batch is a (batch_size, embed_dim) numpy array
+        (embed_dim is 768 for default bert transformers and 384 for minis)
+        """
+        if story_batches is None and self._stories is None:
+            raise RuntimeError(
+                'There is nothing to embed! '+\
+                'Consider running `get_story_batches()` first!'
+            )
+
+
         print('[INFO] generating embeddings...')
         def batch_generator(story_batches):
             num = 0
@@ -151,9 +167,23 @@ class BatchedPipeliner:
             print(f'[INFO] got {num} embeddings!')
         
         # copy genrator: save one copy, return another
-        gen = batch_generator(story_batches)
+        gen = batch_generator(story_batches or self._stories)
         print('[INFO] copying embedding generator...')
         batches = tee(gen, 2)
+        self._embeddings = batches[0]
+
+        return batches[1]
+
+    def standardize_embedding_batches(self, embedding_batches=None):
+        if embedding_batches is None and self._embeddings is None:
+            raise RuntimeError(
+                'There is nothing to standardize! '+\
+                'Consider running `get_embedding_batches()` first!'
+            )
+        
+        print('[INFO] standardizing embeddings...')
+        normalized = self.scaler.fit_transform(embedding_batches or self._embeddings)
+        batches = tee(normalized, 2)
         self._embeddings = batches[0]
 
         return batches[1]
@@ -176,7 +206,7 @@ class BatchedPipeliner:
             return embedding_batches or self._embeddings
 
         # copy high dim embeddings
-        highdim_batches = tee(embedding_batches or self._embeddings)
+        highdim_batches = tee(embedding_batches or self._embeddings, 2)
 
         # train pca
         print(f'[INFO] reducing embedding dimensionality to {n_dims}...')
