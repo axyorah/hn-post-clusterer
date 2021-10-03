@@ -1,7 +1,10 @@
 from flask import current_app as app
 
 import os, json, datetime
+from collections import defaultdict
+import bs4 as bs
 import requests as rq
+from smart_open import open
 
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
@@ -15,12 +18,15 @@ from flaskr.utils.dbutils import (
     get_stories_with_children_from_id_list,
     get_document_dict_from_sqlite_rows,
     get_stories_from_db,
+    DBHelper
 )
 
 from flaskr.utils.datautils import (
     create_file,
     serialize_dict_keys,
 )
+
+from flaskr.utils.semanticutils import Tokenizer
 
 from flaskr.utils.generalutils import BatchedPipeliner
 
@@ -33,6 +39,7 @@ CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
 ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
 LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
 LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
+DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
 
 # main page
 @app.route("/", methods=["GET"])
@@ -119,10 +126,54 @@ def semantic_cluster():
         embeddings = pipe.standardize_embedding_batches(embeddings)
         embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
         pipe.cluster_story_batches(embeddings)
-        pipe.serialize_result(fname='./data/df.csv')
+        pipe.serialize_result(fname=DF_FNAME)
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
         return {"ok": True}
 
     return {"ok": False}
+
+@app.route("/wordcloud", methods=["GET", "POST"])
+def generate_wordcloud():
+    if True:
+
+        print('hello wordcloud!!!')
+
+        #form_request = rqparser.parse(request)
+        dbhelper = DBHelper()
+        tokenizer = Tokenizer()
+        frequencies = dict()
+
+        # read records line by line
+        # and calculate token frequencies for story comments of each label
+        for i,line in enumerate(open(DF_FNAME)):
+            if not i:
+                field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
+                continue
+
+            vals = line.split('\t')
+            story_id = vals[field2idx['id']]
+            label = vals[field2idx['label']]
+
+            story = dbhelper.get_story_with_children_by_id(story_id)
+            comments = bs.BeautifulSoup(story['children'], 'lxml').get_text(separator=' ')
+            tokens = tokenizer.tokenize(comments)
+
+            for token in tokens:
+                if not tokens:
+                    continue
+                if label not in frequencies.keys():
+                    frequencies[label] = defaultdict(int)
+                frequencies[label][token] += 1
+
+        # write frequencies for each label
+        print(frequencies.keys())
+        for lbl in frequencies.keys():
+            with open(f'data/freq_{lbl}.json', 'w') as f:
+                json.dump({ 
+                    key:val for key,val in frequencies[lbl].items()
+                    if val > 1
+                }, f)
+
+        return {"ok": True}
