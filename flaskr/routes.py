@@ -8,35 +8,21 @@ from flask import request, make_response, Response
 
 from flaskr.utils.formutils import (
     RequestParser,
-    update_display_record
 )
 from flaskr.utils.dbutils import (
     query_api_and_add_result_to_db,
     get_stories_with_children_from_id_range,
     get_stories_with_children_from_id_list,
-    get_document_list_from_sqlite_rows,
     get_document_dict_from_sqlite_rows,
     get_stories_from_db,
-)
-from flaskr.utils.clusterutils import (    
-    serialized2kmeanslabels
 )
 
 from flaskr.utils.datautils import (
     create_file,
-    serialize_raw_documents_to_disc,
-    serialize_vectors_to_disc,
     serialize_dict_keys,
-    serialize_dict_of_dicts,
-    get_stories_from_db_and_serialize_ids_and_comments,
 )
 
-from flaskr.utils.semanticutils import (
-    get_story_embeddings,
-    #train_and_serialize_faiss_index,
-    cluster_stories_with_faiss,
-    project_embeddings,
-)
+from flaskr.utils.generalutils import BatchedPipeliner
 
 # get request parser
 rqparser = RequestParser() 
@@ -123,25 +109,6 @@ def serialize_corpus():
 
     return {"ok": False}
 
-@app.route("/simplecluster", methods=["POST"])
-def simple_cluster():
-    if request.method == "POST":
-        form_request = rqparser.parse(request)
-        result = serialized2kmeanslabels(
-            CORPUS_FNAME, form_request["num_topics"], form_request["n_clusters"]
-        )
-
-        create_file(LABEL_FNAME)
-        create_file(LSI_FNAME)
-
-        serialize_raw_documents_to_disc(LABEL_FNAME, result['labels'])
-        serialize_vectors_to_disc(LSI_FNAME, result['lsi'])
-
-        return {"ok": True}
-    return {"ok": False}
-
-from flaskr.utils.generalutils import BatchedPipeliner
-
 @app.route("/semanticcluster", methods=["POST"])
 def semantic_cluster():
     if request.method == "POST":
@@ -149,6 +116,7 @@ def semantic_cluster():
         pipe = BatchedPipeliner(request)
         stories = pipe.get_story_batches()
         embeddings = pipe.get_embedding_batches(stories)
+        embeddings = pipe.standardize_embedding_batches(embeddings)
         embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
         pipe.cluster_story_batches(embeddings)
         pipe.serialize_result(fname='./data/df.csv')
