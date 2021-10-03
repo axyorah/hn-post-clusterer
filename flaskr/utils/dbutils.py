@@ -401,3 +401,66 @@ def get_stories_from_db(form_request, delta_id=10000):
             dct = get_document_dict_from_sqlite_rows([row])
             for key, val in dct.items():
                 yield val
+
+class DBHelper:
+    def __init__(self):
+        self.db = get_db()
+        self.story_pattern_without_where = """
+        WITH RECURSIVE tab(id, parent_id, root_id, level, title, body) AS (
+            SELECT 
+                s.story_id, 
+                s.story_id,
+                s.story_id,
+                1,
+                s.title,
+                s.title
+            FROM story AS s
+
+            UNION
+
+            SELECT
+                c.comment_id, 
+                c.parent_id,
+                tab.root_id,
+                tab.level + 1,
+                c.author,
+                c.body
+            FROM tab, comment as c WHERE c.parent_id = tab.id
+        ) 
+
+        SELECT 
+            s.story_id,
+            s.author, 
+            s.unix_time,
+            s.score,
+            s.title, 
+            s.url,
+            s.num_comments,
+            (
+                SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
+                FROM tab
+                WHERE root_id = s.story_id
+                GROUP BY root_id
+            ) AS children            
+        FROM story AS s
+        """
+
+    def get_story_with_children_by_id(self, story_id):
+
+        fields = [
+            'story_id', 'author', 'unix_time', 'score', 
+            'title', 'url', 'num_comments', 'children'
+        ]
+
+        row = self.db.execute(        
+            f'''
+            {self.story_pattern_without_where}
+            WHERE s.story_id = ?;
+            ''', 
+            (story_id,)
+        ).fetchone()
+
+        return {
+            field: row.__getitem__(field)
+            for field in fields
+        }
