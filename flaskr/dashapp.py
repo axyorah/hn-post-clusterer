@@ -1,4 +1,4 @@
-import os
+import os, re, json
 import numpy as np
 import pandas as pd
 import dash
@@ -7,6 +7,9 @@ from dash import dash_table
 from dash import html
 from dash import dcc
 import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 # set globals
 CORPUS_DIR = 'data'
@@ -27,12 +30,28 @@ def update_fig_layout(fig):
         font_color=STYLE['text_color']
     )
 
+    return fig
+
 def read_semantic_df():
     df = pd.read_csv(DF_FNAME, sep='\t')
     df['ax-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
     df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
     return df
 
+def read_cluster_frequencies():
+    fnames = [
+        os.path.join('data', fname) 
+        for fname in os.listdir('data') if 'freq' in fname
+    ]
+
+    frequencies = dict()
+    for fname in fnames:
+        res = re.search('freq_(?P<lbl>[0-9])+', fname)
+        lbl = res['lbl']
+        with open(fname, 'r') as f:
+            frequencies[lbl] = json.load(f)
+
+    return frequencies
 
 def get_barplot(df):
     df_bar = df.groupby('label').count()
@@ -71,8 +90,27 @@ def get_scatterplot(df):
 
     return fig
   
-    
+def get_wordclouds(frequencies):
+    wcloud = WordCloud()
+    num = int(np.ceil(np.sqrt(len(frequencies.keys()))))
 
+    fig = make_subplots(rows=num, cols=num)
+    for lbl in range(len(frequencies.keys())):
+        row = lbl // num + 1
+        col = lbl % num + 1
+        cloud = wcloud.generate_from_frequencies(frequencies[str(lbl)])
+        fig.add_trace(go.Image(z=cloud.to_array()), row=row, col=col)
+
+    update_fig_layout(fig)
+    fig.update_xaxes(showticklabels=False).update_yaxes(showticklabels=False)
+
+    return fig
+
+def get_wordcloud(freq):
+    wcloud = WordCloud()
+    cloud = wcloud.generate_from_frequencies(freq)
+    return update_fig_layout(px.imshow(cloud.to_array()))
+        
 def init_dashboard(server):
     """Create a Plotly Dash dashboard."""
     dash_app = dash.Dash(
@@ -133,6 +171,26 @@ def init_dashboard(server):
         df = read_semantic_df()
         return get_scatterplot(df)
 
+    # wordcloud subplots
+    wordcloud_container = html.Div(
+        children = [
+            dcc.Graph(
+                id='wordcloud',
+                className='graph',
+                figure=get_wordclouds({'0': {'test': 1}}),
+            ), 
+            html.Button('Update', id='wordcloud-plot-update-btn', className='graph-btn', n_clicks=0)
+        ],
+    )
+
+    @dash_app.callback(
+        Output(component_id='wordcloud', component_property='figure'),
+        Input(component_id='wordcloud-plot-update-btn', component_property='n_clicks')
+    )
+    def update_wordcloud_plot(n_clicks):
+        freqs = read_cluster_frequencies()
+        return get_wordclouds(freqs)
+
 
     # --- Put Everything Together ---
     # NOTE ON CALLBACKS:
@@ -151,6 +209,8 @@ def init_dashboard(server):
             return semantic_cluster_bar_plot
         elif pathname == '/dashapp/semantic-cluster-scatter-plot':
             return semantic_cluster_scatter_plot
+        elif pathname == '/dashapp/wordcloud-plot':
+            return wordcloud_container
         else:
             return #TODO: error page
 

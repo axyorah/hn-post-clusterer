@@ -14,6 +14,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     
     // show `in-progress`
     semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
+    wordcloudBtn.innerHTML = `${spinnerAmination} Gathering Data..`;
 
     // clear figures
     while (countsBarPlotRoot.children.length) {
@@ -35,21 +36,30 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         // make figures and select visible
         figureRoot.style.display = "";
         selectRoot.style.display = "";
-
-        // // display plots:
+    }).then(res => {
         // // create bar plot and store it in barPlotRef
         const countsBarPlotRef = document.createElement('iframe');
         countsBarPlotRef.setAttribute('class', 'graph-container');
         countsBarPlotRef.setAttribute('src', '/dashapp/semantic-cluster-bar-plot');
         countsBarPlotRoot.appendChild(countsBarPlotRef);
-
+    }).then(res => {
         // // create 2d scatter plot with two axes = first two PCA coordinates
         const embedPcaPlotRef = document.createElement('iframe');
         embedPcaPlotRef.setAttribute('class', 'graph-container');
         embedPcaPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
-        embedPcaPlotRoot.append(embedPcaPlotRef);      
-    })
-    .catch(err => {
+        embedPcaPlotRoot.append(embedPcaPlotRef);
+    }).then(res => {
+        // generate data for wordcloud        
+        return fetch('/wordcloud');
+    }).then(res => {
+        wordcloudBtn.innerHTML = 'Generate WordCloud';
+
+        // // create wordcloud
+        const wordcloudPlotRef = document.createElement('iframe');
+        wordcloudPlotRef.setAttribute('class', 'graph-container');
+        wordcloudPlotRef.setAttribute('src', '/dashapp/wordcloud-plot');
+        wordcloudPlotRoot.append(wordcloudPlotRef);
+    }).catch(err => {
         console.log(err);
         semanticClusterBtn.innerHTML = `Cluster Posts`;
     });

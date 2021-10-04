@@ -14,6 +14,13 @@
         </button>
     </li>
 
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="same-label-tab-btn" data-bs-toggle="tab" 
+            data-bs-target="#wordcloud-tab" aria-selected="false">
+            <h2>Word Clouds</h2>
+        </button>
+    </li>
+
 </ul>
 
 <div class="tab-content" id="tab-content">
@@ -52,6 +59,17 @@
                 <code>TODO: t-SNE for dim reduction</code>
             </p>
             <div id="embed-tsne-plot-root"></div>
+        </div>
+    </section>
+
+    <section class="tab-pane fade" id="wordcloud-tab" role="tabpanel" aria-labelledby="wordcloud-tab">
+        <div class="box">
+            <p>Generate word cloud for each cluster.</p>
+            <div id="wordcloud-plot-root"></div>
+
+            <button id="wordcloud-btn">Generate WordCloud</button>
+
+            <div id="wordcloud-plot-root"></div>
         </div>
     </section>
 

@@ -25,7 +25,7 @@
             {% include "partials/get_data.html" %}
         </div>
 
-        <div id="figure-root" style="display: none;">
+        <div id="figure-root" ><!--style="display: none;">-->
             {% include "partials/show_figures.html" %}
         </div>
 
@@ -83,6 +83,8 @@
         const countsBarPlotRoot = document.querySelector("#counts-bar-plot-root");
         const embedPcaPlotRoot = document.querySelector("#embed-pca-plot-root");
         const embedTsnePlotRoot = document.querySelector("#embed-tsne-plot-root");
+        const wordcloudBtn = document.querySelector("#wordcloud-btn");
+        const wordcloudPlotRoot = document.querySelector("#wordcloud-plot-root");
 
         // Select Cluster
         const selectRoot = document.querySelector("#select-root");
