@@ -18,6 +18,29 @@ nltk.download('stopwords')
 stop_words = stopwords.words('english')
 stop_words = set(stop_words)
 
+class RareWordFinder:
+    def __init__(self, minfreq):
+        self.minfreq = max(minfreq, 2)
+        self.counter = defaultdict(int)
+        self.rare = set()
+
+    def count_tokens(self, tokens):
+        """
+        count frequencies of each token and store it in `self.counter` dict
+        """
+        for token in tokens:
+            self.counter[token] += 1
+            if self.counter[token] < self.minfreq:
+                self.rare.add(token)
+            elif token in self.rare:
+                self.rare.remove(token)
+
+    def get_rare_words(self):
+        """
+        returns the set of tokens whose frequency is lower than `self.minfreq`
+        """
+        return self.rare
+
 class StoryEmbedder:
     def __init__(self, model_name='sentence-transformers/all-distilroberta-v1'):
         self.model = SentenceTransformer(model_name)

@@ -49,29 +49,6 @@ def copy_and_measure_batch_generator(generator, num_copies=1):
         num_items += len(batch)
     return gs[1:], (num_batches, num_items, len(item) if hasattr(item, '__iter__') else 1)
 
-class RareWordFinder:
-    def __init__(self, minfreq):
-        self.minfreq = max(minfreq, 2)
-        self.counter = defaultdict(int)
-        self.rare = set()
-
-    def count_tokens(self, tokens):
-        """
-        count frequencies of each token and store it in `self.counter` dict
-        """
-        for token in tokens:
-            self.counter[token] += 1
-            if self.counter[token] < self.minfreq:
-                self.rare.add(token)
-            elif token in self.rare:
-                self.rare.remove(token)
-
-    def get_rare_words(self):
-        """
-        returns the set of tokens whose frequency is lower than `self.minfreq`
-        """
-        return self.rare
-
 class SerialReader:
     def __init__(self, fname, blacklist=set()):
         self.fname = fname
