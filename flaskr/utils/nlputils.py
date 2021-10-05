@@ -68,8 +68,10 @@ class Tokenizer:
             'with', 'without', 'take', 'need', 'stuff', 'also', 'much',
             'yup', 'nope', 'get', 'even', 'ye', 'want', 'happen',
             'week', 'could', 'see', 'oh', 'man', 'lol', 'tell', 'lot', 
-            'few', 'time', 'went', 'yet', 
+            'few', 'time', 'went', 'yet', 'make', 'like', 'people',
+            'one', 'two', 'three', 'work', 'use'
         ])
+        self.blacklist = self.stop_words.union(self.trivial_words)
         
     def remove_punctuation(self, txt):
         txt =  self.punct_pattern.sub(' ', txt)
@@ -81,8 +83,7 @@ class Tokenizer:
             
         return [
             self.porter.stem(word) for word in txt 
-            if word not in self.stop_words 
-            and word not in self.trivial_words
+            if word not in self.blacklist
         ]
     
     def tokenize(self, txt: str):
