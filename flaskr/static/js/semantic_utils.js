@@ -14,7 +14,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     
     // show `in-progress`
     semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
-    wordcloudBtn.innerHTML = `${spinnerAmination} Gathering Data..`;
+    wordcloudInfo.innerHTML = `${spinnerAmination} Processing Data...`;
 
     // clear figures
     while (countsBarPlotRoot.children.length) {
@@ -52,12 +52,14 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         // generate data for wordcloud        
         return fetch('/wordcloud');
     }).then(res => {
-        wordcloudBtn.innerHTML = 'Generate WordCloud';
+        wordcloudInfo.innerHTML = '';
 
-        // // create wordcloud
+        // create wordcloud
+        const numRows = Math.ceil(params['num-clusters'] / 2);
         const wordcloudPlotRef = document.createElement('iframe');
         wordcloudPlotRef.setAttribute('class', 'graph-container');
         wordcloudPlotRef.setAttribute('src', '/dashapp/wordcloud-plot');
+        wordcloudPlotRef.style.height = `${100 + 200 * numRows}px`;
         wordcloudPlotRoot.append(wordcloudPlotRef);
     }).catch(err => {
         console.log(err);

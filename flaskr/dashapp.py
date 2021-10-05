@@ -92,17 +92,28 @@ def get_scatterplot(df):
   
 def get_wordclouds(frequencies):
     wcloud = WordCloud()
-    num = int(np.ceil(np.sqrt(len(frequencies.keys()))))
 
-    fig = make_subplots(rows=num, cols=num)
+    fig = make_subplots(
+        rows=int(np.ceil(len(frequencies.keys())/2))+1, 
+        cols=2,
+        subplot_titles=[f'Cluster {i}' for i in range(len(frequencies.keys()))],
+        horizontal_spacing=0.01,
+        vertical_spacing=0.03
+    )
     for lbl in range(len(frequencies.keys())):
-        row = lbl // num + 1
-        col = lbl % num + 1
+        row, col = lbl // 2 + 1, lbl % 2 + 1
         cloud = wcloud.generate_from_frequencies(frequencies[str(lbl)])
-        fig.add_trace(go.Image(z=cloud.to_array()), row=row, col=col)
+        fig.add_trace(
+            go.Image(
+                z=cloud.to_array(), 
+                hovertemplate=f'Cluster {lbl}',                
+            ), 
+            row=row, col=col,           
+        )
 
     update_fig_layout(fig)
-    fig.update_xaxes(showticklabels=False).update_yaxes(showticklabels=False)
+    fig.update_xaxes(visible=False) 
+    fig.update_yaxes(visible=False)
 
     return fig
 
@@ -172,24 +183,36 @@ def init_dashboard(server):
         return get_scatterplot(df)
 
     # wordcloud subplots
+    def get_wordcloud_dccgraph(freqs):
+        return dcc.Graph(
+            id='wordcloud',
+            className='graph',
+            figure=get_wordclouds(freqs),
+            style={'height': f'{100 + 200 * int(np.ceil(len(freqs.keys()) / 2))}px'}
+        )
+
+    def get_wordcloud_button():
+        return html.Button(
+            'Update', 
+            id='wordcloud-plot-update-btn', 
+            className='graph-btn', 
+            n_clicks=0
+        )
     wordcloud_container = html.Div(
-        children = [
-            dcc.Graph(
-                id='wordcloud',
-                className='graph',
-                figure=get_wordclouds({'0': {'test': 1}}),
-            ), 
-            html.Button('Update', id='wordcloud-plot-update-btn', className='graph-btn', n_clicks=0)
-        ],
+        id='wordcloud-container',
+        children = [ 'Generating WordClouds...', get_wordcloud_button() ],
     )
 
     @dash_app.callback(
-        Output(component_id='wordcloud', component_property='figure'),
+        Output(component_id='wordcloud-container', component_property='children'),
         Input(component_id='wordcloud-plot-update-btn', component_property='n_clicks')
     )
-    def update_wordcloud_plot(n_clicks):
+    def update_wordcloud_style(n_clicks):
         freqs = read_cluster_frequencies()
-        return get_wordclouds(freqs)
+        return [
+            get_wordcloud_dccgraph(freqs),
+            get_wordcloud_button()
+        ]
 
 
     # --- Put Everything Together ---
