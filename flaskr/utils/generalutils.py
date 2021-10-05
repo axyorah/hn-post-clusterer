@@ -12,11 +12,9 @@ from flaskr.utils.formutils import (
     RequestParser,
 )
 
-from flaskr.utils.semanticutils import (
+from flaskr.utils.nlputils import (
     StoryEmbedder,
     html2sentences,
-    #get_story_embeddings,
-
 )
 
 from flaskr.utils.dbutils import (
@@ -31,7 +29,6 @@ from flaskr.utils.clusterutils import (
 )
 
 # TODO: use `cycle` instead of `tee` for copying generators...
-# TODO: make 'measure' in 'copy_and_measure_generator' optional
 
 def rebatch_generator(batches, min_batch_size):
     """

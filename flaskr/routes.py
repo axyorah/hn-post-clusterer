@@ -26,7 +26,7 @@ from flaskr.utils.datautils import (
     serialize_dict_keys,
 )
 
-from flaskr.utils.semanticutils import Tokenizer
+from flaskr.utils.nlputils import Tokenizer
 
 from flaskr.utils.generalutils import BatchedPipeliner
 
