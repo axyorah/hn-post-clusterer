@@ -92,7 +92,8 @@ class Tokenizer:
             'yup', 'nope', 'get', 'even', 'ye', 'want', 'happen',
             'week', 'could', 'see', 'oh', 'man', 'lol', 'tell', 'lot', 
             'few', 'time', 'went', 'yet', 'make', 'like', 'people',
-            'one', 'two', 'three', 'work', 'use'
+            'one', 'two', 'three', 'http', 'https', 'www', 'com',
+            'work', 'use', 
         ])
         self.blacklist = self.stop_words.union(self.trivial_words)
         
