@@ -23,6 +23,9 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     while (embedPcaPlotRoot.children.length) {
         embedPcaPlotRoot.removeChild(embedPcaPlotRoot.lastChild);
     }
+    while (wordcloudPlotRoot.children.length) {
+        wordcloudPlotRoot.removeChild(wordcloudPlotRoot.lastChild);
+    }
 
     // make figures, select, and table invisible
     figureRoot.style.display = "none";
