@@ -464,3 +464,83 @@ class DBHelper:
             field: row.__getitem__(field)
             for field in fields
         }
+
+    def get_story_rows_with_children_from_id_range(self, form_request):
+        return self.db.execute(
+            f'''
+            {self.story_pattern_without_where}
+                WHERE 
+                s.story_id BETWEEN ? AND ? AND
+                s.num_comments BETWEEN ? AND ? AND
+                s.score BETWEEN ? AND ?
+            ;
+            ''', 
+            (
+                form_request['begin_id'], form_request['end_id'],
+                form_request['begin_comm'], form_request['end_comm'],
+                form_request['begin_score'], form_request['end_score']
+            )
+        ).fetchall()
+
+    def get_story_rows_with_children_from_id_list(self, form_request):
+        return self.db.execute(
+            f'''
+            {self.story_pattern_without_where}
+                WHERE 
+                s.story_id IN ({", ".join("?" for _ in form_request["story_ids"])})
+            ;
+            ''', 
+            tuple(form_request['story_ids'])
+        ).fetchall()
+
+    def story_rows_to_dicts(self, rows, aslist=False):
+        """
+        convert sql row objects corresponding to stories
+        into dicts with fields
+            story_id, author, unix_time, score, title, url, num_comments, children
+        return dictionary is aslist=False (default),
+        where keys are story ids and values are story dicts
+        or lists of story dicts in aslist=True
+        """
+        fields = [
+            'story_id', 'author', 'unix_time', 'score', 
+            'title', 'url', 'num_comments', 'children'
+        ]
+
+        if aslist:
+            return [
+                {field: row.__getitem__(field) for field in fields} 
+                for row in rows
+            ]
+        else:
+            return {
+                row.__getitem__('story_id'): {
+                    field: row.__getitem__(field) for field in fields
+                } for row in rows
+            }
+
+    def get_stories_with_children_from_id_range(self, form_request, aslist=False):
+        """
+        return story dicts from a range specified in `form_request`;
+        return either a dict (aslist=False) where keys are story ids 
+        and values are story dicts,
+        or a list of story dicts (aslist=True);
+        form_request should have fields `begin_id` and `end_id`;
+        internal dicts correspond to stories with fields:
+            story_id, author, unix_time, score, title, url, num_comments, children
+        """
+        rows = self.get_story_rows_with_children_from_id_range(form_request)
+        return self.story_rows_to_dicts(rows, aslist=aslist)
+
+    def get_stories_with_children_from_id_list(self, form_request, aslist=False):
+        """
+        return story dicts from an id list specified in `form_request`;
+        return either a dict (aslist=False) where keys are story ids 
+        and values are story dicts,
+        or a list of story dicts (aslist=True);
+        form_request should have field `story_ids`;
+        internal dicts correspond to stories with fields:
+            story_id, author, unix_time, score, title, url, num_comments, children
+        """
+        rows = self.get_story_rows_with_children_from_id_list(form_request)
+        return self.story_rows_to_dicts(rows, aslist=aslist)
