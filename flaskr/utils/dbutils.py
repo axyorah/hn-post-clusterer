@@ -544,3 +544,21 @@ class DBHelper:
         """
         rows = self.get_story_rows_with_children_from_id_list(form_request)
         return self.story_rows_to_dicts(rows, aslist=aslist)
+
+    def yield_story_from_id_range(self, form_request, delta_id=10000):
+        begin_id = int(form_request["begin_id"])
+        end_id = int(form_request["end_id"])
+        for b_id in range(begin_id, end_id, delta_id):
+            # get current(!) begin_id and end_id range (b_id and e_id)
+            e_id = min(b_id + delta_id - 1, end_id)
+            form_request["begin_id"] = b_id
+            form_request["end_id"] = e_id
+            print(f"fetching posts from {b_id} to {e_id}")
+
+            # query db for a portion of data and... 
+            story_dicts = self.get_stories_with_children_from_id_range(form_request, aslist=True)
+        
+            # ... yield intividual posts as dicts
+            for dct in story_dicts:
+                for _, val in dct.items():
+                    yield val    

@@ -9,15 +9,10 @@ from smart_open import open
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
-from flaskr.utils.formutils import (
-    RequestParser,
-)
+from flaskr.utils.formutils import RequestParser
+
 from flaskr.utils.dbutils import (
     query_api_and_add_result_to_db,
-    get_stories_with_children_from_id_range,
-    get_stories_with_children_from_id_list,
-    get_document_dict_from_sqlite_rows,
-    get_stories_from_db,
     DBHelper
 )
 
@@ -27,7 +22,6 @@ from flaskr.utils.datautils import (
 )
 
 from flaskr.utils.nlputils import Tokenizer
-
 from flaskr.utils.generalutils import BatchedPipeliner
 
 # get request parser
@@ -58,15 +52,16 @@ def seed_db():
 def query_db():
     if request.method == "POST":
         form_request = rqparser.parse(request)
+        dbhelper = DBHelper()
             
         if request.form.get('sender') == 'show':
-            story_rows = get_stories_with_children_from_id_range(form_request)
+            story_dict = dbhelper.get_stories_with_children_from_id_range(form_request)
         elif request.form.get('sender') == 'kmeans-show':
-            story_rows = get_stories_with_children_from_id_list(form_request)
+            story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
         else:
-            story_rows = []
+            story_dict = {}
             
-        story_dict = get_document_dict_from_sqlite_rows(story_rows)
+        #story_dict = get_document_dict_from_sqlite_rows(story_rows)
             
         return json.dumps(story_dict)
 
@@ -101,9 +96,9 @@ def csv_reader():
 def serialize_corpus():
     if request.method == "POST":
         form_request = rqparser.parse(request)
-        #get_stories_from_db_and_serialize_ids_and_comments(CORPUS_DIR, form_request)
+        dbhelper = DBHelper()
         
-        stories = get_stories_from_db(form_request) # generator of story dicts
+        stories = dbhelper.yield_story_from_id_range(form_request)# generator of story dicts
 
         create_file(ID_FNAME)
         create_file(CORPUS_FNAME)
@@ -137,10 +132,8 @@ def semantic_cluster():
 @app.route("/wordcloud", methods=["GET", "POST"])
 def generate_wordcloud():
     if True:
-
         print('hello wordcloud!!!')
 
-        #form_request = rqparser.parse(request)
         dbhelper = DBHelper()
         tokenizer = Tokenizer()
         frequencies = dict()
