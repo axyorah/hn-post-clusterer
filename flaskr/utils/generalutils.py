@@ -18,8 +18,7 @@ from flaskr.utils.nlputils import (
 )
 
 from flaskr.utils.dbutils import (
-    get_stories_with_children_from_id_range,
-    get_document_dict_from_sqlite_rows
+    DBHelper,
 )
 
 from flaskr.utils.clusterutils import (
@@ -63,6 +62,7 @@ class BatchedPipeliner:
         self._embeddings = None
         self._labels = None
 
+        self.dbhelper = DBHelper()
         self.embedder = StoryEmbedder(model_name=self._model_name)
         self.scaler = BatchedGeneratorStandardizer()
         self.kmeans = MiniBatchKMeans(n_clusters=self._n_clusters)
@@ -96,10 +96,10 @@ class BatchedPipeliner:
                 request_form['begin_id'] = b_id
                 request_form['end_id'] = min(b_id + delta_id, end_id)
 
-                story_rows = get_stories_with_children_from_id_range(request_form) # list of sql rows
-                story_dicts = get_document_dict_from_sqlite_rows(story_rows, aslist=True) # list of dicts
+                story_dicts = self.dbhelper.get_stories_with_children_from_id_range(
+                    request_form, aslist=True
+                )
 
-                # TODO: make it a list of dicts and adjust helpers in semanticutils.py
                 if len(story_dicts):
                     num += len(story_dicts)
                     yield story_dicts
