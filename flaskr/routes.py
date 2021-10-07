@@ -10,19 +10,15 @@ from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
 from flaskr.utils.formutils import RequestParser
+from flaskr.utils.dbutils import DBHelper
+from flaskr.utils.nlputils import Tokenizer
+from flaskr.utils.generalutils import BatchedPipeliner
 
-from flaskr.utils.dbutils import (
-    query_api_and_add_result_to_db,
-    DBHelper
-)
-
-from flaskr.utils.datautils import (
+from flaskr.utils.ioutils import (
     create_file,
     serialize_dict_keys,
 )
 
-from flaskr.utils.nlputils import Tokenizer
-from flaskr.utils.generalutils import BatchedPipeliner
 
 # get request parser
 rqparser = RequestParser() 
@@ -44,7 +40,9 @@ def index():
 def seed_db():
     if request.method == "POST":
         form_request = rqparser.parse(request)
-        query_api_and_add_result_to_db(form_request)
+        dbhelper = DBHelper()
+
+        dbhelper.query_api_and_add_result_to_db(form_request)
 
     return {"ok": True}
 
@@ -60,8 +58,6 @@ def query_db():
             story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
         else:
             story_dict = {}
-            
-        #story_dict = get_document_dict_from_sqlite_rows(story_rows)
             
         return json.dumps(story_dict)
 

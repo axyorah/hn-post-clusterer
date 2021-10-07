@@ -8,10 +8,6 @@ def create_file(fname):
     with open(fname, 'w') as f:
         f.write('')
 
-def parse_raw_html_document(document):
-    soup = bs.BeautifulSoup(document, 'lxml')
-    return soup.get_text(separator=' ')
-
 def append_raw_document_to_file(fname, document):
     """
     fname: string: name of the file to append document to
