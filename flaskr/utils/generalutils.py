@@ -143,6 +143,49 @@ class BatchedPipeliner:
             ) for story in data
         ]
     
+    def fetch_or_generate_story_embeddings(self, data):
+        """
+        the same as `get_story_embeddings(.)` but instead of always 
+        calculating the embedding on the fly 
+        it fetches the embedding from db if present 
+        and writes it to db when calculated
+        INPUTS:
+           data: list: each element is a story dict with keys:
+               story_id, author, unix_time, score, title, url, num_comments, children
+               e.g.:
+               [
+                   {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
+                   {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
+               ]
+        OUTPUTS:
+            list: each element is a BERT embedding based on story comments
+            [
+                ndarray of floats with shape (768,), or (384,)
+                ...
+            ]
+        """
+        batch = []
+        for story in data:
+            # fetch embedding if roberta is selected and the embedding is already in db
+            if self.request_form['model_name'] == 'sentence-transformers/all-distilroberta-v1' and\
+                story.get('comment_embedding'):
+                embedding = np.array([
+                    float(val) for val in story['comment_embedding'].split(',')
+                ])
+            else:
+                embedding = self.embedder.embed_and_average_sentences(
+                    html2sentences(story['children'])
+                )
+                # write embedding to db (update story row) only if roberta was used
+                if self.request_form['model_name'] == 'sentence-transformers/all-distilroberta-v1':
+                    story['comment_embedding'] = ','.join(str(val) for val in embedding)
+                    self.dbhelper.update_story_in_db(story, commit=False)
+            batch.append(embedding) 
+
+        self.dbhelper.db.commit()
+
+        return batch
+
     def get_embedding_batches(self, story_batches=None):
         """
         each element of a batch is a (batch_size, embed_dim) numpy array
@@ -154,13 +197,13 @@ class BatchedPipeliner:
                 'Consider running `get_story_batches()` first!'
             )
 
-
         print('[INFO] generating embeddings...')
         def batch_generator(story_batches):
             num = 0
             for batch in story_batches:
                 num += len(batch)
-                yield np.stack(self.get_story_embeddings(batch))
+                #yield np.stack(self.get_story_embeddings(batch))
+                yield np.stack(self.fetch_or_generate_story_embeddings(batch))
             print(f'[INFO] got {num} embeddings!')
         
         # copy genrator: save one copy, return another
