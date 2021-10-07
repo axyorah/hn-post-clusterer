@@ -14,21 +14,12 @@ from flaskr.utils.dbutils import DBHelper
 from flaskr.utils.nlputils import Tokenizer
 from flaskr.utils.generalutils import BatchedPipeliner
 
-from flaskr.utils.ioutils import (
-    create_file,
-    serialize_dict_keys,
-)
-
 
 # get request parser
 rqparser = RequestParser() 
 
 # set globals
 CORPUS_DIR = 'data'
-CORPUS_FNAME = os.path.join(CORPUS_DIR, 'corpus.txt')
-ID_FNAME = os.path.join(CORPUS_DIR, 'ids.txt')
-LABEL_FNAME = os.path.join(CORPUS_DIR, 'labels.txt')
-LSI_FNAME = os.path.join(CORPUS_DIR, 'lsi.txt')
 DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
 
 # main page
@@ -85,25 +76,6 @@ def csv_reader():
                 contents[idx2field[i]].append(val)
         
         return { "contents": contents, "ok": True } 
-
-    return {"ok": False}
-
-@app.route("/file/write", methods=["POST"])    
-def serialize_corpus():
-    if request.method == "POST":
-        form_request = rqparser.parse(request)
-        dbhelper = DBHelper()
-        
-        stories = dbhelper.yield_story_from_id_range(form_request)# generator of story dicts
-
-        create_file(ID_FNAME)
-        create_file(CORPUS_FNAME)
-
-        serialize_dict_keys(
-            stories, keys=['story_id', 'children'], 
-            key2fname={'story_id': ID_FNAME, 'children': CORPUS_FNAME}
-        )
-        return {"ok": True}
 
     return {"ok": False}
 

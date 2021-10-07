@@ -25,22 +25,6 @@ function queryDbAndShowResult(data) {
     .catch((err) => console.log(err));
 }
 
-function queryDbAndSerializeResult(data) {
-    // add in-progress animation
-    queryDbBtn.innerHTML = `${spinnerAmination} Writing result to disk...`;
-    
-    // post form data to DB server, display res in a table
-    postData('/file/write', data)
-    .then(res => {
-        queryDbBtn.innerText = 'Query DB';
-        console.log(`Serialized stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);        
-    })
-    .catch((err) => {
-        queryDbBtn.innerText = 'Whoopsie!';
-        console.log(err)
-    });
-}
-
 function getMorePostsBtn() {
     const counter = new Counter();
     const moreBtn = document.createElement('button');
