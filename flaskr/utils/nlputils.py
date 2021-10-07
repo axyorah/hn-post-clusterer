@@ -1,22 +1,51 @@
+import os
 import json
 import numpy as np
 import lxml
 import bs4 as bs
-import sys
 import re
 from collections import defaultdict
-
-#from sklearn.decomposition import PCA
 from sentence_transformers import SentenceTransformer
-#import faiss
+
+from smart_open import open
 
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, LancasterStemmer
 
+from flaskr.utils.dbutils import DBHelper
+
 nltk.download('stopwords')
 stop_words = stopwords.words('english')
 stop_words = set(stop_words)
+
+def html2text(html):
+    soup = bs.BeautifulSoup(html, 'lxml')
+    return soup.get_text(separator=' ')
+
+def html2paragraphs(html):
+    soup = bs.BeautifulSoup(html, 'lxml')    
+    return [
+        sp.get_text(separator=' ') 
+        for sp in soup.find_all('p')
+    ]
+
+def html2sentences(html):
+    # get dict to remove punctuation
+    tr = {
+        i: '' for i in 
+        list(range(33, 46)) + 
+        list(range(58,64)) + 
+        list(range(91,97)) +
+        list(range(123,127))
+    }
+    # get html-free text
+    txt = html2text(html)
+    # split into sentences
+    return [
+        sentence.strip().lower().translate(tr)
+        for sentence in txt.split('.')
+    ]
 
 class RareWordFinder:
     def __init__(self, minfreq):
@@ -51,33 +80,7 @@ class StoryEmbedder:
     def embed_and_average_sentences(self, sentences: 'List[str]'):
         return self.model.encode(sentences).mean(axis=0)
 
-def html2text(html):
-    soup = bs.BeautifulSoup(html, 'lxml')
-    return soup.get_text(separator=' ')
 
-def html2paragraphs(html):
-    soup = bs.BeautifulSoup(html, 'lxml')    
-    return [
-        sp.get_text(separator=' ') 
-        for sp in soup.find_all('p')
-    ]
-
-def html2sentences(html):
-    # get dict to remove punctuation
-    tr = {
-        i: '' for i in 
-        list(range(33, 46)) + 
-        list(range(58,64)) + 
-        list(range(91,97)) +
-        list(range(123,127))
-    }
-    # get html-free text
-    txt = html2text(html)
-    # split into sentences
-    return [
-        sentence.strip().lower().translate(tr)
-        for sentence in txt.split('.')
-    ]
 
 class Tokenizer:
     def __init__(self):
@@ -114,45 +117,45 @@ class Tokenizer:
         txt = self.remove_punctuation(txt.lower())
         return self.get_stems(txt)
 
-# def get_story_embeddings(data: list, model_name='sentence-transformers/all-distilroberta-v1'):
-#     """
-#     INPUTS:
-#        data: list: each element is a story dict with keys:
-#            story_id, author, unix_time, score, title, url, num_comments, children
-#            e.g.:
-#            [
-#                {story_id: ..., author: ..., unix_time: ..., title: ..., ...},
-#                {storY_id, ..., author: ..., unix_time: ..., title: ..., ...},
-#            ]
-#         model_name: str: name of the sentence transformer from list https://www.sbert.net/docs/pretrained_models.html
-#     OUTPUTS:
-#         list: each element is a BERT embedding based on story comments
-#         [
-#             ndarray of floats with shape (768,), or (384,)
-#             ...
-#         ]
-#     """
-#     embedder = StoryEmbedder(model_name=model_name)
+class ClusterFrequencyCounter:
+    def __init__(self):
+        self.dbhelper = DBHelper()
+        self.tokenizer = Tokenizer()
+        self.frequencies = dict()
 
-#     return [
-#         embedder.embed_and_average_sentences(
-#             html2sentences(story['children'])
-#         ) for story in data
-#     ]
+    def update_cluster_frequencies(self, label: int, tokens: 'List[str]'):
+        for token in tokens:
+            if not token:
+                continue
+            if label not in self.frequencies.keys():
+                self.frequencies[label] = defaultdict(int)
+            self.frequencies[label][token] += 1
 
-# def cluster_stories_with_faiss(embeds, nclusters=15):
-#     d = embeds.shape[1]
-#     verbose = False
-#     niter = 20
+    def count_serialized_cluster_frequencies(self, fname: str):
+        for i,line in enumerate(open(fname)):
+            if not i:
+                field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
+                continue
 
-#     kmeans = faiss.Kmeans(d, nclusters, niter=niter, verbose=verbose)
-#     kmeans.train(embeds)
-#     _, lbls = kmeans.assign(embeds)
+            vals = line.split('\t')
+            story_id = vals[field2idx['id']]
+            label = vals[field2idx['label']]
 
-#     return lbls
+            story = self.dbhelper.get_story_with_children_by_id(story_id)
+            comments = html2text(story['children'])
+            tokens = self.tokenizer.tokenize(comments)
 
-# def project_embeddings(embeds, n=2):
-#     # TODO: fit with centroids
-#     # TODO: make class that would cluster and project...
-#     pca = PCA(n_components=n)
-#     return pca.fit_transform(embeds)
+            self.update_cluster_frequencies(label, tokens)
+
+        return self.frequencies
+
+    def serialize_cluster_frequencies(self, data_dir='.', min_freq=2):
+        for label in self.frequencies.keys():
+            fname = os.path.join(data_dir, f'freq_{label}.json')
+            with open(fname, 'w') as f:
+                json.dump({
+                    key:val for key,val in self.frequencies[label].items()
+                    if val >= min_freq
+                }, f)
+
+        return True

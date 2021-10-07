@@ -11,8 +11,11 @@ from flask import request, make_response, Response
 
 from flaskr.utils.formutils import RequestParser
 from flaskr.utils.dbutils import DBHelper
-from flaskr.utils.nlputils import Tokenizer
 from flaskr.utils.generalutils import BatchedPipeliner
+from flaskr.utils.nlputils import (
+    Tokenizer,
+    ClusterFrequencyCounter
+)
 
 
 # get request parser
@@ -98,43 +101,10 @@ def semantic_cluster():
     return {"ok": False}
 
 @app.route("/wordcloud", methods=["GET", "POST"])
-def generate_wordcloud():
-    if True:
-        print('hello wordcloud!!!')
+def serialize_data_for_wordcloud():
 
-        dbhelper = DBHelper()
-        tokenizer = Tokenizer()
-        frequencies = dict()
+    counter = ClusterFrequencyCounter()
+    counter.count_serialized_cluster_frequencies(DF_FNAME)
+    counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
 
-        # read records line by line
-        # and calculate token frequencies for story comments of each label
-        for i,line in enumerate(open(DF_FNAME)):
-            if not i:
-                field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
-                continue
-
-            vals = line.split('\t')
-            story_id = vals[field2idx['id']]
-            label = vals[field2idx['label']]
-
-            story = dbhelper.get_story_with_children_by_id(story_id)
-            comments = bs.BeautifulSoup(story['children'], 'lxml').get_text(separator=' ')
-            tokens = tokenizer.tokenize(comments)
-
-            for token in tokens:
-                if not tokens:
-                    continue
-                if label not in frequencies.keys():
-                    frequencies[label] = defaultdict(int)
-                frequencies[label][token] += 1
-
-        # write frequencies for each label
-        print(frequencies.keys())
-        for lbl in frequencies.keys():
-            with open(f'data/freq_{lbl}.json', 'w') as f:
-                json.dump({ 
-                    key:val for key,val in frequencies[lbl].items()
-                    if val > 1
-                }, f)
-
-        return {"ok": True}
+    return {"ok": True}
