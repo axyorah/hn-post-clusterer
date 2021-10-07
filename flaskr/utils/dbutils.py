@@ -250,6 +250,7 @@ class DBHelper:
             s.title, 
             s.url,
             s.num_comments,
+            s.comment_embedding,
             (
                 SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
                 FROM tab
@@ -276,15 +277,12 @@ class DBHelper:
             return False
 
     def add_story_to_db(self, story, commit=True):
-        """
-        expects api fields
-        """
         # add to `story` table
         self.db.execute(
             '''
             INSERT INTO story
             (story_id, author, unix_time, body, url, score, title, num_comments)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
             (
                 story.get('story_id'),
@@ -294,7 +292,8 @@ class DBHelper:
                 story.get('url'), 
                 story.get('score'), 
                 story.get('title'), 
-                story.get('num_comments')
+                story.get('num_comments'),
+                story.get('comment_embedding')
             )
         )
 
@@ -305,16 +304,13 @@ class DBHelper:
             (parent_id, parent_type)
             VALUES (?, ?)
             ''',
-            ( story.get('id'), 'story')
+            ( story.get('story_id'), 'story')
         )
 
         if commit:
             self.db.commit()
 
     def add_comment_to_db(self, comment, commit=True):
-        """
-        expects api fiedls!!!
-        """
         # add to `comment` table
         self.db.execute(
             '''
@@ -338,16 +334,13 @@ class DBHelper:
             (parent_id, parent_type)
             VALUES (?, ?)
             ''',
-            (comment.get('id'),'comment')
+            (comment.get('commen_id'),'comment')
         )
 
         if commit:
             self.db.commit()
 
     def update_story_in_db(self, story, commit=True):
-        """
-        expects api fields!!!
-        """
         self.db.execute(
             '''
             UPDATE story
@@ -358,7 +351,8 @@ class DBHelper:
                 url = ?, 
                 score = ?, 
                 title = ?, 
-                num_comments = ?
+                num_comments = ?,
+                comment_embedding = ?
             WHERE story_id = ?
             ''',
             (
@@ -369,11 +363,12 @@ class DBHelper:
                 story.get('score'), 
                 story.get('title'), 
                 story.get('num_comments'),
-                story.get('id'),
+                story.get('comment_embedding'),
+                story.get('story_id'),
             )
         ) 
 
-        if commit:   
+        if commit:
             self.db.commit()
 
     def add_item_to_db(self, item, commit=True):
@@ -463,7 +458,8 @@ class DBHelper:
         # TODO: embeds
         fields = [
             'story_id', 'author', 'unix_time', 'score', 
-            'title', 'url', 'num_comments', 'children'
+            'title', 'url', 'num_comments', 'children',
+            'comment_embedding', 
         ]
 
         row = self.db.execute(        
@@ -498,6 +494,7 @@ class DBHelper:
             'title'
             'url'
             'num_comments': number of comments
+            'comment_embedding'
             'children'    : all comments related to the same story (html markup)
         """
         return self.db.execute(
@@ -530,6 +527,7 @@ class DBHelper:
             'url'
             'num_comments': number of comments
             'children'    : all comments related to the same story (html markup)
+            'comment_embedding'
         """
         return self.db.execute(
             f'''
@@ -552,7 +550,8 @@ class DBHelper:
         """
         fields = [
             'story_id', 'author', 'unix_time', 'score', 
-            'title', 'url', 'num_comments', 'children'
+            'title', 'url', 'num_comments', 'children',
+            'comment_embedding'
         ]
 
         if aslist:
