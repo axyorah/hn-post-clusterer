@@ -1,4 +1,11 @@
 function reset() {
+    // clear old csv files
+    const deletable = {
+        "sender": "deleter",
+        "fnames": "data/df.csv,data/df_tsne.csv"
+    }
+    postData('/file/delete', deletable);
+
     // clear figures
     while (countsBarPlotRoot.children.length) {
         countsBarPlotRoot.removeChild(countsBarPlotRoot.lastChild);
@@ -53,7 +60,7 @@ function addTsneEmbeddings() {
     embedTsnePlotRoot.append(embedTsnePlotRef);
 }
 
-function addWordCloud() {
+function addWordCloud( params ) {
     wordcloudInfo.innerHTML = '';
 
     // create wordcloud
@@ -96,7 +103,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         }).then(res => addBarPlot()
         ).then(res => addPcaEmbeddings()
         ).then(res => fetch('/wordcloud')
-        ).then(res => addWordCloud()
+        ).then(res => addWordCloud( params )
         ).catch(err => {
             console.log(err);
             semanticClusterBtn.innerHTML = `Cluster Posts`;
@@ -144,7 +151,7 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
 
 embedTsneBtn.addEventListener('click', function (res) {
     // add in-progress animation
-    this.innerHTML = `${spinnerAmination} Recalculating embedding 2D projection...`;
+    this.innerHTML = `${spinnerAmination} Recalculating embedding projection...`;
 
     // remove tsne plots if present
     while (embedTsnePlotRoot.children.length) {
@@ -153,7 +160,9 @@ embedTsneBtn.addEventListener('click', function (res) {
 
     // calculate reduced-dim embeddings with tsne and add plot
     fetch('/tsne')
-        .then(res => {
-            addTsneEmbeddings();
-        })
+        .then(res => addTsneEmbeddings())
+        .catch(err => {
+            console.log(err);
+            embedTsneBtn.innerHTML = 'Prettify with t-SNE';
+        });
 })
