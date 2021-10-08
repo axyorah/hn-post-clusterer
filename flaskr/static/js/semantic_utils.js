@@ -51,14 +51,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         embedPcaPlotRef.setAttribute('class', 'graph-container');
         embedPcaPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
         embedPcaPlotRoot.append(embedPcaPlotRef);
-    }).then(res => {
-        fetch('/tsne')
-    }).then(res => {
-        const embedTsnePlotRef = document.createElement('iframe');
-        embedTsnePlotRef.setAttribute('class', 'graph-container');
-        embedTsnePlotRef.setAttribute('src', '/dashapp/tsne-cluster-scatter-plot');
-        embedTsnePlotRoot.append(embedTsnePlotRef);
-    }).then(res => {
+    }).then(res => {        
         // generate data for wordcloud        
         return fetch('/wordcloud');
     }).then(res => {
@@ -113,5 +106,25 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     }).catch(err => {
         console.log(err)
         this.innerHTML = 'Show Posts';
+    })
+})
+
+embedTsneBtn.addEventListener('click', function (res) {
+    // add in-progress animation
+    this.innerHTML = `${spinnerAmination} Recalculating embedding 2D projection...`;
+
+    // remove tsne plots if present
+    while (embedTsnePlotRoot.children.length) {
+        embedTsnePlotRoot.removeChild(embedTsnePlotRoot.lastChild);
+    }
+
+    // calculate reduced-dim embeddings with tsne and add plot
+    fetch('/tsne')
+    .then(res => {
+        embedTsneBtn.innerHTML = 'Prettify with t-SNE';
+        const embedTsnePlotRef = document.createElement('iframe');
+        embedTsnePlotRef.setAttribute('class', 'graph-container');
+        embedTsnePlotRef.setAttribute('src', '/dashapp/tsne-cluster-scatter-plot');
+        embedTsnePlotRoot.append(embedTsnePlotRef);
     })
 })
