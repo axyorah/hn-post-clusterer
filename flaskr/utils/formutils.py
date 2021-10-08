@@ -19,6 +19,7 @@ class RequestParser:
             'show-kmeans-clusters-num': 'n_clusters',
             'story_ids': 'story_ids',
             'fname': 'fname',
+            'fnames': 'fnames',
             'num-clusters': 'n_clusters',
             'model-name': 'model_name',
         }
@@ -38,7 +39,8 @@ class RequestParser:
             ],
             'kmeans-run': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
             'kmeans-show': ['story_ids'],
-            'reader': ['fname']
+            'reader': ['fname'],
+            'deleter': ['fnames']
         }
         # specify how each key should be parsed
         self.key2type = {
@@ -49,6 +51,7 @@ class RequestParser:
                 'num_topics', 'n_clusters'
             ]},
             'fname': 'str',
+            'fnames': 'list[str]',
             'model_name': 'str',
             'story_ids': 'list[str]'
         }

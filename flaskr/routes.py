@@ -18,6 +18,7 @@ rqparser = RequestParser()
 # set globals
 CORPUS_DIR = 'data'
 DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
+DFT_FNAME = os.path.join(CORPUS_DIR, 'df_tsne.csv')
 
 # main page
 @app.route("/", methods=["GET"])
@@ -76,6 +77,22 @@ def csv_reader():
 
     return {"ok": False}
 
+@app.route("/file/delete", methods=["POST"])
+def delete_serialized():
+    if request.method == "POST":
+        form_request = rqparser.parse(request)
+        
+        print(f"[INFO] deleting", end=" ")        
+        for fname in form_request['fnames']:
+            ext = fname.split('.')[-1]
+            if os.path.isfile(fname) and ext in ["txt", "csv"]:
+                print(fname, end=", ")
+                os.remove(fname)
+        print("")                
+        
+        return {"ok": True}
+    return {"ok": False}
+
 @app.route("/semanticcluster", methods=["POST"])
 def semantic_cluster():
     if request.method == "POST":
@@ -111,7 +128,7 @@ def embeddings2tsne():
     tsneer = TSNEer(random_state=42, n_components=2)
     embeddings = tsneer.read_embedding_from_csv(DF_FNAME)
     tsneer.reduce_embedding_dimensions(embeddings)
-    tsneer.serialize_results('data/df_tsne.csv')
+    tsneer.serialize_results(DFT_FNAME)
 
     return {"ok": True}
 
