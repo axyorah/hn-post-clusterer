@@ -1,21 +1,15 @@
-from flask import current_app as app
-
-import os, json, datetime
-from collections import defaultdict
-import bs4 as bs
-import requests as rq
+import os, json
 from smart_open import open
 
+from flask import current_app as app
 from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 
 from flaskr.utils.formutils import RequestParser
 from flaskr.utils.dbutils import DBHelper
 from flaskr.utils.generalutils import BatchedPipeliner
-from flaskr.utils.nlputils import (
-    Tokenizer,
-    ClusterFrequencyCounter
-)
+from flaskr.utils.nlputils import ClusterFrequencyCounter
+from flaskr.utils.clusterutils import TSNEer
 
 
 # get request parser
@@ -108,3 +102,17 @@ def serialize_data_for_wordcloud():
     counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
 
     return {"ok": True}
+
+@app.route("/tsne", methods=["GET", "POST"])
+def embeddings2tsne():
+
+    print('hello tsne!')
+
+    tsneer = TSNEer(random_state=42, n_components=2)
+    embeddings = tsneer.read_embedding_from_csv(DF_FNAME)
+    tsneer.reduce_embedding_dimensions(embeddings)
+    tsneer.serialize_results('data/df_tsne.csv')
+
+    return {"ok": True}
+
+

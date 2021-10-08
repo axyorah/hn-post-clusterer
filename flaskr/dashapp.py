@@ -38,6 +38,12 @@ def read_semantic_df():
     df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
     return df
 
+def read_tsne_df():
+    df = pd.read_csv('data/df_tsne.csv', sep='\t')
+    df['ax-0'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[0]))
+    df['ax-1'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[1]))
+    return df
+
 def read_cluster_frequencies():
     fnames = [
         os.path.join('data', fname) 
@@ -182,6 +188,28 @@ def init_dashboard(server):
         df = read_semantic_df()
         return get_scatterplot(df)
 
+    # tsne
+    tsne_cluster_scatter_plot = html.Div(
+        children=[
+            dcc.Graph(
+                id='tsne-cluster-2d',
+                className='graph',
+                figure=get_scatterplot(
+                    pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
+                )
+            ),
+            html.Button('Update', id='tsne-scatter-plot-update-btn', className='graph-btn', n_clicks=0),
+        ]
+    )
+
+    @dash_app.callback(
+        Output(component_id='tsne-cluster-2d', component_property='figure'),
+        Input(component_id='tsne-scatter-plot-update-btn', component_property='n_clicks')
+    )
+    def update_tsne_scatter_plot(n_clicks):
+        df = read_tsne_df()
+        return get_scatterplot(df)
+
     # wordcloud subplots
     def get_wordcloud_dccgraph(freqs):
         return dcc.Graph(
@@ -232,6 +260,8 @@ def init_dashboard(server):
             return semantic_cluster_bar_plot
         elif pathname == '/dashapp/semantic-cluster-scatter-plot':
             return semantic_cluster_scatter_plot
+        elif pathname == '/dashapp/tsne-cluster-scatter-plot':
+            return tsne_cluster_scatter_plot
         elif pathname == '/dashapp/wordcloud-plot':
             return wordcloud_container
         else:

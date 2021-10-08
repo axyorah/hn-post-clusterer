@@ -6,6 +6,9 @@ import errno
 from smart_open import open  # for transparently opening remote files
 from itertools import cycle, tee
 
+from sklearn.manifold import TSNE
+import pandas as pd
+
 
 def copy_and_measure_generator(generator, num_copies=1):
     """
@@ -288,5 +291,31 @@ class KMeansForGenerator:
                 np.dot(sample - self.centroids[c],sample - self.centroids[c])
                 for c in range(self.n_clusters)
             ])
-            for sample in X_generator            
+            for sample in X_generator
         )
+
+class TSNEer:
+    def __init__(self, **kwargs):
+        self.tsne = TSNE(**kwargs)
+        self.reduced = None
+
+    def read_embedding_from_csv(self, fname, colname='embedding', sep='\t'):
+        self.df = pd.read_csv(fname, sep=sep)
+        return np.stack(
+            self.df[colname].map(
+                lambda line: [float(val) for val in line.split(',')]
+            ).to_numpy()
+        )
+
+    def reduce_embedding_dimensions(self, embeddings):
+        self.reduced = self.tsne.fit_transform(embeddings)
+        print(self.reduced.shape)
+        return self.reduced
+
+    def serialize_results(self, fname):
+        self.df['embedding_tsne'] = [
+            ','.join([str(val) for val in arr])
+            for arr in self.reduced            
+        ]
+
+        self.df.to_csv(fname, sep='\t')

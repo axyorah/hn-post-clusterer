@@ -52,6 +52,13 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         embedPcaPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
         embedPcaPlotRoot.append(embedPcaPlotRef);
     }).then(res => {
+        fetch('/tsne')
+    }).then(res => {
+        const embedTsnePlotRef = document.createElement('iframe');
+        embedTsnePlotRef.setAttribute('class', 'graph-container');
+        embedTsnePlotRef.setAttribute('src', '/dashapp/tsne-cluster-scatter-plot');
+        embedTsnePlotRoot.append(embedTsnePlotRef);
+    }).then(res => {
         // generate data for wordcloud        
         return fetch('/wordcloud');
     }).then(res => {
