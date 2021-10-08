@@ -114,11 +114,15 @@ def semantic_cluster():
 @app.route("/wordcloud", methods=["GET", "POST"])
 def serialize_data_for_wordcloud():
 
-    counter = ClusterFrequencyCounter()
-    counter.count_serialized_cluster_frequencies(DF_FNAME)
-    counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
+    if request.method == "POST":
 
-    return {"ok": True}
+        counter = ClusterFrequencyCounter()
+        counter.count_serialized_cluster_frequencies(DF_FNAME)
+        counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
+
+        return {"ok": True, "num_clusters": len(counter.frequencies.keys())}
+        
+    return {"ok": False}
 
 @app.route("/tsne", methods=["GET", "POST"])
 def embeddings2tsne():
@@ -131,5 +135,3 @@ def embeddings2tsne():
     tsneer.serialize_results(DFT_FNAME)
 
     return {"ok": True}
-
-

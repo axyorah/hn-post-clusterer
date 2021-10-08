@@ -60,11 +60,11 @@ function addTsneEmbeddings() {
     embedTsnePlotRoot.append(embedTsnePlotRef);
 }
 
-function addWordCloud( params ) {
+function addWordCloud( num_clusters ) {
     wordcloudInfo.innerHTML = '';
 
     // create wordcloud
-    const numRows = Math.ceil(params['num-clusters'] / 2);
+    const numRows = Math.ceil(num_clusters / 2);
     const wordcloudPlotRef = document.createElement('iframe');
     wordcloudPlotRef.setAttribute('class', 'graph-container');
     wordcloudPlotRef.setAttribute('src', '/dashapp/wordcloud-plot');
@@ -88,7 +88,6 @@ semanticClusterBtn.addEventListener('click', function (evt) {
 
     // show `in-progress`
     semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
-    wordcloudInfo.innerHTML = `${spinnerAmination} Processing Data...`;
 
     // clear all figures and hide tabs
     reset();
@@ -101,9 +100,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
             figureRoot.style.display = "";
             selectRoot.style.display = "";
         }).then(res => addBarPlot()
-        ).then(res => addPcaEmbeddings()
-        ).then(res => fetch('/wordcloud')
-        ).then(res => addWordCloud( params )
+        ).then(res => addPcaEmbeddings()        
         ).catch(err => {
             console.log(err);
             semanticClusterBtn.innerHTML = `Cluster Posts`;
@@ -165,4 +162,19 @@ embedTsneBtn.addEventListener('click', function (res) {
             console.log(err);
             embedTsneBtn.innerHTML = 'Prettify with t-SNE';
         });
+})
+
+wordcloudBtn.addEventListener('click', function (evt) {
+    this.innerHTML = `${spinnerAmination} Generating WordClouds...`;
+
+    postData('/wordcloud', {})
+        .then(res => {
+            console.log(res);
+            addWordCloud( res['num_clusters'] )
+        }).then(res => {
+            wordcloudBtn.innerHTML = 'Generate WordClouds';
+        }).catch(err => {
+            console.log(err);
+            wordcloudBtn.innerHTML = 'Generate WordClouds';
+        })
 })
