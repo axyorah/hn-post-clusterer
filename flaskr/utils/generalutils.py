@@ -358,3 +358,14 @@ class BatchedPipeliner:
                     )
 
         return True
+
+    def serialize_pca_explained_variance(self, fname='data/pca.txt'):
+        if self.pca is None:
+            return
+        
+        with open(fname, 'w') as f:
+            f.write('\n'.join(
+                str(val) for val in self.pca.explained_variance_ratio_
+            ))
+
+        return True

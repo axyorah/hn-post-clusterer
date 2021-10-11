@@ -19,6 +19,7 @@ rqparser = RequestParser()
 CORPUS_DIR = 'data'
 DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
 DFT_FNAME = os.path.join(CORPUS_DIR, 'df_tsne.csv')
+PCA_FNAME = os.path.join(CORPUS_DIR, 'pca.txt')
 
 # main page
 @app.route("/", methods=["GET"])
@@ -104,6 +105,7 @@ def semantic_cluster():
         embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
         pipe.cluster_story_batches(embeddings)
         pipe.serialize_result(fname=DF_FNAME)
+        pipe.serialize_pca_explained_variance(fname=PCA_FNAME)
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         

@@ -2,7 +2,7 @@ function reset() {
     // clear old csv files
     const deletable = {
         "sender": "deleter",
-        "fnames": "data/df.csv,data/df_tsne.csv"
+        "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt"
     }
     postData('/file/delete', deletable);
 
