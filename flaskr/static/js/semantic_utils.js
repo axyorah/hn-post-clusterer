@@ -1,3 +1,9 @@
+function removeAllNodeChildren(node) {
+    while (node.children.length) {
+        node.removeChild(node.lastChild);
+    }
+}
+
 function reset() {
     // clear old csv files
     const deletable = {
@@ -27,9 +33,7 @@ function reset() {
 }
 
 function addBarPlot() {
-    while (countsBarPlotRoot.children.length) {
-        countsBarPlotRoot.removeChild(countsBarPlotRoot.lastChild);
-    }
+    removeAllNodeChildren(countsBarPlotRoot);
 
     const countsBarPlotRef = document.createElement('iframe');
     countsBarPlotRef.setAttribute('class', 'graph-container');
@@ -38,9 +42,7 @@ function addBarPlot() {
 }
 
 function addPcaEmbeddings() {
-    while (embedPcaPlotRoot.children.length) {
-        embedPcaPlotRoot.removeChild(embedPcaPlotRoot.lastChild);
-    }
+    removeAllNodeChildren(embedPcaPlotRoot);
 
     const embedPcaPlotRef = document.createElement('iframe');
     embedPcaPlotRef.setAttribute('class', 'graph-container');
@@ -48,10 +50,12 @@ function addPcaEmbeddings() {
     embedPcaPlotRoot.append(embedPcaPlotRef);
 }
 
+function addPcaExplainedVariance() {
+    removeAllNodeChildren(pcaExplainedVarianceRoot);
+}
+
 function addTsneEmbeddings() {
-    while (embedTsnePlotRoot.children.length) {
-        embedTsnePlotRoot.removeChild(embedTsnePlotRoot.lastChild);
-    }
+    removeAllNodeChildren(embedTsnePlotRoot);
 
     embedTsneBtn.innerHTML = 'Prettify with t-SNE';
     const embedTsnePlotRef = document.createElement('iframe');
@@ -100,7 +104,8 @@ semanticClusterBtn.addEventListener('click', function (evt) {
             figureRoot.style.display = "";
             selectRoot.style.display = "";
         }).then(res => addBarPlot()
-        ).then(res => addPcaEmbeddings()        
+        ).then(res => addPcaEmbeddings()
+        ).then(res => addPcaExplainedVariance()    
         ).catch(err => {
             console.log(err);
             semanticClusterBtn.innerHTML = `Cluster Posts`;
