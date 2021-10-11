@@ -54,6 +54,7 @@ class BatchedPipeliner:
         self._n_clusters = self.request_form['n_clusters']
         self._model_name = self.request_form['model_name']
 
+        self._n_pca_dims = 100
         self._min_batch_size = 100
         self._num_batches = 0
         self._num_stories = 0
@@ -66,6 +67,7 @@ class BatchedPipeliner:
         self.embedder = StoryEmbedder(model_name=self._model_name)
         self.scaler = BatchedGeneratorStandardizer()
         self.kmeans = MiniBatchKMeans(n_clusters=self._n_clusters)
+        self.pca = None
         self.centroids = None
         """
         pipe:
@@ -245,19 +247,22 @@ class BatchedPipeliner:
             )
             return embedding_batches or self._embeddings
 
+        # adjust _n_pca_dims if needed
+        self._n_pca_dims = n_dims
+
         # copy high dim embeddings
         highdim_batches = tee(embedding_batches or self._embeddings, 2)
 
         # train pca
-        print(f'[INFO] reducing embedding dimensionality to {n_dims}...')
-        pca = IncrementalPCA(n_components=n_dims)
+        print(f'[INFO] reducing embedding dimensionality to {self._n_pca_dims}...')
+        self.pca = IncrementalPCA(n_components=self._n_pca_dims)
         for batch in highdim_batches[0]:
-            pca.partial_fit(batch)
+            self.pca.partial_fit(batch)
         
         # reduce
         def batch_generator(batches):
             for batch in batches:
-                yield pca.transform(batch)
+                yield self.pca.transform(batch)
 
         lowdim_batches = tee(batch_generator(highdim_batches[1]), 2)
         self._embeddings = lowdim_batches[0]
@@ -322,11 +327,13 @@ class BatchedPipeliner:
                 'Consider running .cluster_story_batches()'
             )     
 
-        # --- project to low-dim space ---
-        n_dims = min(10, len(self.kmeans.cluster_centers_)) # num dimensions to project embeddings onto 
-        print(f'[INFO] projecting embeddings to {n_dims}-dim space...')
-        pca = PCA(n_components=n_dims)
-        pca.fit(self.kmeans.cluster_centers_)
+        # --- project to low-dim space if it wasn't done already ---
+        # embeds were not projected to low-dim space if num_stories < n_pca_dim
+        if self.pca is None:
+            n_dims = min(self._num_stories, self._n_pca_dims)
+            self.pca = PCA(n_components=n_dims)
+            self.pca.fit(self.kmeans.cluster_centers_)
+            print(f'[INFO] pca dim set to {n_dims}')
 
         # --- serialize ---
         print(f'[INFO] serializing result to {fname}...')
@@ -337,7 +344,7 @@ class BatchedPipeliner:
         for st_batch, emb_batch, lbl_batch in zip(story_batches[1], emb_batches[1], self._labels):
             # reduce dimensionality with pca if it hasn't already been done
             # otehrwise take n_dims first eigenvecs
-            emb_proj = pca.transform(emb_batch) if emb_batch.shape[1] > n_dims else emb_batch[:,:n_dims]
+            emb_proj = self.pca.transform(emb_batch) if emb_batch.shape[1] > self._n_pca_dims else emb_batch
             for st, emb, lbl in zip(st_batch, emb_proj, lbl_batch):
                 with open(fname, 'a') as f:
                     f.write(
