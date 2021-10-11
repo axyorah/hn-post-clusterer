@@ -157,6 +157,19 @@ def get_wordcloud(freq):
     wcloud = WordCloud()
     cloud = wcloud.generate_from_frequencies(freq)
     return update_fig_layout(px.imshow(cloud.to_array()))
+
+def get_interactive_html_graph(graph_id, init_figure):
+    return html.Div(
+        children=[
+            dcc.Graph(
+                id=graph_id,
+                className='graph',
+                figure=init_figure
+            ),
+            html.Button('Update', id=f'{graph_id}-update-btn', className='graph-btn', n_clicks=0),
+        ],
+        id=f'{graph_id}-container',
+    )
         
 def init_dashboard(server):
     """Create a Plotly Dash dashboard."""
@@ -176,16 +189,9 @@ def init_dashboard(server):
 
     # --- Semantic Clustering ---
     # bar plot
-    semantic_cluster_bar_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='semantic-bar-plot',
-                className='graph',
-                figure=get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
-            ),
-            html.Button('Update', id='semantic-bar-plot-update-btn', className='graph-btn', n_clicks=0),
-        ],
-        id='dash-container',
+    semantic_cluster_bar_plot = get_interactive_html_graph(
+        'semantic-bar-plot', 
+        get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
     )
 
     @dash_app.callback(
@@ -197,39 +203,25 @@ def init_dashboard(server):
         return get_barplot(df)
 
     # 2d cluster scatter plot
-    semantic_cluster_scatter_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='semantic-cluster-2d',
-                className='graph',
-                figure=get_scatterplot(
-                    pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
-                )
-            ),
-            html.Button('Update', id='semantic-scatter-plot-update-btn', className='graph-btn', n_clicks=0),
-        ]
+    semantic_cluster_scatter_plot = get_interactive_html_graph(
+        'semantic-cluster-2d',
+        get_scatterplot(
+            pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
+        )
     )
 
     @dash_app.callback(
         Output(component_id='semantic-cluster-2d', component_property='figure'),
-        Input(component_id='semantic-scatter-plot-update-btn', component_property='n_clicks')
+        Input(component_id='semantic-cluster-2d-update-btn', component_property='n_clicks')
     )
     def update_semantic_scatter_plot(n_clicks):
         df = read_semantic_df()
         return get_scatterplot(df)
 
     # explained pca variance
-    pca_explained_variance_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='pca-explained-variance',
-                className='graph',
-                figure=get_pca_explained_variance_plot(
-                    pd.DataFrame({'Variance': [], 'Cummulative': []})
-                )
-            ),
-            html.Button('Update', id='pca-explained-variance-update-btn', className='graph-btn', n_clicks=0),
-        ]
+    pca_explained_variance_plot = get_interactive_html_graph(
+        'pca-explained-variance',
+        get_pca_explained_variance_plot(pd.DataFrame({'Variance': [], 'Cummulative': []}))
     )
 
     @dash_app.callback(
@@ -241,22 +233,16 @@ def init_dashboard(server):
         return get_pca_explained_variance_plot(df)
 
     # tsne
-    tsne_cluster_scatter_plot = html.Div(
-        children=[
-            dcc.Graph(
-                id='tsne-cluster-2d',
-                className='graph',
-                figure=get_scatterplot(
-                    pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
-                )
-            ),
-            html.Button('Update', id='tsne-scatter-plot-update-btn', className='graph-btn', n_clicks=0),
-        ]
+    tsne_cluster_scatter_plot = get_interactive_html_graph(
+        'tsne-cluster-2d',
+        get_scatterplot(
+            pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
+        )
     )
 
     @dash_app.callback(
         Output(component_id='tsne-cluster-2d', component_property='figure'),
-        Input(component_id='tsne-scatter-plot-update-btn', component_property='n_clicks')
+        Input(component_id='tsne-cluster-2d-update-btn', component_property='n_clicks')
     )
     def update_tsne_scatter_plot(n_clicks):
         df = read_tsne_df()
