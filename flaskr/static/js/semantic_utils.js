@@ -52,6 +52,11 @@ function addPcaEmbeddings() {
 
 function addPcaExplainedVariance() {
     removeAllNodeChildren(pcaExplainedVarianceRoot);
+
+    const pcaExplainedVarianceRef = document.createElement('iframe');
+    pcaExplainedVarianceRef.setAttribute('class', 'graph-container');
+    pcaExplainedVarianceRef.setAttribute('src', '/dashapp/pca-explained-variance-plot');
+    pcaExplainedVarianceRoot.append(pcaExplainedVarianceRef);
 }
 
 function addTsneEmbeddings() {

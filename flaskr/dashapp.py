@@ -1,5 +1,6 @@
 import os, re, json
 import numpy as np
+from itertools import accumulate
 import pandas as pd
 import dash
 from dash.dependencies import Input, Output
@@ -59,6 +60,16 @@ def read_cluster_frequencies():
 
     return frequencies
 
+def read_pca_explained_variance():
+    if not os.path.isfile('data/pca.txt'):
+        return pd.DataFrame({'Variance': [], 'Cummulative': []})
+
+    with open('data/pca.txt') as f:
+        variance = [float(val) for val in f.read().splitlines()]
+
+    cummulative = list(accumulate(variance))
+    return pd.DataFrame({'Variance': variance, 'Cummulative': cummulative})
+
 def get_barplot(df):
     df_bar = df.groupby('label').count()
     df_bar['Cluster#'] = df_bar.index
@@ -90,6 +101,25 @@ def get_scatterplot(df):
         color='Cluster#', 
         opacity=0.5,
         hover_data=['id', 'title']
+    )
+
+    update_fig_layout(fig)
+
+    return fig
+
+def get_pca_explained_variance_plot(df):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=df.index.map(lambda val: val + 1),
+            y=df['Cummulative'].map(lambda val: int(val * 100)),
+            mode='lines',
+            hovertemplate='#Dimensions: %{x}<br>Explained Variance: %{y}%',
+    ))    
+
+    fig.update_layout(
+        xaxis_title='Number of PCA vectors',
+        yaxis_title='% Variance Explained'
     )
 
     update_fig_layout(fig)
@@ -188,6 +218,28 @@ def init_dashboard(server):
         df = read_semantic_df()
         return get_scatterplot(df)
 
+    # explained pca variance
+    pca_explained_variance_plot = html.Div(
+        children=[
+            dcc.Graph(
+                id='pca-explained-variance',
+                className='graph',
+                figure=get_pca_explained_variance_plot(
+                    pd.DataFrame({'Variance': [], 'Cummulative': []})
+                )
+            ),
+            html.Button('Update', id='pca-explained-variance-update-btn', className='graph-btn', n_clicks=0),
+        ]
+    )
+
+    @dash_app.callback(
+        Output(component_id='pca-explained-variance', component_property='figure'),
+        Input(component_id='pca-explained-variance-update-btn', component_property='n_clicks')
+    )
+    def update_semantic_scatter_plot(n_clicks):
+        df = read_pca_explained_variance()
+        return get_pca_explained_variance_plot(df)
+
     # tsne
     tsne_cluster_scatter_plot = html.Div(
         children=[
@@ -262,6 +314,8 @@ def init_dashboard(server):
             return semantic_cluster_scatter_plot
         elif pathname == '/dashapp/tsne-cluster-scatter-plot':
             return tsne_cluster_scatter_plot
+        elif pathname == '/dashapp/pca-explained-variance-plot':
+            return pca_explained_variance_plot
         elif pathname == '/dashapp/wordcloud-plot':
             return wordcloud_container
         else:
