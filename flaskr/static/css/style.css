@@ -67,6 +67,17 @@ th {
     border-bottom: 2px solid white;
 }
 
+li {
+    margin-top: 5px;
+}
+
+.li-comment {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: rgb(215,215,235);
+}
+
 button {
     background-color: rgba(0,0,0,0);
     border: 1px solid rgb(3, 205, 255);

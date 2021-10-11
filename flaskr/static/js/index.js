@@ -11,7 +11,7 @@ const range = {
     },
 
     comm: {
-        min: 2,
+        min: 5,
         max: 300
     },
 
