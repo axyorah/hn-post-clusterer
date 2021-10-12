@@ -1,12 +1,12 @@
 .graph-container {
     width: 100%;
-    height: 300px;
+    height: 500px;
     padding: 0px;
 }
 
 .graph {
     width: 100%;
-    height: 300px;
+    height: 500px;
     fill: transparent;
 }
 
