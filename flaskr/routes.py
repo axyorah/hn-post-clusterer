@@ -126,14 +126,30 @@ def serialize_data_for_wordcloud():
         
     return {"ok": False}
 
-@app.route("/tsne", methods=["GET", "POST"])
+@app.route("/tsne", methods=["POST"])
 def embeddings2tsne():
 
-    print('hello tsne!')
+    print(request.method)
 
-    tsneer = TSNEer(random_state=42, n_components=2)
-    embeddings = tsneer.read_embedding_from_csv(DF_FNAME)
-    tsneer.reduce_embedding_dimensions(embeddings)
-    tsneer.serialize_results(DFT_FNAME)
+    if request.method == "POST":
+        print('hello tsne!')
 
-    return {"ok": True}
+        form_request = rqparser.parse(request)
+        perplexity = min(max(form_request['perplexity'], 5), 50)
+        dims = min(max(form_request['dims'], 2), 100)
+
+        tsneer = TSNEer(
+            random_state=42, 
+            n_components=2, 
+            perplexity=perplexity
+        )
+        embeddings = tsneer.read_embedding_from_csv(
+            DF_FNAME, 
+            dims=dims
+        )
+        tsneer.reduce_embedding_dimensions(embeddings)
+        tsneer.serialize_results(DFT_FNAME)
+
+        return {"ok": True}
+
+    return {"ok": False}

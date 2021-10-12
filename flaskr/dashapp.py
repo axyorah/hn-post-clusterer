@@ -61,7 +61,7 @@ def init_dashboard(server):
         Input(component_id='semantic-bar-plot-update-btn', component_property='n_clicks')
     )
     def update_semantic_bar_plot(n_clicks):
-        df = data.get_barplot_df()#pd.read_csv(DF_FNAME, sep='\t')
+        df = data.get_barplot_df()
         return figs.get_barplot(df)
 
     # 2d cluster scatter plot

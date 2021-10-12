@@ -22,6 +22,8 @@ class RequestParser:
             'fnames': 'fnames',
             'num-clusters': 'n_clusters',
             'model-name': 'model_name',
+            'perplexity': 'perplexity',
+            'dims': 'dims',
         }
         # specify the list of html eles for each sender type
         self.sender2html = {
@@ -40,7 +42,8 @@ class RequestParser:
             'kmeans-run': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
             'kmeans-show': ['story_ids'],
             'reader': ['fname'],
-            'deleter': ['fnames']
+            'deleter': ['fnames'],
+            'tsneer': ['perplexity', 'dims']
         }
         # specify how each key should be parsed
         self.key2type = {
@@ -48,12 +51,13 @@ class RequestParser:
                 'begin_id', 'end_id', 
                 'begin_comm', 'end_comm', 
                 'begin_score', 'end_score', 
-                'num_topics', 'n_clusters'
+                'num_topics', 'n_clusters',
+                'perplexity', 'dims'
             ]},
             'fname': 'str',
             'fnames': 'list[str]',
             'model_name': 'str',
-            'story_ids': 'list[str]'
+            'story_ids': 'list[str]',
         }
 
     def _parse_field(self, key, field):

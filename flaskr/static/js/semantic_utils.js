@@ -160,13 +160,14 @@ embedTsneBtn.addEventListener('click', function (res) {
     // add in-progress animation
     this.innerHTML = `${spinnerAmination} Recalculating embedding projection...`;
 
-    // remove tsne plots if present
-    while (embedTsnePlotRoot.children.length) {
-        embedTsnePlotRoot.removeChild(embedTsnePlotRoot.lastChild);
+    const params = {
+        'sender': 'tsneer',
+        'perplexity': tsnePerplexityNum.value,
+        'dims': tsneDimsNum.value
     }
 
     // calculate reduced-dim embeddings with tsne and add plot
-    fetch('/tsne')
+    postData('/tsne', params)
         .then(res => addTsneEmbeddings())
         .catch(err => {
             console.log(err);

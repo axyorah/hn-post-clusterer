@@ -1,0 +1,27 @@
+<div class="controls">
+    <div class="hor" style="justify-content: space-around;">
+
+        <div id="tsne-perplexity">
+            <b>Perplexity</b>
+            <div class="hor-item">
+                <div>
+                    <input type="number" class="box p-2 my-2" name="tsne-perplexity-num" id="tsne-perplexity-num"
+                        min="5" , max="50" , value="30">
+                </div>
+            </div>
+        </div>
+
+        <div id="tsne-dims">
+            <b>#dimensions</b>
+            <div class="hor-item">
+                <div>
+                    <input type="number" class="box p-2 my-2" name="tsne-dims-num" id="tsne-dims-num" 
+                        min="5" , max="50" , value="10">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<button id="embed-tsne-btn">Prettify with t-SNE</button>

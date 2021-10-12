@@ -299,11 +299,15 @@ class TSNEer:
         self.tsne = TSNE(**kwargs)
         self.reduced = None
 
-    def read_embedding_from_csv(self, fname, colname='embedding', sep='\t'):
+    def read_embedding_from_csv(self, fname, colname='embedding', sep='\t', dims=768):
+        print('tsne dims:', dims)
         self.df = pd.read_csv(fname, sep=sep)
         return np.stack(
             self.df[colname].map(
-                lambda line: [float(val) for val in line.split(',')]
+                lambda line: [
+                    float(val) for i,val in enumerate(line.split(','))
+                    if i < dims
+                ]
             ).to_numpy()
         )
 
