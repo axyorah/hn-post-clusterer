@@ -12,152 +12,13 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-# set globals
-CORPUS_DIR = 'data'
-DF_FNAME = os.path.join(CORPUS_DIR, 'df.csv')
+from flaskr.utils.dashutils import (
+    DataHelper,
+    FigureHelper
+)
 
-STYLE = {
-    'background_color': 'rgba(255,255,255,0.1)',
-    'paper_color': 'rgb(76, 73, 82)',
-    'text_color': 'white'
-}
-
-def update_fig_layout(fig):
-    # update style to match the rest of the flask app style
-    fig.update_layout(
-        transition_duration=500,
-        plot_bgcolor=STYLE['background_color'],
-        paper_bgcolor=STYLE['paper_color'],
-        font_color=STYLE['text_color']
-    )
-
-    return fig
-
-def read_semantic_df():
-    df = pd.read_csv(DF_FNAME, sep='\t')
-    df['ax-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
-    df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
-    return df
-
-def read_tsne_df():
-    df = pd.read_csv('data/df_tsne.csv', sep='\t')
-    df['ax-0'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[0]))
-    df['ax-1'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[1]))
-    return df
-
-def read_cluster_frequencies():
-    fnames = [
-        os.path.join('data', fname) 
-        for fname in os.listdir('data') if 'freq' in fname
-    ]
-
-    frequencies = dict()
-    for fname in fnames:
-        res = re.search('freq_(?P<lbl>[0-9])+', fname)
-        lbl = res['lbl']
-        with open(fname, 'r') as f:
-            frequencies[lbl] = json.load(f)
-
-    return frequencies
-
-def read_pca_explained_variance():
-    if not os.path.isfile('data/pca.txt'):
-        return pd.DataFrame({'Variance': [], 'Cummulative': []})
-
-    with open('data/pca.txt') as f:
-        variance = [float(val) for val in f.read().splitlines()]
-
-    cummulative = list(accumulate(variance))
-    return pd.DataFrame({'Variance': variance, 'Cummulative': cummulative})
-
-def get_barplot(df):
-    df_bar = df.groupby('label').count()
-    df_bar['Cluster#'] = df_bar.index
-    df_bar['Number of Posts'] = df_bar['id']
-
-    fig = px.bar(
-        df_bar,
-        x='Cluster#',
-        y='Number of Posts',
-        color='Cluster#'
-    )
-
-    update_fig_layout(fig)
-
-    return fig
-
-def get_scatterplot(df):
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=df['ax-0'],
-            y=df['ax-1'],
-            opacity=0.5,
-            mode='markers',
-            marker_color=df['label'],
-            customdata=df[['id', 'title','label']],
-            hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}'
-    ))
-
-    fig.update_layout(
-        xaxis_title='Axis-A',
-        yaxis_title='Axis-B'
-    )
-
-    update_fig_layout(fig)
-
-    return fig
-
-def get_pca_explained_variance_plot(df):
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=df.index.map(lambda val: val + 1),
-            y=df['Cummulative'].map(lambda val: int(val * 100)),
-            mode='lines',
-            hovertemplate='#Dimensions: %{x}<br>Explained Variance: %{y}%',
-    ))    
-
-    fig.update_layout(
-        xaxis_title='Number of PCA vectors (dimensions)',
-        yaxis_title='% Variance Explained'
-    )
-
-    update_fig_layout(fig)
-
-    return fig
-  
-def get_wordclouds(frequencies):
-    wcloud = WordCloud()
-
-    fig = make_subplots(
-        rows=int(np.ceil(len(frequencies.keys())/2))+1, 
-        cols=2,
-        subplot_titles=[f'Cluster {i}' for i in range(len(frequencies.keys()))],
-        horizontal_spacing=0.01,
-        vertical_spacing=0.03
-    )
-    for lbl in range(len(frequencies.keys())):
-        row, col = lbl // 2 + 1, lbl % 2 + 1
-        cloud = wcloud.generate_from_frequencies(frequencies[str(lbl)])
-        fig.add_trace(
-            go.Image(
-                z=cloud.to_array(), 
-                hovertemplate=f'Cluster {lbl}',                
-            ), 
-            row=row, col=col,           
-        )
-
-    update_fig_layout(fig)
-    fig.update_xaxes(visible=False) 
-    fig.update_yaxes(visible=False)
-
-    return fig
-
-def get_wordcloud(freq):
-    wcloud = WordCloud()
-    cloud = wcloud.generate_from_frequencies(freq)
-    return update_fig_layout(px.imshow(cloud.to_array()))
+data = DataHelper()
+figs = FigureHelper()
 
 def get_interactive_html_graph(graph_id, init_figure):
     return html.Div(
@@ -192,7 +53,7 @@ def init_dashboard(server):
     # bar plot
     semantic_cluster_bar_plot = get_interactive_html_graph(
         'semantic-bar-plot', 
-        get_barplot(pd.DataFrame(data={'id':[], 'label':[]}))
+        figs.get_barplot(pd.DataFrame(data={'Cluster#':[], 'Number of Posts':[]}))
     )
 
     @dash_app.callback(
@@ -200,13 +61,13 @@ def init_dashboard(server):
         Input(component_id='semantic-bar-plot-update-btn', component_property='n_clicks')
     )
     def update_semantic_bar_plot(n_clicks):
-        df = pd.read_csv(DF_FNAME, sep='\t')
-        return get_barplot(df)
+        df = data.get_barplot_df()#pd.read_csv(DF_FNAME, sep='\t')
+        return figs.get_barplot(df)
 
     # 2d cluster scatter plot
     semantic_cluster_scatter_plot = get_interactive_html_graph(
         'semantic-cluster-2d',
-        get_scatterplot(
+        figs.get_scatterplot(
             pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
         )
     )
@@ -216,13 +77,13 @@ def init_dashboard(server):
         Input(component_id='semantic-cluster-2d-update-btn', component_property='n_clicks')
     )
     def update_semantic_scatter_plot(n_clicks):
-        df = read_semantic_df()
-        return get_scatterplot(df)
+        df = data.get_pca_embedding_df()
+        return figs.get_scatterplot(df)
 
     # explained pca variance
     pca_explained_variance_plot = get_interactive_html_graph(
         'pca-explained-variance',
-        get_pca_explained_variance_plot(pd.DataFrame({'Variance': [], 'Cummulative': []}))
+        figs.get_pca_explained_variance_plot(pd.DataFrame({'Variance': [], 'Cummulative': []}))
     )
 
     @dash_app.callback(
@@ -230,13 +91,13 @@ def init_dashboard(server):
         Input(component_id='pca-explained-variance-update-btn', component_property='n_clicks')
     )
     def update_semantic_scatter_plot(n_clicks):
-        df = read_pca_explained_variance()
-        return get_pca_explained_variance_plot(df)
+        df = data.get_pca_explained_variance()
+        return figs.get_pca_explained_variance_plot(df)
 
     # tsne
     tsne_cluster_scatter_plot = get_interactive_html_graph(
         'tsne-cluster-2d',
-        get_scatterplot(
+        figs.get_scatterplot(
             pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
         )
     )
@@ -246,15 +107,15 @@ def init_dashboard(server):
         Input(component_id='tsne-cluster-2d-update-btn', component_property='n_clicks')
     )
     def update_tsne_scatter_plot(n_clicks):
-        df = read_tsne_df()
-        return get_scatterplot(df)
+        df = data.get_tsne_embedding_df()
+        return figs.get_scatterplot(df)
 
     # wordcloud subplots
     def get_wordcloud_dccgraph(freqs):
         return dcc.Graph(
             id='wordcloud',
             className='graph',
-            figure=get_wordclouds(freqs),
+            figure=figs.get_wordclouds(freqs),
             style={'height': f'{100 + 200 * int(np.ceil(len(freqs.keys()) / 2))}px'}
         )
 
@@ -276,7 +137,7 @@ def init_dashboard(server):
         Input(component_id='wordcloud-plot-update-btn', component_property='n_clicks')
     )
     def update_wordcloud_style(n_clicks):
-        freqs = read_cluster_frequencies()
+        freqs = data.get_cluster_frequencies()
         return [
             get_wordcloud_dccgraph(freqs),
             get_wordcloud_button()
