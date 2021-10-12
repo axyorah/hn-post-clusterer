@@ -87,20 +87,21 @@ def get_barplot(df):
     return fig
 
 def get_scatterplot(df):
-    df_scat = {
-        'Axis-A': df['ax-0'],
-        'Axis-B': df['ax-1'],
-        'id': df['id'],
-        'Cluster#': df['label'],
-        'title': df['title']
-    }
-    fig = px.scatter(
-        df_scat, 
-        x='Axis-A', 
-        y='Axis-B', 
-        color='Cluster#', 
-        opacity=0.5,
-        hover_data=['id', 'title']
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=df['ax-0'],
+            y=df['ax-1'],
+            opacity=0.5,
+            mode='markers',
+            marker_color=df['label'],
+            customdata=df[['id', 'title','label']],
+            hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}'
+    ))
+
+    fig.update_layout(
+        xaxis_title='Axis-A',
+        yaxis_title='Axis-B'
     )
 
     update_fig_layout(fig)
@@ -118,7 +119,7 @@ def get_pca_explained_variance_plot(df):
     ))    
 
     fig.update_layout(
-        xaxis_title='Number of PCA vectors',
+        xaxis_title='Number of PCA vectors (dimensions)',
         yaxis_title='% Variance Explained'
     )
 
@@ -264,6 +265,7 @@ def init_dashboard(server):
             className='graph-btn', 
             n_clicks=0
         )
+
     wordcloud_container = html.Div(
         id='wordcloud-container',
         children = [ 'Generating WordClouds...', get_wordcloud_button() ],
