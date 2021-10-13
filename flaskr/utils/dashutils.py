@@ -142,7 +142,7 @@ class FigureHelper:
         fig.add_trace(
             go.Scatter(
                 x=df.index.map(lambda val: val + 1),
-                y=df['Cummulative'].map(lambda val: int(val * 100)),
+                y=df['Cummulative'].map(lambda val: np.round(val * 100,2)),
                 mode='lines',
                 hovertemplate='#Dimensions: %{x}<br>Explained Variance: %{y}%',
         ))    
