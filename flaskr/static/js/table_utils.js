@@ -72,7 +72,7 @@ function getNewHNPostTable(morePostBtn) {
     tableRoot.appendChild(table);
 
     // create header
-    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', '#comments', 'comments'];
+    const fields = ['Id', 'Time', 'Title', 'Score', '#Comments', 'Comments'];
     const trHead = document.createElement('tr');
     for (let i = 0; i < fields.length; i++ ) {
         const th = document.createElement('th');
@@ -106,7 +106,7 @@ function getHTMLDetails(title, innerHTML) {
 
 function appendDataToHNPostTable(table, data) {
     // add data
-    const fields = ['story_id', 'author', 'unix_time', 'score', 'title', 'num_comments'];
+    const fields = ['story_id', 'unix_time', 'title', 'score', 'num_comments'];
     for (let storyId of Object.keys(data)) {        
         const tr = document.createElement('tr');
         
@@ -116,12 +116,14 @@ function appendDataToHNPostTable(table, data) {
 
             if (fields[i] === 'unix_time') {
                 const date = new Date(data[storyId][fields[i]] * 1000);
-                td.innerText = `${date.getFullYear()}/${date.getMonth()}/${date.getDate()}`;
+                td.innerText = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
             } else {
                 td.innerText = data[storyId][fields[i]];
             }
             if (fields[i] === 'title') {
-                td.innerHTML = `<a href=${data[storyId]['url']}>${data[storyId][fields[i]]}</a>`
+                td.innerHTML = 
+                    (data[storyId]['url'] != null ? `<a href=${data[storyId]['url']} target='_blank'>${data[storyId][fields[i]]}</a>` : data[storyId][fields[i]]) + 
+                    ` by ${data[storyId]['author']}`
             }
             tr.appendChild(td);
         }
