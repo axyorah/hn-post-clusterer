@@ -5,10 +5,10 @@ function removeAllNodeChildren(node) {
 }
 
 function reset() {
-    // clear old csv files
+    // clear old data files
     const deletable = {
         "sender": "deleter",
-        "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt"
+        "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt,data/freq_*.json"
     }
     postData('/file/delete', deletable);
 

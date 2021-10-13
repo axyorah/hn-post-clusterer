@@ -1,4 +1,4 @@
-import os, json
+import os, json, glob
 from smart_open import open
 
 from flask import current_app as app
@@ -83,10 +83,14 @@ def delete_serialized():
     if request.method == "POST":
         form_request = rqparser.parse(request)
         
-        print(f"[INFO] deleting", end=" ")        
-        for fname in form_request['fnames']:
-            ext = fname.split('.')[-1]
-            if os.path.isfile(fname) and ext in ["txt", "csv"]:
+        print(f"[INFO] deleting...", end=" ")        
+        for pattern in form_request["fnames"]:
+            # only data-files can be deleted!
+            ext = pattern.split('.')[-1]
+            if ext not in ["txt", "csv", "json"]:
+                continue
+            fnames = glob.glob(pattern)
+            for fname in fnames:
                 print(fname, end=", ")
                 os.remove(fname)
         print("")                
@@ -128,9 +132,6 @@ def serialize_data_for_wordcloud():
 
 @app.route("/tsne", methods=["POST"])
 def embeddings2tsne():
-
-    print(request.method)
-
     if request.method == "POST":
         print('hello tsne!')
 
