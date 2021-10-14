@@ -4,6 +4,15 @@ function removeAllNodeChildren(node) {
     }
 }
 
+function addGraphFromRouteToNode(node, route) {
+    const nodeRef = document.createElement('iframe');
+    nodeRef.setAttribute('class', 'graph-container');
+    nodeRef.setAttribute('src', route);
+    node.appendChild(nodeRef);
+
+    return nodeRef;
+}
+
 function reset() {
     // clear old data files
     const deletable = {
@@ -34,51 +43,34 @@ function reset() {
 
 function addBarPlot() {
     removeAllNodeChildren(countsBarPlotRoot);
-
-    const countsBarPlotRef = document.createElement('iframe');
-    countsBarPlotRef.setAttribute('class', 'graph-container');
-    countsBarPlotRef.setAttribute('src', '/dashapp/semantic-cluster-bar-plot');
-    countsBarPlotRoot.appendChild(countsBarPlotRef);
+    addGraphFromRouteToNode(countsBarPlotRoot, '/dashapp/semantic-cluster-bar-plot');
 }
 
 function addPcaEmbeddings() {
     removeAllNodeChildren(embedPcaPlotRoot);
-
-    const embedPcaPlotRef = document.createElement('iframe');
-    embedPcaPlotRef.setAttribute('class', 'graph-container');
-    embedPcaPlotRef.setAttribute('src', '/dashapp/semantic-cluster-scatter-plot');
-    embedPcaPlotRoot.append(embedPcaPlotRef);
+    addGraphFromRouteToNode(embedPcaPlotRoot, '/dashapp/semantic-cluster-scatter-plot');
 }
 
 function addPcaExplainedVariance() {
     removeAllNodeChildren(pcaExplainedVarianceRoot);
-
-    const pcaExplainedVarianceRef = document.createElement('iframe');
-    pcaExplainedVarianceRef.setAttribute('class', 'graph-container');
-    pcaExplainedVarianceRef.setAttribute('src', '/dashapp/pca-explained-variance-plot');
-    pcaExplainedVarianceRoot.append(pcaExplainedVarianceRef);
+    addGraphFromRouteToNode(pcaExplainedVarianceRoot, '/dashapp/pca-explained-variance-plot');
 }
 
 function addTsneEmbeddings() {
     removeAllNodeChildren(embedTsnePlotRoot);
+    addGraphFromRouteToNode(embedTsnePlotRoot, '/dashapp/tsne-cluster-scatter-plot');
 
     embedTsneBtn.innerHTML = 'Prettify with t-SNE';
-    const embedTsnePlotRef = document.createElement('iframe');
-    embedTsnePlotRef.setAttribute('class', 'graph-container');
-    embedTsnePlotRef.setAttribute('src', '/dashapp/tsne-cluster-scatter-plot');
-    embedTsnePlotRoot.append(embedTsnePlotRef);
 }
 
 function addWordCloud( num_clusters ) {
     wordcloudInfo.innerHTML = '';
 
-    // create wordcloud
+    removeAllNodeChildren(wordcloudPlotRoot);
+    wordcloudPlotRef = addGraphFromRouteToNode(wordcloudPlotRoot,'/dashapp/wordcloud-plot');
+
     const numRows = Math.ceil(num_clusters / 2);
-    const wordcloudPlotRef = document.createElement('iframe');
-    wordcloudPlotRef.setAttribute('class', 'graph-container');
-    wordcloudPlotRef.setAttribute('src', '/dashapp/wordcloud-plot');
     wordcloudPlotRef.style.height = `${100 + 200 * numRows}px`;
-    wordcloudPlotRoot.append(wordcloudPlotRef);
 }
 
 semanticClusterBtn.addEventListener('click', function (evt) {
