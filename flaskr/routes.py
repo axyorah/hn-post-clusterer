@@ -98,7 +98,7 @@ def delete_serialized():
         return {"ok": True}
     return {"ok": False}
 
-@app.route("/semanticcluster", methods=["POST"])
+@app.route("/cluster/run", methods=["POST"])
 def semantic_cluster():
     if request.method == "POST":
 
