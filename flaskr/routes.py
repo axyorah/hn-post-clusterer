@@ -51,8 +51,8 @@ def query_db():
             
         return json.dumps(story_dict)
 
-@app.route("/file/read", methods=["POST"])
-def file_reader():
+@app.route("/file/readtxt", methods=["POST"])
+def txt_reader():
     if request.method == "POST":
         form_request = rqparser.parse(request)
         with open(form_request["fname"], "r") as f:
@@ -117,7 +117,7 @@ def semantic_cluster():
 
     return {"ok": False}
 
-@app.route("/wordcloud", methods=["GET", "POST"])
+@app.route("/wordcloud", methods=["POST"])
 def serialize_data_for_wordcloud():
 
     if request.method == "POST":
