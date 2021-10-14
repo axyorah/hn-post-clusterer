@@ -47,9 +47,8 @@ def rebatch_generator(batches, min_batch_size):
     yield prev + curr
 
 class BatchedPipeliner:
-    def __init__(self, request):
-        self.rqparser = RequestParser()
-        self.request_form = self.rqparser.parse(request)
+    def __init__(self, request_form):
+        self.request_form = request_form
 
         self._n_clusters = self.request_form['n_clusters']
         self._model_name = self.request_form['model_name']
