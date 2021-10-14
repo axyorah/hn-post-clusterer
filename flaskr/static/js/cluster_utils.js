@@ -76,7 +76,7 @@ function addWordCloud( num_clusters ) {
 semanticClusterBtn.addEventListener('click', function (evt) {
     // store params for db query
     const params = {
-        'sender': 'semantic',
+        'sender': 'clusterer',
         'show-id-begin-range': show.id.begin.range.value,
         'show-id-end-range': show.id.end.range.value,
         'show-comm-begin-range': show.comm.begin.range.value,
@@ -134,7 +134,7 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
             targetLabel
         );
         return postData('/db/get', {
-            'sender': 'kmeans-show',
+            'sender': 'db-lister',
             'story_ids': filtered_ids,
         })
     }).then(res => {

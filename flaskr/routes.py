@@ -42,9 +42,7 @@ def query_db():
         form_request = rqparser.parse(request)
         dbhelper = DBHelper()
             
-        if request.form.get('sender') == 'show':
-            story_dict = dbhelper.get_stories_with_children_from_id_range(form_request)
-        elif request.form.get('sender') == 'kmeans-show':
+        if request.form.get('sender') == 'db-lister':
             story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
         else:
             story_dict = {}

@@ -1,6 +1,6 @@
 seedSubmitBtn.addEventListener('click', function (evt) {    
     const params = {
-        'sender': 'seed',
+        'sender': 'db-seeder',
         'seed-id-begin-range': seed.id.begin.range.value,
         'seed-id-end-range': seed.id.end.range.value
     };

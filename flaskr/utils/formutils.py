@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from flaskr.db import get_db
 import requests as rq
 import datetime
@@ -27,22 +28,16 @@ class RequestParser:
         }
         # specify the list of html eles for each sender type
         self.sender2html = {
-            'seed': ['seed-id-begin-range', 'seed-id-end-range'],
-            'show': [
-                'show-id-begin-range', 'show-id-end-range', 
-                'show-comm-begin-range', 'show-comm-end-range', 
-                'show-score-begin-range', 'show-score-end-range'
-            ],
-            'semantic': [
+            'db-seeder': ['seed-id-begin-range', 'seed-id-end-range'],
+            'db-lister': ['story_ids'],
+            'reader': ['fname'],
+            'deleter': ['fnames'],
+            'clusterer': [
                 'show-id-begin-range', 'show-id-end-range', 
                 'show-comm-begin-range', 'show-comm-end-range', 
                 'show-score-begin-range', 'show-score-end-range',
                 'num-clusters', 'model-name'
             ],
-            'kmeans-run': ['show-lsi-topics-num', 'show-kmeans-clusters-num'],
-            'kmeans-show': ['story_ids'],
-            'reader': ['fname'],
-            'deleter': ['fnames'],
             'tsneer': ['perplexity', 'dims']
         }
         # specify how each key should be parsed
@@ -63,11 +58,25 @@ class RequestParser:
     def _parse_field(self, key, field):
         keytype = self.key2type[key]
         if keytype == 'int':
-            return int(field)
+            try:
+                return int(field)
+            except:
+                print(f'{field} received non-{keytype}!')
+                return
+
         if keytype == 'str':
-            return field
+            try:
+                return field
+            except:
+                print(f'{field} received non-{keytype}!')
+                return
+
         elif keytype == 'list[str]':
-            return [item for item in field.split(',')]
+            try:
+                return [item for item in field.split(',')]
+            except:
+                print(f'{field} received non-{keytype}!')
+                return
         return field
 
     def _parse_request(self, request, htmls):
@@ -78,7 +87,7 @@ class RequestParser:
             if form.get(html) is None and form.get(key) is None:
                 raise NameError(f'Error accessing element with id "{html}" ({key})')
 
-            parsed[key] = self._parse_field(key, form.get(html) or form.get(key))
+            parsed[key] = self._parse_field(key, form.get(html) or form.get(key)) # can be None
                 
         return parsed
 
