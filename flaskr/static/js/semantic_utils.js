@@ -167,7 +167,7 @@ embedTsneBtn.addEventListener('click', function (res) {
     }
 
     // calculate reduced-dim embeddings with tsne and add plot
-    postData('/tsne', params)
+    postData('/cluster/visuals/tsne', params)
         .then(res => addTsneEmbeddings())
         .catch(err => {
             console.log(err);
@@ -178,7 +178,7 @@ embedTsneBtn.addEventListener('click', function (res) {
 wordcloudBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Generating WordClouds...`;
 
-    postData('/wordcloud', {})
+    postData('/cluster/visuals/wordcloud', {})
         .then(res => {
             console.log(res);
             addWordCloud( res['num_clusters'] )

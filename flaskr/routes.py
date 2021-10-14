@@ -99,7 +99,7 @@ def delete_serialized():
     return {"ok": False}
 
 @app.route("/cluster/run", methods=["POST"])
-def semantic_cluster():
+def cluster_posts_and_serialize_results():
     if request.method == "POST":
 
         pipe = BatchedPipeliner(request)
@@ -117,7 +117,7 @@ def semantic_cluster():
 
     return {"ok": False}
 
-@app.route("/wordcloud", methods=["POST"])
+@app.route("/cluster/visuals/wordcloud", methods=["POST"])
 def serialize_data_for_wordcloud():
 
     if request.method == "POST":
@@ -130,10 +130,9 @@ def serialize_data_for_wordcloud():
         
     return {"ok": False}
 
-@app.route("/tsne", methods=["POST"])
-def embeddings2tsne():
+@app.route("/cluster/visuals/tsne", methods=["POST"])
+def serialize_data_for_tsne():
     if request.method == "POST":
-        print('hello tsne!')
 
         form_request = rqparser.parse(request)
         perplexity = min(max(form_request['perplexity'], 5), 50)
