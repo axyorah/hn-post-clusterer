@@ -40,7 +40,7 @@ const config = {
         endLabel.innerText = `To: ${yf}/${mf}/${df}`;
     },
 
-    general: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {
+    general: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal, showLabel=false) {
         beginRange.min = minVal;
         beginRange.max = maxVal;
         beginRange.value = minVal;
@@ -49,8 +49,10 @@ const config = {
         endRange.max = maxVal;
         endRange.value = maxVal;
     
-        beginLabel.innerText = `From: ${minVal}`;
-        endLabel.innerText = `To: ${maxVal}`;
+        if (showLabel) {
+            beginLabel.innerText = `From: ${minVal}`;
+            endLabel.innerText = `To: ${maxVal}`;
+        }
     }, 
 };
 config.id = config.general;
@@ -83,24 +85,28 @@ const update = {
     }, 
 
     general: {
-        begin: function(beginRange, endRange, beginLabel, endLabel) {
+        begin: function(beginRange, endRange, beginLabel, endLabel, showLabel=false) {
             let beginVal = parseInt(beginRange.value);
             let endVal = parseInt(endRange.value);
             if (beginVal >= endVal) {
                 beginVal = endVal - 1;
                 beginRange.value = beginVal;
             }
-            beginLabel.innerText = `From: ${beginVal}`;            
+            if (showLabel) {
+                beginLabel.innerText = `From: ${beginVal}`;
+            }
         }, 
 
-        end: function(beginRange, endRange, beginLabel, endLabel) {
+        end: function(beginRange, endRange, beginLabel, endLabel, showLabel=false) {
             let beginVal = parseInt(beginRange.value);
             let endVal = parseInt(endRange.value);
             if (endVal <= beginVal) {
                 endVal = beginVal + 1;
                 endRange.value = endVal;
             }
-            endLabel.innerText = `To: ${endVal}`;            
+            if (showLabel) {
+                endLabel.innerText = `To: ${endVal}`;
+            }                        
         }
     },
 }
@@ -145,7 +151,8 @@ for (let filterBy of ['id', 'comm', 'score']) {
         show[filterBy][loc].range.addEventListener('change', (evt) => {
             update[filterBy][loc](
                 show[filterBy].begin.range, show[filterBy].end.range, 
-                show[filterBy].begin.label, show[filterBy].end.label
+                show[filterBy].begin.label, show[filterBy].end.label,
+                filterBy === 'id' ? true : false
             );
         })
     }
@@ -156,7 +163,8 @@ window.addEventListener('load', (evt) => {
         config[filterBy](
             show[filterBy].begin.range, show[filterBy].end.range, 
             show[filterBy].begin.label, show[filterBy].end.label,
-            range[filterBy].min, range[filterBy].max
+            range[filterBy].min, range[filterBy].max,
+            filterBy === 'id' ? true : false
         )
     }
 })
