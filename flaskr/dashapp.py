@@ -157,11 +157,11 @@ def init_dashboard(server):
         Input('url', 'pathname')
     )
     def display_page(pathname):
-        if pathname == '/dashapp/semantic-cluster-bar-plot':
+        if pathname == '/dashapp/cluster-bar-plot':
             return semantic_cluster_bar_plot
-        elif pathname == '/dashapp/semantic-cluster-scatter-plot':
+        elif pathname == '/dashapp/embeddings-pca-scatter-plot':
             return semantic_cluster_scatter_plot
-        elif pathname == '/dashapp/tsne-cluster-scatter-plot':
+        elif pathname == '/dashapp/embeddings-tsne-scatter-plot':
             return tsne_cluster_scatter_plot
         elif pathname == '/dashapp/pca-explained-variance-plot':
             return pca_explained_variance_plot

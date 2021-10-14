@@ -43,12 +43,12 @@ function reset() {
 
 function addBarPlot() {
     removeAllNodeChildren(countsBarPlotRoot);
-    addGraphFromRouteToNode(countsBarPlotRoot, '/dashapp/semantic-cluster-bar-plot');
+    addGraphFromRouteToNode(countsBarPlotRoot, '/dashapp/cluster-bar-plot');
 }
 
 function addPcaEmbeddings() {
     removeAllNodeChildren(embedPcaPlotRoot);
-    addGraphFromRouteToNode(embedPcaPlotRoot, '/dashapp/semantic-cluster-scatter-plot');
+    addGraphFromRouteToNode(embedPcaPlotRoot, '/dashapp/embeddings-pca-scatter-plot');
 }
 
 function addPcaExplainedVariance() {
@@ -58,7 +58,7 @@ function addPcaExplainedVariance() {
 
 function addTsneEmbeddings() {
     removeAllNodeChildren(embedTsnePlotRoot);
-    addGraphFromRouteToNode(embedTsnePlotRoot, '/dashapp/tsne-cluster-scatter-plot');
+    addGraphFromRouteToNode(embedTsnePlotRoot, '/dashapp/embeddings-tsne-scatter-plot');
 
     embedTsneBtn.innerHTML = 'Prettify with t-SNE';
 }
