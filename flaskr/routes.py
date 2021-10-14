@@ -29,89 +29,117 @@ def index():
 @app.route("/db/add", methods=["POST"])
 def seed_db():
     if request.method == "POST":
-        form_request = rqparser.parse(request)
-        dbhelper = DBHelper()
+        try:
+            form_request = rqparser.parse(request)
 
-        dbhelper.query_api_and_add_result_to_db(form_request)
+            dbhelper = DBHelper()
+            dbhelper.query_api_and_add_result_to_db(form_request)
 
-    return {"ok": True}
+            return {"ok": True}
+        except Exception as e:
+            print(f'[ERR: /db/add] {e}')
+            return e.args[0], 500
+
+
 
 @app.route("/db/get", methods=["POST"])
 def query_db():
     if request.method == "POST":
-        form_request = rqparser.parse(request)
-        dbhelper = DBHelper()
+        try:
+            form_request = rqparser.parse(request)
+
+            dbhelper = DBHelper()            
+            if request.form.get('sender') == 'db-lister':
+                story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
+            else:
+                story_dict = {}
             
-        if request.form.get('sender') == 'db-lister':
-            story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
-        else:
-            story_dict = {}
-            
-        return json.dumps(story_dict)
+            return json.dumps(story_dict)
+        except Exception as e:
+            print(f'[ERR: /db/get] {e}')
+            return e.args[0], 500
 
 @app.route("/file/readtxt", methods=["POST"])
 def txt_reader():
     if request.method == "POST":
-        form_request = rqparser.parse(request)
-        with open(form_request["fname"], "r") as f:
-            lines = f.read().splitlines()
-        return {"contents": lines, "ok": True}
+        try:
+            form_request = rqparser.parse(request)
+            with open(form_request["fname"], "r") as f:
+                lines = f.read().splitlines()
+            return {"contents": lines, "ok": True}
+        except Exception as e:
+            print(f'[ERR: /file/readtxt] {e}')
+            return e.args[0], 500
     
     return {"ok": False}
 
 @app.route("/file/readcsv", methods=["POST"])
 def csv_reader():
     if request.method == "POST":
-        form_request = rqparser.parse(request)
-        with open(form_request["fname"], "r") as f:
-            lines = f.read().splitlines()
+        try:
+            form_request = rqparser.parse(request)
+            with open(form_request["fname"], "r") as f:
+                lines = f.read().splitlines()
         
-        idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
-        contents = {field: [] for field in idx2field.values()}
-        for line in lines[1:]:
-            for i,val in enumerate(line.split("\t")):
-                contents[idx2field[i]].append(val)
+            idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
+            contents = {field: [] for field in idx2field.values()}
+            for line in lines[1:]:
+                for i,val in enumerate(line.split("\t")):
+                    contents[idx2field[i]].append(val)
         
-        return { "contents": contents, "ok": True } 
+            return { "contents": contents, "ok": True } 
+        except Exception as e:
+            print(f'[ERR: /file/readcsv] {e}')
+            return e.args[0], 500
 
     return {"ok": False}
 
 @app.route("/file/delete", methods=["POST"])
 def delete_serialized():
     if request.method == "POST":
-        form_request = rqparser.parse(request)
+        try:
+            form_request = rqparser.parse(request)
         
-        print(f"[INFO] deleting...", end=" ")        
-        for pattern in form_request["fnames"]:
-            # only data-files can be deleted!
-            ext = pattern.split('.')[-1]
-            if ext not in ["txt", "csv", "json"]:
-                continue
-            fnames = glob.glob(pattern)
-            for fname in fnames:
-                print(fname, end=", ")
-                os.remove(fname)
-        print("")                
+            print(f"[INFO] deleting...", end=" ")        
+            for pattern in form_request["fnames"]:
+                # only data-files can be deleted!
+                ext = pattern.split('.')[-1]
+                if ext not in ["txt", "csv", "json"]:
+                    continue
+                fnames = glob.glob(pattern)
+                for fname in fnames:
+                    print(fname, end=", ")
+                    os.remove(fname)
+            print("")                
         
-        return {"ok": True}
+            return {"ok": True}
+        except Exception as e:
+            print(f'[ERR: /file/delete] {e}')
+            return e.args[0], 500
+
     return {"ok": False}
 
 @app.route("/cluster/run", methods=["POST"])
 def cluster_posts_and_serialize_results():
     if request.method == "POST":
+        try:
+            request_form = rqparser.parse(request)
 
-        pipe = BatchedPipeliner(request)
-        stories = pipe.get_story_batches()
-        embeddings = pipe.get_embedding_batches(stories)
-        embeddings = pipe.standardize_embedding_batches(embeddings)
-        embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
-        pipe.cluster_story_batches(embeddings)
-        pipe.serialize_result(fname=DF_FNAME)
-        pipe.serialize_pca_explained_variance(fname=PCA_FNAME)
+            pipe = BatchedPipeliner(request_form)
+            stories = pipe.get_story_batches()
+            embeddings = pipe.get_embedding_batches(stories)
+            embeddings = pipe.standardize_embedding_batches(embeddings)
+            embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
+            pipe.cluster_story_batches(embeddings)
+            pipe.serialize_result(fname=DF_FNAME)
+            pipe.serialize_pca_explained_variance(fname=PCA_FNAME)
 
-        # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
+            # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
-        return {"ok": True}
+            return {"ok": True}
+        except Exception as e:
+            print(f'[ERR: /cluster/run] {e}')
+            return e.args[0], 500
 
     return {"ok": False}
 
@@ -120,34 +148,43 @@ def serialize_data_for_wordcloud():
 
     if request.method == "POST":
 
-        counter = ClusterFrequencyCounter()
-        counter.count_serialized_cluster_frequencies(DF_FNAME)
-        counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
+        try:
+            counter = ClusterFrequencyCounter()
+            counter.count_serialized_cluster_frequencies(DF_FNAME)
+            counter.serialize_cluster_frequencies(data_dir='data', min_freq=2)
 
-        return {"ok": True, "num_clusters": len(counter.frequencies.keys())}
+            return {"ok": True, "num_clusters": len(counter.frequencies.keys())}
+
+        except Exception as e:
+            print(f'[ERR: /cluster/visuals/wordcloud] {e}')
+            return e.args[0], 500
         
     return {"ok": False}
 
 @app.route("/cluster/visuals/tsne", methods=["POST"])
 def serialize_data_for_tsne():
     if request.method == "POST":
+        try:    
+            form_request = rqparser.parse(request)
+            perplexity = min(max(form_request['perplexity'], 5), 50)
+            dims = min(max(form_request['dims'], 2), 100)
 
-        form_request = rqparser.parse(request)
-        perplexity = min(max(form_request['perplexity'], 5), 50)
-        dims = min(max(form_request['dims'], 2), 100)
+            tsneer = TSNEer(
+                random_state=42, 
+                n_components=2, 
+                perplexity=perplexity
+            )
+            embeddings = tsneer.read_embedding_from_csv(
+                DF_FNAME, 
+                dims=dims
+            )
+            tsneer.reduce_embedding_dimensions(embeddings)
+            tsneer.serialize_results(DFT_FNAME)
 
-        tsneer = TSNEer(
-            random_state=42, 
-            n_components=2, 
-            perplexity=perplexity
-        )
-        embeddings = tsneer.read_embedding_from_csv(
-            DF_FNAME, 
-            dims=dims
-        )
-        tsneer.reduce_embedding_dimensions(embeddings)
-        tsneer.serialize_results(DFT_FNAME)
-
-        return {"ok": True}
+            return {"ok": True}
+            
+        except Exception as e:
+            print(f'[ERR: /cluster/visuals/tsne] {e}')
+            return e.args[0], 500
 
     return {"ok": False}

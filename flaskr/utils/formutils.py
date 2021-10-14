@@ -57,27 +57,26 @@ class RequestParser:
 
     def _parse_field(self, key, field):
         keytype = self.key2type[key]
-        if keytype == 'int':
+        if keytype == 'int':            
             try:
                 return int(field)
-            except:
-                print(f'{field} received non-{keytype}!')
-                return
+            except TypeError as err:
+                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
 
         if keytype == 'str':
             try:
                 return field
-            except:
-                print(f'{field} received non-{keytype}!')
-                return
+            except TypeError as err:
+                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
 
         elif keytype == 'list[str]':
             try:
                 return [item for item in field.split(',')]
-            except:
-                print(f'{field} received non-{keytype}!')
-                return
-        return field
+            except TypeError as err:
+                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
+        else:
+            raise TypeError(f'[ERR] {key} is of unrecognized type!\n')
+        
 
     def _parse_request(self, request, htmls):
         form = request.form
@@ -85,22 +84,22 @@ class RequestParser:
         for html in htmls:
             key = self.html2key.get(html)
             if form.get(html) is None and form.get(key) is None:
-                raise NameError(f'Error accessing element with id "{html}" ({key})')
-
-            parsed[key] = self._parse_field(key, form.get(html) or form.get(key)) # can be None
-                
+                raise NameError(f'Error accessing element with id "{html}" ({key})\n')
+            
+            parsed[key] = self._parse_field(key, form.get(html) or form.get(key)) 
+                            
         return parsed
 
     def parse(self, request):
         """
         parse form request
-        request should have a field `sender` (`seed`, `show`, `kmeans`, ...)
+        request should have a field `sender` (`db-seeder`, `clusterer`, `tsneer`, ...)
         which will be used to correctly parse the request
         """
         sender = request.form.get('sender')
 
         if sender is None:
-            raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}'))
+            raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}\n'))
 
         if self.sender2html.get(sender) is None:
             raise(KeyError(
