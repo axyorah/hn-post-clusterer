@@ -131,8 +131,8 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     }).then(res => {
         // filters post ids based on the target label
         filtered_ids = filterAbyBwhereBisC(
-            res.contents['id'],
-            res.contents['label'],
+            res.data['id'],
+            res.data['label'],
             targetLabel
         );
         return postData('/db/get', {
@@ -175,7 +175,7 @@ wordcloudBtn.addEventListener('click', function (evt) {
     postData('/cluster/visuals/wordcloud', {})
         .then(res => {
             console.log(res);
-            addWordCloud( res['num_clusters'] )
+            addWordCloud( res.data['num_clusters'] )
         }).then(res => {
             wordcloudBtn.innerHTML = 'Generate WordClouds';
         }).catch(err => {

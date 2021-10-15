@@ -92,7 +92,7 @@ def txt_reader():
                 "code": 200,
                 "ok": True,
                 "message": f"read {form_request['fname']}",
-                "contents": lines,
+                "data": lines,
                 "path": "/file/readtxt"
             })
         except Exception as e:
@@ -122,7 +122,7 @@ def csv_reader():
                 "code": 200,
                 "ok": True,
                 "message": f"read {form_request['fname']} as dataframe",
-                "contents": contents,
+                "data": contents,
                 "path": "/file/readcsv"
             })
         except Exception as e:
@@ -213,7 +213,7 @@ def serialize_data_for_wordcloud():
                 "code": 200,
                 "ok": True,
                 "message": f"calculated token frequencies required for wordcloud and serialized result",
-                "num_clusters": len(counter.frequencies.keys()),
+                "data": {"num_clusters": len(counter.frequencies.keys())},
                 "path": "/cluster/visuals/wordcloud"
             })
 
