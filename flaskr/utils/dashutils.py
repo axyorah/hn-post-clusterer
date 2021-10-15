@@ -121,7 +121,7 @@ class FigureHelper:
             go.Scatter(
                 x=df['ax-0'],
                 y=df['ax-1'],
-                opacity=0.5,
+                opacity=0.7,
                 mode='markers',
                 marker_color=df['label'],
                 customdata=df[['id', 'title','label']],
