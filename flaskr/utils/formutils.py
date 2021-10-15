@@ -70,6 +70,17 @@ class RequestParser:
             'model_name': 'name of the transformer',
             'story_ids': 'list of post ids'
         }
+        self.key2bounds = {
+            'begin_id': [1, 99999999],
+            'end_id': [2, 100000000],
+            'begin_comm': [5, 299],
+            'end_comm': [6, 300],
+            'begin_score': [0, 299],
+            'end_score': [1, 300],
+            'n_clusters': [2, 50],
+            'perplexity': [5, 50],
+            'dims': [5, 50]
+        }
 
     def _parse_field(self, key, field):
         keytype = self.key2type[key]
@@ -106,6 +117,18 @@ class RequestParser:
                             
         return parsed
 
+    def _fit_parsed_request_within_bounds(self, parsed):
+        """
+        modifies input dict: fits all int-type entries within their specified bounds
+        """
+        for key in parsed.keys():
+            if self.key2type.get(key) != 'int':
+                continue
+            if self.key2bounds.get(key) is not None and parsed[key] < self.key2bounds[key][0]:
+                parsed[key] = self.key2bounds[key][0]
+            if self.key2bounds.get(key) is not None and parsed[key] > self.key2bounds[key][1]:
+                parsed[key] = self.key2bounds[key][1]
+
     def parse(self, request):
         """
         parse form request
@@ -124,8 +147,10 @@ class RequestParser:
                 f'Got {sender}\n'+\
                 f'Received form: {request.form}\n'
             ))
-            
-        return self._parse_request(request, self.sender2html[sender])
+
+        parsed = self._parse_request(request, self.sender2html[sender])
+        self._fit_parsed_request_within_bounds(parsed) # modifies input
+        return parsed
 
 def update_display_record(display, form):
     begin_date = datetime.datetime.fromtimestamp(form.get('begin_date') // 1000)
