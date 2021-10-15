@@ -41,27 +41,56 @@
             <div id="embed-pca-plot-root"></div>
 
             <p>
-                Embedding for each post is calculated by collecting all comments 
+                Recall, that embedding for each post is calculated by collecting all comments 
                 that belong to given post, calculating all the individual sentence embeddings 
                 for these comments and averaging the result.
             </p>
             <p>
-                BERT models that were use here produce <code>768</code>- (default) 
-                or <code>384</code>-dimensional (mini) embeddings vectors. 
-                The figure above shows the 2D projecttion of the embeddings 
+                DistilRoBERTa transformer that we used here produces 
+                <code>768</code>-dimensional embeddings vectors, which is a bit tricky to visualize.
+                Figure above shows 2D projection of all the post embeddings 
                 that was obtained with PCA. 
-                Linear dimensionality-reduction methods like PCA are simple and quick,
-                but the result might not always look satisfactory. 
-                If you want clusters to be more, well, clustered, 
-                you can try running nonlinear t-SNE method. 
+                Was some information about the original data lost while creating a 2D projection? 
+                Oh, absolutely! Figure below shows how much variance in the original data 
+                is explained with first PCA vectors. <code>TODO: explain plot</code>
 
-                <code>TODO: explained pca dims plot and how it's relevant for t-SNE</code>
-
-                Just push the <code class="mark">Prettify</code> button below. 
-                It will take some time...
             </p>
 
             <div id="pca-explained-variance-root"></div>
+
+            <p>
+                Linear dimensionality-reduction methods like PCA are simple and quick,
+                but the results might not always look satisfactory. 
+                If you want clusters to be more, well, clustered, 
+                you can try some nonlinear methods, such as t-SNE. 
+            </p>
+            <p>
+                The idea behind t-SNE is to distort the original space 
+                so that closer data points get even closer together 
+                and distant data points get even further apart. 
+                What is "close" and what is "distant", though? 
+                You can regulate what should be considered close or distant 
+                by varying the <code>perplexity</code> parameter.
+                You can very loosely interpret it as a number of 
+                effective neighbours for each point. 
+                If you set perplexity to be a lower number 
+                the algorithm would favour smaller clusters; 
+                if you choose it to be high the algorithm will converge 
+                with a few larger clusters. 
+                It is recommended to choose perplexity within <code>5 - 50</code> range.
+            </p>
+            <p>
+                Another paramer you can consider is the number of 
+                first PCA vectors that will be used as inputs to t-SNE. 
+                t-SNE is quite computationally taxing, so it might be a good idea 
+                to feed to t-SNE reduced-dimensionality PCA projections 
+                instead of the original <code>786</code>-dimensional DistilRoBERTa embeddings. 
+                Choose first <code>5 - 50</code> PCA vectors. 
+                You might find the above graph quite useful.
+            </p>
+            <p>
+                To  run t-SNE just hit the <code class="mark">Prettify</code> button below. 
+            </p>
 
             {% include "partials/set_tsne_filters.html" %}
             
