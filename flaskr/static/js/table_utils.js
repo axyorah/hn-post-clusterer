@@ -18,11 +18,15 @@ function queryDbAndShowResult(data) {
     
     // post form data to DB server, display res in a table
     postData('/db/get', data)
+    .then(res => checkForServerErrors(res))
     .then(res => {
         console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
         appendDataToHNPostTable(table, res.data);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+        console.log(err);
+        addAlertMessage(err);
+    });
 }
 
 function getMorePostsBtn() {

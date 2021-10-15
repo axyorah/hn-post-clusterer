@@ -19,7 +19,12 @@ function reset() {
         "sender": "deleter",
         "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt,data/freq_*.json"
     }
-    postData('/file/delete', deletable);
+    postData('/file/delete', deletable)
+    .then(res => checkForServerErrors(res))
+    .catch(err => {
+        console.log(err);
+        addAlertMessage(err);
+    });
 
     // clear figures
     removeAllNodeChildren(countsBarPlotRoot);
@@ -89,25 +94,21 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     reset();
 
     postData('/cluster/run', params)
+        .then(res => checkForServerErrors(res))
         .then(res => {
-            if (res.ok) {
-                semanticClusterBtn.innerHTML = `Cluster Posts`;
-                console.log(res);
-    
-                // make figures and select visible
-                figureRoot.style.display = "";
-                selectRoot.style.display = "";
-            } else {
-                console.log(res);
-                throw new Error(res.errors);
-            }            
-        }).then(res => addBarPlot()
-        ).then(res => addPcaEmbeddings()
-        ).then(res => addPcaExplainedVariance()    
-        ).catch(err => {
-            console.log(err);
-            addAlertMessage(err);
             semanticClusterBtn.innerHTML = `Cluster Posts`;
+    
+            // make figures and select visible
+            figureRoot.style.display = "";
+            selectRoot.style.display = "";
+        })
+        .then(res => addBarPlot())
+        .then(res => addPcaEmbeddings())
+        .then(res => addPcaExplainedVariance())
+        .catch(err => {
+            console.log(err);
+            semanticClusterBtn.innerHTML = `Cluster Posts`;
+            addAlertMessage(err);
         });
 });
 
@@ -128,7 +129,9 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     postData('/file/readcsv', {
         'sender': 'reader',
         'fname': 'data/df.csv'
-    }).then(res => {
+    })
+    .then(res => checkForServerErrors(res))
+    .then(res => {
         // filters post ids based on the target label
         filtered_ids = filterAbyBwhereBisC(
             res.data['id'],
@@ -139,14 +142,18 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
             'sender': 'db-lister',
             'story_ids': filtered_ids,
         })
-    }).then(res => {
+    })
+    .then(res => checkForServerErrors(res))
+    .then(res => {
         // display filtered posts in a new table
         const table = getNewHNPostTable(); // no morePostsBtn!
         appendDataToHNPostTable(table, res.data);
         this.innerHTML = 'Show Posts';
-    }).catch(err => {
+    })
+    .catch(err => {
         console.log(err)
         this.innerHTML = 'Show Posts';
+        addAlertMessage(err);
     })
 })
 
@@ -162,24 +169,27 @@ embedTsneBtn.addEventListener('click', function (res) {
 
     // calculate reduced-dim embeddings with tsne and add plot
     postData('/cluster/visuals/tsne', params)
-        .then(res => addTsneEmbeddings())
-        .catch(err => {
-            console.log(err);
-            embedTsneBtn.innerHTML = 'Prettify with t-SNE';
-        });
+    .then(res => checkForServerErrors(res))
+    .then(res => addTsneEmbeddings())
+    .catch(err => {
+        console.log(err);
+        embedTsneBtn.innerHTML = 'Prettify with t-SNE';
+        addAlertMessage(err);
+    });
 })
 
 wordcloudBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Generating WordClouds...`;
 
     postData('/cluster/visuals/wordcloud', {})
-        .then(res => {
-            console.log(res);
-            addWordCloud( res.data['num_clusters'] )
-        }).then(res => {
-            wordcloudBtn.innerHTML = 'Generate WordClouds';
-        }).catch(err => {
-            console.log(err);
-            wordcloudBtn.innerHTML = 'Generate WordClouds';
-        })
+    .then(res => checkForServerErrors(res))
+    .then(res => addWordCloud(res.data['num_clusters']))
+    .then(res => {
+        wordcloudBtn.innerHTML = 'Generate WordClouds';
+    })
+    .catch(err => {
+        console.log(err);
+        wordcloudBtn.innerHTML = 'Generate WordClouds';
+        addAlertMessage(err);
+    })
 })

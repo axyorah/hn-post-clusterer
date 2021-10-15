@@ -19,6 +19,8 @@
 
     <main class="container">
 
+        <div id="alert-root" class="mt-5"></div>
+
         <h1 class="mt-5">TITLE</h1>
 
         <div id="filter-root">
@@ -40,6 +42,7 @@
         // General
         const container = document.querySelector(".container");
         const tabs = document.querySelectorAll(".nav-link");
+        const alertRoot = document.querySelector("#alert-root");
 
         // Filter - HN api
         const seed = new Object();

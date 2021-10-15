@@ -9,14 +9,16 @@ seedSubmitBtn.addEventListener('click', function (evt) {
 
     // seed db with entries withing specified id range
     postData('/db/add', params)
-        .then(res => {
-            // stop spinner animation
-            this.innerHTML = 'Get Data';
-        })
-        .catch(err => {
-            this.innerHTML = 'Whoopsy!';
-            console.log(err);
-        })
+    .then(res => checkForServerErrors(res))
+    .then(res => {
+        // stop spinner animation
+        this.innerHTML = 'Get Data';
+    })
+    .catch(err => {
+        this.innerHTML = 'Get Data';
+        console.log(err);
+        addAlertMessage(err);
+    })
 })
 
 for (let filterBy of ['date', 'id']) {

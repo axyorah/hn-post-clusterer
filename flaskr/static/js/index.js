@@ -145,6 +145,38 @@ function filterAbyBwhereBisC(a, b, c) {
     }).filter(val => val !== undefined);
 }
 
+function addAlertMessage(message) {
+    const alert = document.createElement('div');
+    alert.setAttribute('class', 'alert alert-danger alert-dismissible fade show');
+    alert.setAttribute('role', 'alert');
+    alert.style.justifyContent = "space-between";
+    alert.style.opacity = "0.7";
+    alert.style.margin = "0px";
+
+    const msg = document.createElement('p');
+    msg.style.margin = "0px";
+    msg.innerText = message;
+
+    const btn = document.createElement('button');
+    btn.setAttribute('class', 'btn-close');
+    btn.setAttribute('data-bs-dismiss', 'alert');
+    btn.setAttribute('aria-label', 'Close');
+    btn.style.margin = "0px";
+
+    alert.appendChild(msg);
+    alert.appendChild(btn);
+
+    alertRoot.append(alert);
+}
+
+function checkForServerErrors(res) {
+    if (res.ok) {
+        return res;
+    } else {
+        throw new Error(res.errors);
+    }
+}
+
 // Event Listeners    
 for (let filterBy of ['id', 'comm', 'score']) {
     for (let loc of ['begin', 'end']) {
