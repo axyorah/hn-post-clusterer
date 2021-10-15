@@ -20,7 +20,7 @@ function queryDbAndShowResult(data) {
     postData('/db/get', data)
     .then(res => {
         console.log(`Posting stuff from #${data['show-id-begin-range']} to #${data['show-id-end-range']}`);
-        appendDataToHNPostTable(table, res);
+        appendDataToHNPostTable(table, res.data);
     })
     .catch((err) => console.log(err));
 }

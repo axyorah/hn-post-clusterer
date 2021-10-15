@@ -22,18 +22,13 @@ function reset() {
     postData('/file/delete', deletable);
 
     // clear figures
-    while (countsBarPlotRoot.children.length) {
-        countsBarPlotRoot.removeChild(countsBarPlotRoot.lastChild);
-    }
-    while (embedPcaPlotRoot.children.length) {
-        embedPcaPlotRoot.removeChild(embedPcaPlotRoot.lastChild);
-    }
-    while (wordcloudPlotRoot.children.length) {
-        wordcloudPlotRoot.removeChild(wordcloudPlotRoot.lastChild);
-    }
-    while (embedTsnePlotRoot.children.length) {
-        embedTsnePlotRoot.removeChild(embedTsnePlotRoot.lastChild);
-    }
+    removeAllNodeChildren(countsBarPlotRoot);
+    removeAllNodeChildren(embedPcaPlotRoot);
+    removeAllNodeChildren(embedTsnePlotRoot);
+    removeAllNodeChildren(wordcloudPlotRoot);
+
+    // clear alerts
+    removeAllNodeChildren(alertRoot);
 
     // make figures, select, and table invisible
     figureRoot.style.display = "none";
@@ -95,16 +90,23 @@ semanticClusterBtn.addEventListener('click', function (evt) {
 
     postData('/cluster/run', params)
         .then(res => {
-            semanticClusterBtn.innerHTML = `Cluster Posts`;
-
-            // make figures and select visible
-            figureRoot.style.display = "";
-            selectRoot.style.display = "";
+            if (res.ok) {
+                semanticClusterBtn.innerHTML = `Cluster Posts`;
+                console.log(res);
+    
+                // make figures and select visible
+                figureRoot.style.display = "";
+                selectRoot.style.display = "";
+            } else {
+                console.log(res);
+                throw new Error(res.errors);
+            }            
         }).then(res => addBarPlot()
         ).then(res => addPcaEmbeddings()
         ).then(res => addPcaExplainedVariance()    
         ).catch(err => {
             console.log(err);
+            addAlertMessage(err);
             semanticClusterBtn.innerHTML = `Cluster Posts`;
         });
 });
@@ -140,7 +142,7 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     }).then(res => {
         // display filtered posts in a new table
         const table = getNewHNPostTable(); // no morePostsBtn!
-        appendDataToHNPostTable(table, res);
+        appendDataToHNPostTable(table, res.data);
         this.innerHTML = 'Show Posts';
     }).catch(err => {
         console.log(err)
