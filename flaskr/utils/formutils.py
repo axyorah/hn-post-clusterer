@@ -54,6 +54,22 @@ class RequestParser:
             'model_name': 'str',
             'story_ids': 'list[str]',
         }
+        # provide description of each key (should be useful when printing errors)
+        self.key2description = {
+            'begin_id': 'minimal post id',
+            'end_id': 'maximal post id',
+            'begin_comm': 'minimal number of comments',
+            'end_comm': 'maximal number of comments',
+            'begin_score': 'minimal score',
+            'end_score': 'maximal score',
+            'n_clusters': 'number of clusters',
+            'perplexity': 'perplexity',
+            'dims': 'number of PCA input vectors',
+            'fname': 'file name',
+            'fnames': 'file names',
+            'model_name': 'name of the transformer',
+            'story_ids': 'list of post ids'
+        }
 
     def _parse_field(self, key, field):
         keytype = self.key2type[key]
@@ -61,21 +77,21 @@ class RequestParser:
             try:
                 return int(field)
             except TypeError as err:
-                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
+                raise TypeError(f'{self.key2description.get(key) or key} should be an integer, received {field}!\n')
 
         if keytype == 'str':
             try:
                 return field
             except TypeError as err:
-                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
+                raise TypeError(f'{self.key2description.get(key) or key} should be a string, received {field}!\n')
 
         elif keytype == 'list[str]':
             try:
                 return [item for item in field.split(',')]
             except TypeError as err:
-                raise TypeError(f'[ERR] `{key}` should be {keytype}, received {field}!\n')
+                raise TypeError(f'{self.key2description.get(key) or key} should be a list of strings, received {field}!\n')
         else:
-            raise TypeError(f'[ERR] {key} is of unrecognized type!\n')
+            raise TypeError(f'[ERR] {self.key2description.get(key) or key} is of unrecognized type!\n')
         
 
     def _parse_request(self, request, htmls):
