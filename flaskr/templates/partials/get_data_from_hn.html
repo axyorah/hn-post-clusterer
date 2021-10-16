@@ -1,40 +1,24 @@
-<div class="controls">
-    <div class="hor">
-        <div id="seed-filter-by-id">
-            <b>Filter by Id</b>
-            <div class="hor-item">
-                <div>
-                    <label for="seed-id-begin-range" id="seed-id-begin-label">From:</label>
-                    <br>
-                    <input type="range" name="seed-id-begin-range" id="seed-id-begin-range" min="1" , max="10" ,
-                        value="1">
-                </div>
-                <div>
-                    <label for="seed-id-end-range" id="seed-id-end-label">To:</label>
-                    <br>
-                    <input type="range" name="seed-id-end-range" id="seed-id-end-range" min="1" , max="10" ,
-                        value="10">
-                </div>
-            </div>
-        </div>
+<div class="box">
 
-        <div id="seed-filter-by-date" style="visibility: hidden;">
-            <b>Filter by Date</b>
-            <div class="hor-item">
-                <div>
-                    <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
-                    <br>
-                    <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" , max="10" ,
-                        value="1">
-                </div>
-                <div>
-                    <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
-                    <br>
-                    <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" , max="10" ,
-                        value="10">
-                </div>
-            </div>
-        </div>
-    </div>
-    <button id="seed-submit-btn">Get Data</button>
+    <h3 class="mb-2">Store HN Post Metadata locally</h3>
+
+    <section id="api-filters">
+        <p>
+            First, we need to fetch some post metadata from HN API 
+            and store it locally for further analysis. 
+            This will take time, but you'd only need to do it once.
+        </p>
+        <details >
+            <summary>Add data to local database</summary>
+            <p>
+                Just specify the range of <code>id</code>s and hit the <code class="mark">Get Data</code> button.
+            </p>
+    
+            {% include "partials/set_hn_api_filters.html" %}
+
+            <button id="seed-submit-btn">Get Data</button>
+    
+        </details>
+    </section>
+
 </div>

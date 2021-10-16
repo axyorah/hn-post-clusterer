@@ -21,13 +21,20 @@
 
         <div id="alert-root" class="mt-5"></div>
 
-        <h1 class="mt-5">TITLE</h1>
+        <h1 class="page-title mt-5">HN POST ORGANIZER</h1>
+        <h5 class="page-title mt-3">
+            Simple app that brings some extra order to HN posts by clustering similar posts together.
+        </h5>
 
-        <div id="filter-root">
-            {% include "partials/get_data.html" %}
+        <div id="api-root">
+            {% include "partials/get_data_from_hn.html" %}
         </div>
 
-        <div id="figure-root" ><!--style="display: none;">-->
+        <div id="db-root">
+            {% include "partials/get_data_from_db.html" %}
+        </div>
+
+        <div id="figure-root" style="display: none;">
             {% include "partials/show_figures.html" %}
         </div>
 
@@ -108,7 +115,8 @@
     </script>
 
     <script src="{{url_for('static', filename='js/tabstyle.js')}}"></script>
-    <script src="{{url_for('static', filename='js/index.js')}}"></script>
+    <script src="{{url_for('static', filename='js/general_utils.js')}}"></script>
+    <script src="{{url_for('static', filename='js/form_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/db_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/table_utils.js')}}"></script>
     <script src="{{url_for('static', filename='js/cluster_utils.js')}}"></script>
