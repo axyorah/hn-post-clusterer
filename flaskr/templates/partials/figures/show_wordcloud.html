@@ -1,0 +1,42 @@
+<section class="tab-pane fade" id="wordcloud-tab" role="tabpanel" aria-labelledby="wordcloud-tab">
+    <div class="box">
+        <p>
+            While you can expect that the posts clustered together 
+            would be semantically similar, it might still be a bit problematic 
+            to label clusters with common "human" tags, 
+            like like "cybersecurity", "mathematics" or "health".  
+        </p>
+        <p>
+            Your best attempts at giving clusters names might look like  
+            "posts about security issues and license disputes" or 
+            "posts about medicine in general and COVID in particular with occasional politics". 
+            The "quality" of your clusters 
+            (how similar the posts clustered together are from a "human" perspective) 
+            would depend among others on the number of clusters you've chosen and 
+            suitability of the embedding model for the data that are clustered.
+        </p>
+        <p>
+            One of the simpler ways of getting the idea 
+            of what each cluster is about involves generating <code>Word Clouds</code>. 
+            The idea behind the Word Cloud is very simple: 
+            the more frequent the term appears in the text - 
+            the larger it looks on a visual cloud. 
+            (As a reminder: text in our case corresponts to 
+            all <code>comments</code> of the posts clustered together)
+        </p>
+        <p>
+            Cluster Word Clouds should make it easier for you 
+            to navigate in the deluge of posts. 
+            However, the processing steps that are needed 
+            to generate Word Clouds might take some time. 
+            Hit the <code class="mark">Generate</code> button 
+            and go make some tea - it will take a while :)
+        </p>
+
+        <p id="wordcloud-info"></p>
+
+        <button id="wordcloud-btn">Generate WordClouds</button>
+
+        <div id="wordcloud-plot-root"></div>
+    </div>
+</section>
