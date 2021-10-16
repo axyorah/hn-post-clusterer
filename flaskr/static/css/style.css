@@ -8,6 +8,12 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.title-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 section {
     margin-top: 20px;
     margin-bottom: 20px;
