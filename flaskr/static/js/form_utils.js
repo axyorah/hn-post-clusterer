@@ -21,8 +21,6 @@ const range = {
     }
 }
 
-const spinnerAmination = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-
 // Helpers
 const config = {
     date: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {
@@ -114,70 +112,21 @@ update.id = update.general;
 update.comm = update.general;
 update.score = update.general;
 
-function urlify(json) {
-    const entries = Object.keys(json).map(key => `${key}=${json[key]}`);
-    return entries.join('&')
-}
 
-async function postData(url, data) {
-    // Default options are marked with *
-    const response = await fetch(url, {
-        method: 'POST', 
-        mode: 'cors', 
-        cache: 'no-cache', 
-        credentials: 'same-origin', 
-        headers: {
-            'Accept': 'application/json, text/plain',
-            // 'Content-Type': 'application/json; charset=UTF-8'
-            'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      redirect: 'follow', 
-      referrerPolicy: 'no-referrer', 
-      body: urlify(data)//JSON.stringify(data) 
-    });
-    return response.json(); 
-}
+// Event Listeners 
+for (let filterBy of ['date', 'id']) {
+    for (let loc of ['begin', 'end']) {
+        seed[filterBy][loc].range.addEventListener('change', (evt) => {
+            update[filterBy][loc](
+                seed[filterBy].begin.range, seed[filterBy].end.range, 
+                seed[filterBy].begin.label, seed[filterBy].end.label,
+                filterBy === 'id' ? true : false
+            );
+        })
 
-function filterAbyBwhereBisC(a, b, c) {
-    const indices = [...Array(a.length).keys()];
-    return indices.map(i => {
-        if (b[i] === c) {return a[i];}
-    }).filter(val => val !== undefined);
-}
-
-function addAlertMessage(message) {
-    const alert = document.createElement('div');
-    alert.setAttribute('class', 'alert alert-danger alert-dismissible fade show');
-    alert.setAttribute('role', 'alert');
-    alert.style.justifyContent = "space-between";
-    alert.style.opacity = "0.7";
-    alert.style.margin = "0px";
-
-    const msg = document.createElement('p');
-    msg.style.margin = "0px";
-    msg.innerText = message;
-
-    const btn = document.createElement('button');
-    btn.setAttribute('class', 'btn-close');
-    btn.setAttribute('data-bs-dismiss', 'alert');
-    btn.setAttribute('aria-label', 'Close');
-    btn.style.margin = "0px";
-
-    alert.appendChild(msg);
-    alert.appendChild(btn);
-
-    alertRoot.append(alert);
-}
-
-function checkForServerErrors(res) {
-    if (res.ok) {
-        return res;
-    } else {
-        throw new Error(res.errors);
     }
 }
 
-// Event Listeners    
 for (let filterBy of ['id', 'comm', 'score']) {
     for (let loc of ['begin', 'end']) {
         show[filterBy][loc].range.addEventListener('change', (evt) => {
@@ -189,6 +138,17 @@ for (let filterBy of ['id', 'comm', 'score']) {
         })
     }
 }
+
+window.addEventListener('load', (evt) => {
+    for (let filterBy of ['date', 'id']) {
+        config[filterBy](
+            seed[filterBy].begin.range, seed[filterBy].end.range, 
+            seed[filterBy].begin.label, seed[filterBy].end.label,
+            range[filterBy].min, range[filterBy].max,
+            filterBy === 'id' ? true : false
+        )
+    }
+})
 
 window.addEventListener('load', (evt) => {
     for (let filterBy of ['id', 'comm', 'score']) {            
