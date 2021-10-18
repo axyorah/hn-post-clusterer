@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Set, Optional, Generator
+
 import os
 import json
 import numpy as np
@@ -19,18 +21,18 @@ nltk.download('stopwords')
 stop_words = stopwords.words('english')
 stop_words = set(stop_words)
 
-def html2text(html):
+def html2text(html: str) -> str:
     soup = bs.BeautifulSoup(html, 'lxml')
     return soup.get_text(separator=' ')
 
-def html2paragraphs(html):
+def html2paragraphs(html: str) -> str:
     soup = bs.BeautifulSoup(html, 'lxml')    
     return [
         sp.get_text(separator=' ') 
         for sp in soup.find_all('p')
     ]
 
-def html2sentences(html):
+def html2sentences(html: str) -> List[str]:
     # get dict to remove punctuation
     tr = {
         i: '' for i in 
@@ -48,12 +50,12 @@ def html2sentences(html):
     ]
 
 class RareWordFinder:
-    def __init__(self, minfreq):
+    def __init__(self, minfreq: int):
         self.minfreq = max(minfreq, 2)
         self.counter = defaultdict(int)
         self.rare = set()
 
-    def count_tokens(self, tokens):
+    def count_tokens(self, tokens: List[str]) -> None:
         """
         count frequencies of each token and store it in `self.counter` dict
         """
@@ -64,20 +66,20 @@ class RareWordFinder:
             elif token in self.rare:
                 self.rare.remove(token)
 
-    def get_rare_words(self):
+    def get_rare_words(self) -> Set:
         """
         returns the set of tokens whose frequency is lower than `self.minfreq`
         """
         return self.rare
 
 class StoryEmbedder:
-    def __init__(self, model_name='sentence-transformers/all-distilroberta-v1'):
+    def __init__(self, model_name: str = 'sentence-transformers/all-distilroberta-v1'):
         self.model = SentenceTransformer(model_name)
 
-    def embed_sentences(self, sentences: 'List[str]'):
+    def embed_sentences(self, sentences: List[str]) -> List[np.ndarray]:
         return self.model.encode(sentences)
 
-    def embed_and_average_sentences(self, sentences: 'List[str]'):
+    def embed_and_average_sentences(self, sentences: List[str]) -> np.ndarray:
         return self.model.encode(sentences).mean(axis=0)
 
 
@@ -100,11 +102,11 @@ class Tokenizer:
         ])
         self.blacklist = self.stop_words.union(self.trivial_words)
         
-    def remove_punctuation(self, txt):
+    def remove_punctuation(self, txt: str) -> str:
         txt =  self.punct_pattern.sub(' ', txt)
         return self.space_pattern.sub(' ', txt)
     
-    def get_stems(self, txt):
+    def get_stems(self, txt: str) -> List[str]:
         if isinstance(txt, str):            
             txt = txt.split(' ')
             
@@ -113,7 +115,7 @@ class Tokenizer:
             if word not in self.blacklist
         ]
     
-    def tokenize(self, txt: str):
+    def tokenize(self, txt: str) -> List[str]:
         txt = self.remove_punctuation(txt.lower())
         return self.get_stems(txt)
 
@@ -123,7 +125,7 @@ class ClusterFrequencyCounter:
         self.tokenizer = Tokenizer()
         self.frequencies = dict()
 
-    def update_cluster_frequencies(self, label: int, tokens: 'List[str]'):
+    def update_cluster_frequencies(self, label: int, tokens: List[str]) -> None:
         for token in tokens:
             if not token:
                 continue
@@ -131,7 +133,7 @@ class ClusterFrequencyCounter:
                 self.frequencies[label] = defaultdict(int)
             self.frequencies[label][token] += 1
 
-    def count_serialized_cluster_frequencies(self, fname: str):
+    def count_serialized_cluster_frequencies(self, fname: str) -> Dict:
         for i,line in enumerate(open(fname)):
             if not i:
                 field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
@@ -149,7 +151,7 @@ class ClusterFrequencyCounter:
 
         return self.frequencies
 
-    def serialize_cluster_frequencies(self, data_dir='.', min_freq=2):
+    def serialize_cluster_frequencies(self, data_dir: str = '.', min_freq: int = 2) -> bool:
         for label in self.frequencies.keys():
             fname = os.path.join(data_dir, f'freq_{label}.json')
             with open(fname, 'w') as f:
