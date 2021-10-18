@@ -6,7 +6,7 @@ import json
 
 class RequestParser:
     # map raw form field name (html ele id) to corresponding short name (key)
-    html2key = {
+    _html2key = {
         'seed-id-begin-range': 'begin_id',
         'seed-id-end-range': 'end_id',
         'show-id-begin-range': 'begin_id',
@@ -26,7 +26,7 @@ class RequestParser:
         'dims': 'dims',
     }
     # specify the list of html eles for each sender type
-    sender2html = {
+    _sender2html = {
         'db-seeder': ['seed-id-begin-range', 'seed-id-end-range'],
         'db-lister': ['story_ids'],
         'reader': ['fname'],
@@ -40,7 +40,7 @@ class RequestParser:
         'tsneer': ['perplexity', 'dims']
     }
     # specify how each key should be parsed
-    key2type = {
+    _key2type = {
         **{key: 'int' for key in [
             'begin_id', 'end_id', 
             'begin_comm', 'end_comm', 
@@ -54,7 +54,7 @@ class RequestParser:
         'story_ids': 'list[str]',
     }
     # provide description of each key (should be useful when printing errors)
-    key2description = {
+    _key2description = {
         'begin_id': 'minimal post id',
         'end_id': 'maximal post id',
         'begin_comm': 'minimal number of comments',
@@ -69,7 +69,7 @@ class RequestParser:
         'model_name': 'name of the transformer',
         'story_ids': 'list of post ids'
     }
-    key2bounds = {
+    _key2bounds = {
         'begin_id': [1, 99999999],
         'end_id': [2, 100000000],
         'begin_comm': [5, 299],
@@ -83,33 +83,33 @@ class RequestParser:
 
     @classmethod
     def _parse_field(cls, key, field):
-        keytype = cls.key2type[key]
+        keytype = cls._key2type[key]
         if keytype == 'int':            
             try:
                 return int(field)
             except TypeError as err:
-                raise TypeError(f'{cls.key2description.get(key) or key} should be an integer, received {field}!\n')
+                raise TypeError(f'{cls._key2description.get(key) or key} should be an integer, received {field}!\n')
 
         if keytype == 'str':
             try:
                 return field
             except TypeError as err:
-                raise TypeError(f'{cls.key2description.get(key) or key} should be a string, received {field}!\n')
+                raise TypeError(f'{cls._key2description.get(key) or key} should be a string, received {field}!\n')
 
         elif keytype == 'list[str]':
             try:
                 return [item for item in field.split(',')]
             except TypeError as err:
-                raise TypeError(f'{cls.key2description.get(key) or key} should be a list of strings, received {field}!\n')
+                raise TypeError(f'{cls._key2description.get(key) or key} should be a list of strings, received {field}!\n')
         else:
-            raise TypeError(f'[ERR] {cls.key2description.get(key) or key} is of unrecognized type!\n')
+            raise TypeError(f'[ERR] {cls._key2description.get(key) or key} is of unrecognized type!\n')
         
     @classmethod
     def _parse_request(cls, request, htmls):
         form = request.form
         parsed = dict()
         for html in htmls:
-            key = cls.html2key.get(html)
+            key = cls._html2key.get(html)
             if form.get(html) is None and form.get(key) is None:
                 raise NameError(f'Error accessing element with id "{html}" ({key})\n')
             
@@ -123,12 +123,12 @@ class RequestParser:
         modifies input dict: fits all int-type entries within their specified bounds
         """
         for key in parsed.keys():
-            if cls.key2type.get(key) != 'int':
+            if cls._key2type.get(key) != 'int':
                 continue
-            if cls.key2bounds.get(key) is not None and parsed[key] < cls.key2bounds[key][0]:
-                parsed[key] = cls.key2bounds[key][0]
-            if cls.key2bounds.get(key) is not None and parsed[key] > cls.key2bounds[key][1]:
-                parsed[key] = cls.key2bounds[key][1]
+            if cls._key2bounds.get(key) is not None and parsed[key] < cls._key2bounds[key][0]:
+                parsed[key] = cls._key2bounds[key][0]
+            if cls._key2bounds.get(key) is not None and parsed[key] > cls._key2bounds[key][1]:
+                parsed[key] = cls._key2bounds[key][1]
 
     @classmethod
     def parse(cls, request):
@@ -142,15 +142,15 @@ class RequestParser:
         if sender is None:
             raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}\n'))
 
-        if cls.sender2html.get(sender) is None:
+        if cls._sender2html.get(sender) is None:
             raise(KeyError(
                 f'"Sender" not recognized! '+\
-                f'Should be one of {list(cls.sender2html.keys())}.\n'+\
+                f'Should be one of {list(cls._sender2html.keys())}.\n'+\
                 f'Got {sender}\n'+\
                 f'Received form: {request.form}\n'
             ))
 
-        parsed = cls._parse_request(request, cls.sender2html[sender])
+        parsed = cls._parse_request(request, cls._sender2html[sender])
         cls._fit_parsed_request_within_bounds(parsed) # modifies input
         return parsed
 
