@@ -49,34 +49,48 @@ def init_dashboard(server):
         html.Div(id='page-content')
     ])
 
-    # --- Semantic Clustering ---
-    # bar plot
-    semantic_cluster_bar_plot = get_interactive_html_graph(
-        'semantic-bar-plot', 
-        figs.get_barplot(pd.DataFrame(data={'Cluster#':[], 'Number of Posts':[]}))
+    # --- Figures ---
+    # cluster count bar plot
+    cluster_bar_plot = get_interactive_html_graph(
+        'cluster-bar-plot', 
+        figs.get_cluster_barplot(pd.DataFrame(data={'Cluster#':[], 'Number of Posts':[]}))
     )
 
     @dash_app.callback(
-        Output(component_id='semantic-bar-plot', component_property='figure'),
-        Input(component_id='semantic-bar-plot-update-btn', component_property='n_clicks')
+        Output(component_id='cluster-bar-plot', component_property='figure'),
+        Input(component_id='cluster-bar-plot-update-btn', component_property='n_clicks')
     )
-    def update_semantic_bar_plot(n_clicks):
-        df = data.get_barplot_df()
-        return figs.get_barplot(df)
+    def update_cluster_bar_plot(n_clicks):
+        df = data.get_cluster_barplot_df()
+        return figs.get_cluster_barplot(df)
+
+    # daily cluster count bar plot
+    daily_bar_plot = get_interactive_html_graph(
+        'daily-bar-plot',
+        figs.get_daily_barplot(pd.DataFrame(data={'Cluster#': [], 'Number of Posts': [], 'Date': []}))
+    )
+
+    @dash_app.callback(
+        Output(component_id='daily-bar-plot', component_property='figure'),
+        Input(component_id='daily-bar-plot-update-btn', component_property='n_clicks')
+    )
+    def update_daily_bar_plot(n_clicks):
+        df = data.get_daily_barplot_df()
+        return figs.get_daily_barplot(df)
 
     # 2d cluster scatter plot
-    semantic_cluster_scatter_plot = get_interactive_html_graph(
-        'semantic-cluster-2d',
+    pca_cluster_scatter_plot = get_interactive_html_graph(
+        'pca-cluster-2d',
         figs.get_scatterplot(
             pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
         )
     )
 
     @dash_app.callback(
-        Output(component_id='semantic-cluster-2d', component_property='figure'),
-        Input(component_id='semantic-cluster-2d-update-btn', component_property='n_clicks')
+        Output(component_id='pca-cluster-2d', component_property='figure'),
+        Input(component_id='pca-cluster-2d-update-btn', component_property='n_clicks')
     )
-    def update_semantic_scatter_plot(n_clicks):
+    def update_pca_scatter_plot(n_clicks):
         df = data.get_pca_embedding_df()
         return figs.get_scatterplot(df)
 
@@ -158,9 +172,11 @@ def init_dashboard(server):
     )
     def display_page(pathname):
         if pathname == '/dashapp/cluster-bar-plot':
-            return semantic_cluster_bar_plot
+            return cluster_bar_plot
+        elif pathname == '/dashapp/daily-bar-plot':
+            return daily_bar_plot
         elif pathname == '/dashapp/embeddings-pca-scatter-plot':
-            return semantic_cluster_scatter_plot
+            return pca_cluster_scatter_plot
         elif pathname == '/dashapp/embeddings-tsne-scatter-plot':
             return tsne_cluster_scatter_plot
         elif pathname == '/dashapp/pca-explained-variance-plot':

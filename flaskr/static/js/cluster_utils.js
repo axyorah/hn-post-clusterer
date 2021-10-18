@@ -27,7 +27,8 @@ function reset() {
     });
 
     // clear figures
-    removeAllNodeChildren(countsBarPlotRoot);
+    removeAllNodeChildren(clusterBarPlotRoot);
+    removeAllNodeChildren(dailyBarPlotRoot);
     removeAllNodeChildren(embedPcaPlotRoot);
     removeAllNodeChildren(embedTsnePlotRoot);
     removeAllNodeChildren(wordcloudPlotRoot);
@@ -41,9 +42,14 @@ function reset() {
     tableRoot.style.display = "none";
 }
 
-function addBarPlot() {
-    removeAllNodeChildren(countsBarPlotRoot);
-    addGraphFromRouteToNode(countsBarPlotRoot, '/dashapp/cluster-bar-plot');
+function addClusterBarPlot() {
+    removeAllNodeChildren(clusterBarPlotRoot);
+    addGraphFromRouteToNode(clusterBarPlotRoot, '/dashapp/cluster-bar-plot');
+}
+
+function addDailyBarPlot() {
+    removeAllNodeChildren(dailyBarPlotRoot);
+    addGraphFromRouteToNode(dailyBarPlotRoot, '/dashapp/daily-bar-plot');
 }
 
 function addPcaEmbeddings() {
@@ -102,7 +108,8 @@ semanticClusterBtn.addEventListener('click', function (evt) {
             figureRoot.style.display = "";
             selectRoot.style.display = "";
         })
-        .then(res => addBarPlot())
+        .then(res => addClusterBarPlot())
+        .then(res => addDailyBarPlot())
         .then(res => addPcaEmbeddings())
         .then(res => addPcaExplainedVariance())
         .catch(err => {

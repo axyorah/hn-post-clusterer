@@ -1,4 +1,4 @@
-import os, json, re
+import os, json, re, datetime
 import numpy as np
 import pandas as pd
 from itertools import accumulate
@@ -27,7 +27,7 @@ def update_fig_layout(fig):
     return fig
 
 class DataHelper:
-    def get_barplot_df(self):
+    def get_cluster_barplot_df(self):
         fname = 'data/df.csv'
 
         if not os.path.isfile(fname):
@@ -41,6 +41,21 @@ class DataHelper:
         df_bar['Number of Posts'] = df_bar['id']
         
         return df_bar
+
+    def get_daily_barplot_df(self):
+        fname = 'data/df.csv'
+
+        df = pd.read_csv(fname, sep='\t')
+        df['unix_time'] = df['unix_time'].map(
+            lambda ts: datetime.datetime.utcfromtimestamp(int(ts)).date()
+        )
+
+        df_bar = df.groupby(['unix_time', 'label']).count()
+        df_bar['Date'] = df_bar.index.map(lambda t: str(t[0]))
+        df_bar['Cluster#'] = df_bar.index.map(lambda t: t[1])
+        df_bar['Number of Posts'] = df_bar['id']
+
+        return df_bar[['Date', 'Cluster#', 'Number of Posts']]
 
     def get_pca_embedding_df(self):
         fname = 'data/df.csv'
@@ -99,10 +114,7 @@ class DataHelper:
 
     
 class FigureHelper:
-    def get_barplot(self, df):
-        # df_bar = df.groupby('label').count()
-        # df_bar['Cluster#'] = df_bar.index
-        # df_bar['Number of Posts'] = df_bar['id']
+    def get_cluster_barplot(self, df):
     
         fig = px.bar(
             df,
@@ -114,6 +126,22 @@ class FigureHelper:
         update_fig_layout(fig)
 
         return fig
+
+    def get_daily_barplot(self, df):
+
+        #df['Cluster#'] = df['Cluster#'].map(str) # str vals -> discrete color scheme
+
+        fig = px.bar(
+            df,
+            x='Date',
+            y='Number of Posts',
+            color='Cluster#', 
+        )
+
+        update_fig_layout(fig)
+
+        return fig
+
 
     def get_scatterplot(self, df):
         fig = go.Figure()
