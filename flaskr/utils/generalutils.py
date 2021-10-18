@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Optional, Generator
+
 import os
 import sys
 import warnings
@@ -25,7 +27,7 @@ from flaskr.utils.clusterutils import (
 
 # TODO: use `cycle` instead of `tee` for copying generators...
 
-def rebatch_generator(batches, min_batch_size):
+def rebatch_generator(batches: Generator, min_batch_size: int):
     """
     resamples generator of batches so that 
     new batches have atleast `min_batch_size` elements
@@ -43,7 +45,7 @@ def rebatch_generator(batches, min_batch_size):
     yield prev + curr
 
 class BatchedPipeliner:
-    def __init__(self, request_form):
+    def __init__(self, request_form: Dict):
         self.request_form = request_form
 
         self._n_clusters = self.request_form['n_clusters']
@@ -73,7 +75,7 @@ class BatchedPipeliner:
         - serialize result
         """
 
-    def get_story_batches(self, delta_id=10000):
+    def get_story_batches(self, delta_id: int = 10000) -> Generator:
         """
         queries db based on form request,
         recursively collects all comments for each story,
@@ -86,7 +88,7 @@ class BatchedPipeliner:
         begin_id = int(self.request_form["begin_id"])
         end_id = int(self.request_form["end_id"])
 
-        def batch_generator(begin_id, end_id, delta_id):
+        def batch_generator(begin_id: int, end_id: int, delta_id: int) -> List:
             num = 0
             for b_id in range(begin_id, end_id, delta_id):
                 request_form = self.request_form
@@ -117,7 +119,7 @@ class BatchedPipeliner:
 
         return batches[1]
 
-    def get_story_embeddings(self, data):
+    def get_story_embeddings(self, data: List[Dict]) -> List[np.ndarray]:
         """
         INPUTS:
            data: list: each element is a story dict with keys:
@@ -140,7 +142,7 @@ class BatchedPipeliner:
             ) for story in data
         ]
     
-    def fetch_or_generate_story_embeddings(self, data):
+    def fetch_or_generate_story_embeddings(self, data: List[Dict]) -> List[np.ndarray]:
         """
         the same as `get_story_embeddings(.)` but instead of always 
         calculating the embedding on the fly 
@@ -183,7 +185,7 @@ class BatchedPipeliner:
 
         return batch
 
-    def get_embedding_batches(self, story_batches=None):
+    def get_embedding_batches(self, story_batches: Optional[Generator] = None) -> Generator:
         """
         each element of a batch is a (batch_size, embed_dim) numpy array
         (embed_dim is 768 for default bert transformers and 384 for minis)
@@ -211,7 +213,7 @@ class BatchedPipeliner:
 
         return batches[1]
 
-    def standardize_embedding_batches(self, embedding_batches=None):
+    def standardize_embedding_batches(self, embedding_batches: Optional[Generator] = None) -> Generator:
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to standardize! '+\
@@ -225,7 +227,7 @@ class BatchedPipeliner:
 
         return batches[1]
 
-    def reduce_embedding_dimensionality(self, embedding_batches=None, n_dims=100):
+    def reduce_embedding_dimensionality(self, embedding_batches: Optional[Generator] = None, n_dims: int = 100) -> Generator:
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to reduce yet! ' +\
@@ -263,7 +265,7 @@ class BatchedPipeliner:
         self._embeddings = lowdim_batches[0]
         return lowdim_batches[1]
     
-    def cluster_story_batches(self, embedding_batches=None):#, n_clusters=10):
+    def cluster_story_batches(self, embedding_batches: Optional[Generator] = None) -> None:
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to cluster yet! ' +\
@@ -290,7 +292,7 @@ class BatchedPipeliner:
 
         self._labels = cluster(batches[1])
     
-    def serialize_result(self, fname='./data/df.csv'):
+    def serialize_result(self, fname: str = './data/df.csv') -> bool:
         # check if all the necessary data is available
         if self.kmeans is None or self._embeddings is None:
             raise RuntimeError(
@@ -354,9 +356,9 @@ class BatchedPipeliner:
 
         return True
 
-    def serialize_pca_explained_variance(self, fname='data/pca.txt'):
+    def serialize_pca_explained_variance(self, fname: int = 'data/pca.txt') -> bool:
         if self.pca is None:
-            return
+            return False
         
         with open(fname, 'w') as f:
             f.write('\n'.join(
