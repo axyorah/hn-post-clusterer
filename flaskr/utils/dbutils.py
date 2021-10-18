@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Set, Optional, Generator, Union
+
 from flaskr.db import get_db
 import requests as rq
 import datetime
@@ -25,13 +27,13 @@ comment_api2schema = {
     'type': 'type' # not in schema...
 }
 
-def query_api(item_id):
+def query_api(item_id: Union[int, str]) -> str:
     # TODO: rename api fields to schema fields
     url = f'https://hacker-news.firebaseio.com/v0/item/{item_id}.json?print=pretty'
     res = rq.get(url)
     return json.loads(res.text)
 
-def translate_response_api2schema( res: dict ):
+def translate_response_api2schema(res: Dict) -> Dict:
     if res is None:
         return
     elif res.get('type') == 'story':
@@ -89,10 +91,10 @@ class DBHelper:
         FROM story AS s
         """
 
-    def query(self, query_pattern, params):
+    def query(self, query_pattern: str, params: List) -> List['Row']:
         return self.db.execute(query_pattern, tuple(params)).fetchall()
 
-    def is_story_id_in_db(self, item_id):
+    def is_story_id_in_db(self, item_id: Union[int, str]) -> bool:
         if self.db.execute(
             'SELECT 1 FROM story WHERE story_id = ?', (item_id,)
         ).fetchone() is not None:
@@ -100,7 +102,7 @@ class DBHelper:
         else:
             return False
     
-    def is_comment_id_in_db(self, item_id):
+    def is_comment_id_in_db(self, item_id: Union[int, str]) -> bool:
         if self.db.execute(
             'SELECT 1 FROM comment WHERE comment_id = ?', (item_id,)
         ).fetchone() is not None:
@@ -108,7 +110,7 @@ class DBHelper:
         else:
             return False
 
-    def add_story_to_db(self, story, commit=True):
+    def add_story_to_db(self, story: Dict, commit: bool = True) -> None:
         # add to `story` table
         self.db.execute(
             '''
@@ -142,7 +144,7 @@ class DBHelper:
         if commit:
             self.db.commit()
 
-    def add_comment_to_db(self, comment, commit=True):
+    def add_comment_to_db(self, comment: Dict, commit: bool = True) -> None:
         # add to `comment` table
         self.db.execute(
             '''
@@ -172,7 +174,7 @@ class DBHelper:
         if commit:
             self.db.commit()
 
-    def update_story_in_db(self, story, commit=True):
+    def update_story_in_db(self, story: Dict, commit: bool = True) -> None:
         self.db.execute(
             '''
             UPDATE story
@@ -209,7 +211,7 @@ class DBHelper:
         elif item.get('type', None) == 'comment':
             self.add_comment_to_db(item, commit=commit)
 
-    def delete_item_by_id_from_db_if_present(self, item_id, commit=True):
+    def delete_item_by_id_from_db_if_present(self, item_id: Union[int, str], commit: bool = True) -> None:
         if self.db.execute(
             'SELECT 1 FROM parent WHERE parent_id = ?', (item_id,)
         ).fetchone() is not None:
@@ -219,7 +221,7 @@ class DBHelper:
         if commit:
             self.db.commit()
 
-    def fetch_and_add_item_by_id(self, item_id, commit=True):
+    def fetch_and_add_item_by_id(self, item_id: Union[int, str], commit: str = True) -> Optional[Dict]:
         print(f'[INFO] getting {item_id}...', end=' ')
 
         # skip if item already in db
@@ -246,7 +248,7 @@ class DBHelper:
 
         return item
 
-    def query_api_and_add_result_to_db(self, form_request, delta_commit=100):
+    def query_api_and_add_result_to_db(self, form_request: Dict, delta_commit: int = 100) -> None:
         """
         collect all the stories in the requested range and 
         all thhe comments parented by these stories + 
@@ -286,8 +288,7 @@ class DBHelper:
         self.db.commit()
 
     
-    def get_story_with_children_by_id(self, story_id):
-        # TODO: embeds
+    def get_story_with_children_by_id(self, story_id: Union[int, str]) -> Dict:
         fields = [
             'story_id', 'author', 'unix_time', 'score', 
             'title', 'url', 'num_comments', 'children',
@@ -307,7 +308,7 @@ class DBHelper:
             for field in fields
         }
 
-    def get_story_rows_with_children_from_id_range(self, form_request):
+    def get_story_rows_with_children_from_id_range(self, form_request: Dict) -> List['Row']:
 
         """
         filters the stories by the id range, #comments and score;
@@ -345,7 +346,7 @@ class DBHelper:
             )
         ).fetchall()
 
-    def get_story_rows_with_children_from_id_list(self, form_request):
+    def get_story_rows_with_children_from_id_list(self, form_request: Dict) -> List['Row']:
         """
         fetches the stories with specified id list;
         form_request: dict: should contain the following fields:
@@ -371,7 +372,7 @@ class DBHelper:
             tuple(form_request['story_ids'])
         ).fetchall()
 
-    def story_rows_to_dicts(self, rows, aslist=False):
+    def story_rows_to_dicts(self, rows: List['Row'], aslist: bool = False) -> Union[Dict,List[Dict]]:
         """
         convert sql row objects corresponding to stories
         into dicts with fields
@@ -398,7 +399,7 @@ class DBHelper:
                 } for row in rows
             }
 
-    def get_stories_with_children_from_id_range(self, form_request, aslist=False):
+    def get_stories_with_children_from_id_range(self, form_request: Dict, aslist: bool = False) -> Union[Dict, List[Dict]]:
         """
         return story dicts from a range specified in `form_request`;
         return either a dict (aslist=False) where keys are story ids 
@@ -411,7 +412,7 @@ class DBHelper:
         rows = self.get_story_rows_with_children_from_id_range(form_request)
         return self.story_rows_to_dicts(rows, aslist=aslist)
 
-    def get_stories_with_children_from_id_list(self, form_request, aslist=False):
+    def get_stories_with_children_from_id_list(self, form_request: Dict, aslist: bool = False) -> Union[Dict, List[Dict]]:
         """
         return story dicts from an id list specified in `form_request`;
         return either a dict (aslist=False) where keys are story ids 
@@ -424,7 +425,7 @@ class DBHelper:
         rows = self.get_story_rows_with_children_from_id_list(form_request)
         return self.story_rows_to_dicts(rows, aslist=aslist)
 
-    def yield_story_from_id_range(self, form_request, delta_id=10000):
+    def yield_story_from_id_range(self, form_request: Dict, delta_id: int = 10000) -> Generator:
         begin_id = int(form_request["begin_id"])
         end_id = int(form_request["end_id"])
         for b_id in range(begin_id, end_id, delta_id):
