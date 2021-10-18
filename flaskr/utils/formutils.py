@@ -1,8 +1,5 @@
-from logging import raiseExceptions
-from flaskr.db import get_db
-import requests as rq
-import datetime
-import json
+from typing import Any, Dict, List, Optional
+from werkzeug.wrappers import Request, Response
 
 class RequestParser:
     # map raw form field name (html ele id) to corresponding short name (key)
@@ -82,7 +79,7 @@ class RequestParser:
     }
 
     @classmethod
-    def _parse_field(cls, key, field):
+    def _parse_field(cls, key: str, field: str) -> Any:
         keytype = cls._key2type[key]
         if keytype == 'int':            
             try:
@@ -105,7 +102,7 @@ class RequestParser:
             raise TypeError(f'[ERR] {cls._key2description.get(key) or key} is of unrecognized type!\n')
         
     @classmethod
-    def _parse_request(cls, request, htmls):
+    def _parse_request(cls, request: Request, htmls: List[str]) -> Dict:
         form = request.form
         parsed = dict()
         for html in htmls:
@@ -118,7 +115,7 @@ class RequestParser:
         return parsed
 
     @classmethod
-    def _fit_parsed_request_within_bounds(cls, parsed):
+    def _fit_parsed_request_within_bounds(cls, parsed: Dict) -> None:
         """
         modifies input dict: fits all int-type entries within their specified bounds
         """
@@ -131,7 +128,7 @@ class RequestParser:
                 parsed[key] = cls._key2bounds[key][1]
 
     @classmethod
-    def parse(cls, request):
+    def parse(cls, request: Request) -> Dict:
         """
         parse form request
         request should have a field `sender` (`db-seeder`, `clusterer`, `tsneer`, ...)
@@ -153,14 +150,3 @@ class RequestParser:
         parsed = cls._parse_request(request, cls._sender2html[sender])
         cls._fit_parsed_request_within_bounds(parsed) # modifies input
         return parsed
-
-def update_display_record(display, form):
-    begin_date = datetime.datetime.fromtimestamp(form.get('begin_date') // 1000)
-    end_date = datetime.datetime.fromtimestamp(form.get('end_date') // 1000)
-
-    display.begin_date = f'{begin_date.year}/{begin_date.month}/{begin_date.day}'
-    display.end_date = f'{end_date.year}/{end_date.month}/{end_date.day}'
-
-    display.begin_id = form.get('begin_id')
-    display.end_id = form.get('end_id')
-
