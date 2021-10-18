@@ -334,7 +334,7 @@ class BatchedPipeliner:
 
         # --- serialize ---
         print(f'[INFO] serializing result to {fname}...')
-        fields = ['id', 'title', 'url','label', 'embedding']
+        fields = ['id', 'title', 'url', 'unix_time', 'label', 'embedding']
         with open(fname, 'w') as f:
             f.write('\t'.join(fields) + '\n')
 
@@ -349,6 +349,7 @@ class BatchedPipeliner:
                             str(st.get('story_id')),
                             st.get('title') or '',
                             st.get('url') or '', # nullable
+                            str(st.get('unix_time')),
                             str(lbl),
                             ','.join(str(val) for val in emb)
                         ]) + '\n'
