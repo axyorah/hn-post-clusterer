@@ -89,6 +89,9 @@ class DBHelper:
         FROM story AS s
         """
 
+    def query(self, query_pattern, params):
+        return self.db.execute(query_pattern, tuple(params)).fetchall()
+
     def is_story_id_in_db(self, item_id):
         if self.db.execute(
             'SELECT 1 FROM story WHERE story_id = ?', (item_id,)
@@ -437,4 +440,4 @@ class DBHelper:
             # ... yield intividual posts as dicts
             for dct in story_dicts:
                 for _, val in dct.items():
-                    yield val    
+                    yield val
