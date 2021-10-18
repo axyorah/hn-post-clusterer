@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Set, Optional, Generator, Union
+
 import os
 import numpy as np
 from collections import defaultdict
@@ -10,7 +12,7 @@ from sklearn.manifold import TSNE
 import pandas as pd
 
 
-def copy_and_measure_generator(generator, num_copies=1):
+def copy_and_measure_generator(generator: Generator, num_copies: int = 1):
     """
     makes a specified number of generator copies
     and measures the number of elements in generator
@@ -29,7 +31,7 @@ def copy_and_measure_generator(generator, num_copies=1):
         rows += 1
     return gs[1:], (rows, len(sample) if hasattr(sample, '__iter__') else 1)
 
-def copy_and_measure_batch_generator(generator, num_copies=1):
+def copy_and_measure_batch_generator(generator: Generator, num_copies: int = 1):
     """
     makes a specified number of generator copies
     and measures the number of elements/batches in generator,
@@ -53,11 +55,11 @@ def copy_and_measure_batch_generator(generator, num_copies=1):
     return gs[1:], (num_batches, num_items, len(item) if hasattr(item, '__iter__') else 1)
 
 class SerialReader:
-    def __init__(self, fname, blacklist=set()):
+    def __init__(self, fname: str, blacklist: Optional[Set]=None):
         self.fname = fname
-        self.blacklist = blacklist
+        self.blacklist = blacklist or set()
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         for line in open(self.fname):
             # assume there's one document per line, tokens separated by whitespace
             yield [word for word in line.lower().split(' ') if word not in self.blacklist]
@@ -67,7 +69,7 @@ class GeneratorNormalizer:
         self.min_sample = None
         self.max_sample = None
 
-    def _set_minmax(self, generator, sample_sz):
+    def _set_minmax(self, generator: Generator, sample_sz: int) -> None:
         min_sample, max_sample = [np.Inf] * sample_sz, [0] * sample_sz
         for sample in generator:
             min_sample = [min(a,b) for a,b in zip(min_sample, sample)]
@@ -76,16 +78,16 @@ class GeneratorNormalizer:
         self.min_sample = np.array(min_sample)
         self.max_sample = np.array(max_sample)
 
-    def _normalize_sample(self, sample):
+    def _normalize_sample(self, sample: List) -> np.ndarray:
         sample = np.array(sample).ravel()
         return (sample - self.min_sample) / (self.max_sample - self.min_sample)
 
-    def _normalize_generator(self, generator):
+    def _normalize_generator(self, generator: Generator) -> Generator:
         return (
             self._normalize_sample(sample) for sample in generator
         )
 
-    def fit_transform(self, generator):
+    def fit_transform(self, generator: Generator) -> Generator:
         (s1, s2), (_, sample_sz) = copy_and_measure_generator(generator, 2)
         
         # get min and max
@@ -96,10 +98,10 @@ class GeneratorNormalizer:
 
         return normalized 
 
-    def transform_generator(self, generator):
+    def transform_generator(self, generator: Generator) -> Generator:
         return self._normalize_generator(generator)
 
-    def transform_sample(self, sample):
+    def transform_sample(self, sample: List) -> np.ndarray:
         return self._normalize_sample(sample)
 
 class GeneratorStandardizer:
@@ -108,7 +110,7 @@ class GeneratorStandardizer:
         self.mean = None
         self.var = None
         
-    def get_mean(self):
+    def get_mean(self) -> np.ndarray:
         (g1,g2) = tee(self.gen)
         
         sm = None
@@ -122,7 +124,7 @@ class GeneratorStandardizer:
         
         return self.mean
         
-    def get_var(self):
+    def get_var(self) -> np.ndarray:
         (g1,g2) = tee(self.gen)
         
         sm = None
@@ -135,21 +137,21 @@ class GeneratorStandardizer:
         self.gen = g2
         return self.var
     
-    def fit(self, gen):
+    def fit(self, gen: Generator) -> bool:
         self.gen = gen        
         mean = self.get_mean()
         var = self.get_var()
         
         return True
         
-    def transform(self, gen):
+    def transform(self, gen: Generator) -> Generator:
         def helper(gen):
             for sample in gen:
                 yield (sample - self.mean) / self.var
                 
         return helper(gen)
     
-    def fit_transform(self, gen):
+    def fit_transform(self, gen: Generator) -> Generator:
         self.fit(gen)
         return self.transform(self.gen)
 
@@ -162,7 +164,7 @@ class BatchedGeneratorStandardizer:
         self.mean = None
         self.var = None
         
-    def get_mean(self):
+    def get_mean(self) -> np.ndarray:
         (g1,g2) = tee(self.gen)
         
         sm,num = None,0
@@ -177,7 +179,7 @@ class BatchedGeneratorStandardizer:
         
         return self.mean
         
-    def get_var(self):
+    def get_var(self) -> np.ndarray:
         # check if self.gen is not None
         (g1,g2) = tee(self.gen)
         
@@ -194,14 +196,14 @@ class BatchedGeneratorStandardizer:
 
         return self.var
     
-    def fit(self, gen):
+    def fit(self, gen: Generator) -> bool:
         self.gen = gen        
         self.get_mean()
         self.get_var()
         
         return True
         
-    def transform(self, gen):
+    def transform(self, gen: Generator) -> Generator:
         def helper(gen):
             mean = self.mean.reshape(1,-1)
             var = self.var.reshape(1,-1)
@@ -210,18 +212,18 @@ class BatchedGeneratorStandardizer:
                 
         return helper(gen)
     
-    def fit_transform(self, gen):
+    def fit_transform(self, gen: Generator) -> Generator:
         self.fit(gen)
         return self.transform(self.gen)
         
 class KMeansForGenerator:
-    def __init__(self, n_clusters, iters=300, tol=1e-5):
+    def __init__(self, n_clusters: int, iters: int = 300, tol: float = 1e-5):
         self.n_clusters = n_clusters
         self.iters = iters
         self.tol = tol
         self.centroids = None
         
-    def fit(self, X_generator):
+    def fit(self, X_generator: Generator) -> np.ndarray:
         """
         finds centroids, consumes input generator
         """
@@ -257,7 +259,7 @@ class KMeansForGenerator:
 
         return self.centroids
     
-    def transform(self, X_generator):
+    def transform(self, X_generator: Generator) -> Generator:
         """
         assigns each sample of the input generator to the closest centroid;
         returns euclidean distances from each sample to the closest centroid;
@@ -275,7 +277,7 @@ class KMeansForGenerator:
             ])
             for sample in X_generator            
         )
-    def predict(self, X_generator):
+    def predict(self, X_generator: Generator) -> Generator:
         """
         assigns each sample of the input generator to the closest centroid;
         returns generator of class predictions for each sample;
@@ -299,7 +301,14 @@ class TSNEer:
         self.tsne = TSNE(**kwargs)
         self.reduced = None
 
-    def read_embedding_from_csv(self, fname, colname='embedding', sep='\t', dims=768):
+    def read_embedding_from_csv(
+            self, 
+            fname: str, 
+            colname: str = 'embedding', 
+            sep: str = '\t', 
+            dims: int = 768
+        ) -> np.ndarray:
+
         print('tsne dims:', dims)
         self.df = pd.read_csv(fname, sep=sep)
         return np.stack(
@@ -311,15 +320,17 @@ class TSNEer:
             ).to_numpy()
         )
 
-    def reduce_embedding_dimensions(self, embeddings):
+    def reduce_embedding_dimensions(self, embeddings: np.ndarray) -> np.ndarray:
         self.reduced = self.tsne.fit_transform(embeddings)
         print(self.reduced.shape)
         return self.reduced
 
-    def serialize_results(self, fname):
+    def serialize_results(self, fname: str) -> bool:
         self.df['embedding_tsne'] = [
             ','.join([str(val) for val in arr])
             for arr in self.reduced            
         ]
 
         self.df.to_csv(fname, sep='\t')
+
+        return True
