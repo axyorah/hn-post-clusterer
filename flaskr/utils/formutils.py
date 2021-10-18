@@ -5,131 +5,133 @@ import datetime
 import json
 
 class RequestParser:
-    def __init__(self):
-        # map raw form field name (html ele id) to corresponding short name (key)
-        self.html2key = {
-            'seed-id-begin-range': 'begin_id',
-            'seed-id-end-range': 'end_id',
-            'show-id-begin-range': 'begin_id',
-            'show-id-end-range': 'end_id',
-            'show-comm-begin-range': 'begin_comm',
-            'show-comm-end-range': 'end_comm',
-            'show-score-begin-range': 'begin_score',
-            'show-score-end-range': 'end_score',
-            'show-lsi-topics-num': 'num_topics',
-            'show-kmeans-clusters-num': 'n_clusters',
-            'story_ids': 'story_ids',
-            'fname': 'fname',
-            'fnames': 'fnames',
-            'num-clusters': 'n_clusters',
-            'model-name': 'model_name',
-            'perplexity': 'perplexity',
-            'dims': 'dims',
-        }
-        # specify the list of html eles for each sender type
-        self.sender2html = {
-            'db-seeder': ['seed-id-begin-range', 'seed-id-end-range'],
-            'db-lister': ['story_ids'],
-            'reader': ['fname'],
-            'deleter': ['fnames'],
-            'clusterer': [
-                'show-id-begin-range', 'show-id-end-range', 
-                'show-comm-begin-range', 'show-comm-end-range', 
-                'show-score-begin-range', 'show-score-end-range',
-                'num-clusters', 'model-name'
-            ],
-            'tsneer': ['perplexity', 'dims']
-        }
-        # specify how each key should be parsed
-        self.key2type = {
-            **{key: 'int' for key in [
-                'begin_id', 'end_id', 
-                'begin_comm', 'end_comm', 
-                'begin_score', 'end_score', 
-                'num_topics', 'n_clusters',
-                'perplexity', 'dims'
-            ]},
-            'fname': 'str',
-            'fnames': 'list[str]',
-            'model_name': 'str',
-            'story_ids': 'list[str]',
-        }
-        # provide description of each key (should be useful when printing errors)
-        self.key2description = {
-            'begin_id': 'minimal post id',
-            'end_id': 'maximal post id',
-            'begin_comm': 'minimal number of comments',
-            'end_comm': 'maximal number of comments',
-            'begin_score': 'minimal score',
-            'end_score': 'maximal score',
-            'n_clusters': 'number of clusters',
-            'perplexity': 'perplexity',
-            'dims': 'number of PCA input vectors',
-            'fname': 'file name',
-            'fnames': 'file names',
-            'model_name': 'name of the transformer',
-            'story_ids': 'list of post ids'
-        }
-        self.key2bounds = {
-            'begin_id': [1, 99999999],
-            'end_id': [2, 100000000],
-            'begin_comm': [5, 299],
-            'end_comm': [6, 300],
-            'begin_score': [0, 299],
-            'end_score': [1, 300],
-            'n_clusters': [2, 50],
-            'perplexity': [5, 50],
-            'dims': [5, 50]
-        }
+    # map raw form field name (html ele id) to corresponding short name (key)
+    html2key = {
+        'seed-id-begin-range': 'begin_id',
+        'seed-id-end-range': 'end_id',
+        'show-id-begin-range': 'begin_id',
+        'show-id-end-range': 'end_id',
+        'show-comm-begin-range': 'begin_comm',
+        'show-comm-end-range': 'end_comm',
+        'show-score-begin-range': 'begin_score',
+        'show-score-end-range': 'end_score',
+        'show-lsi-topics-num': 'num_topics',
+        'show-kmeans-clusters-num': 'n_clusters',
+        'story_ids': 'story_ids',
+        'fname': 'fname',
+        'fnames': 'fnames',
+        'num-clusters': 'n_clusters',
+        'model-name': 'model_name',
+        'perplexity': 'perplexity',
+        'dims': 'dims',
+    }
+    # specify the list of html eles for each sender type
+    sender2html = {
+        'db-seeder': ['seed-id-begin-range', 'seed-id-end-range'],
+        'db-lister': ['story_ids'],
+        'reader': ['fname'],
+        'deleter': ['fnames'],
+        'clusterer': [
+            'show-id-begin-range', 'show-id-end-range', 
+            'show-comm-begin-range', 'show-comm-end-range', 
+            'show-score-begin-range', 'show-score-end-range',
+            'num-clusters', 'model-name'
+        ],
+        'tsneer': ['perplexity', 'dims']
+    }
+    # specify how each key should be parsed
+    key2type = {
+        **{key: 'int' for key in [
+            'begin_id', 'end_id', 
+            'begin_comm', 'end_comm', 
+            'begin_score', 'end_score', 
+            'num_topics', 'n_clusters',
+            'perplexity', 'dims'
+        ]},
+        'fname': 'str',
+        'fnames': 'list[str]',
+        'model_name': 'str',
+        'story_ids': 'list[str]',
+    }
+    # provide description of each key (should be useful when printing errors)
+    key2description = {
+        'begin_id': 'minimal post id',
+        'end_id': 'maximal post id',
+        'begin_comm': 'minimal number of comments',
+        'end_comm': 'maximal number of comments',
+        'begin_score': 'minimal score',
+        'end_score': 'maximal score',
+        'n_clusters': 'number of clusters',
+        'perplexity': 'perplexity',
+        'dims': 'number of PCA input vectors',
+        'fname': 'file name',
+        'fnames': 'file names',
+        'model_name': 'name of the transformer',
+        'story_ids': 'list of post ids'
+    }
+    key2bounds = {
+        'begin_id': [1, 99999999],
+        'end_id': [2, 100000000],
+        'begin_comm': [5, 299],
+        'end_comm': [6, 300],
+        'begin_score': [0, 299],
+        'end_score': [1, 300],
+        'n_clusters': [2, 50],
+        'perplexity': [5, 50],
+        'dims': [5, 50]
+    }
 
-    def _parse_field(self, key, field):
-        keytype = self.key2type[key]
+    @classmethod
+    def _parse_field(cls, key, field):
+        keytype = cls.key2type[key]
         if keytype == 'int':            
             try:
                 return int(field)
             except TypeError as err:
-                raise TypeError(f'{self.key2description.get(key) or key} should be an integer, received {field}!\n')
+                raise TypeError(f'{cls.key2description.get(key) or key} should be an integer, received {field}!\n')
 
         if keytype == 'str':
             try:
                 return field
             except TypeError as err:
-                raise TypeError(f'{self.key2description.get(key) or key} should be a string, received {field}!\n')
+                raise TypeError(f'{cls.key2description.get(key) or key} should be a string, received {field}!\n')
 
         elif keytype == 'list[str]':
             try:
                 return [item for item in field.split(',')]
             except TypeError as err:
-                raise TypeError(f'{self.key2description.get(key) or key} should be a list of strings, received {field}!\n')
+                raise TypeError(f'{cls.key2description.get(key) or key} should be a list of strings, received {field}!\n')
         else:
-            raise TypeError(f'[ERR] {self.key2description.get(key) or key} is of unrecognized type!\n')
+            raise TypeError(f'[ERR] {cls.key2description.get(key) or key} is of unrecognized type!\n')
         
-
-    def _parse_request(self, request, htmls):
+    @classmethod
+    def _parse_request(cls, request, htmls):
         form = request.form
         parsed = dict()
         for html in htmls:
-            key = self.html2key.get(html)
+            key = cls.html2key.get(html)
             if form.get(html) is None and form.get(key) is None:
                 raise NameError(f'Error accessing element with id "{html}" ({key})\n')
             
-            parsed[key] = self._parse_field(key, form.get(html) or form.get(key)) 
+            parsed[key] = cls._parse_field(key, form.get(html) or form.get(key)) 
                             
         return parsed
 
-    def _fit_parsed_request_within_bounds(self, parsed):
+    @classmethod
+    def _fit_parsed_request_within_bounds(cls, parsed):
         """
         modifies input dict: fits all int-type entries within their specified bounds
         """
         for key in parsed.keys():
-            if self.key2type.get(key) != 'int':
+            if cls.key2type.get(key) != 'int':
                 continue
-            if self.key2bounds.get(key) is not None and parsed[key] < self.key2bounds[key][0]:
-                parsed[key] = self.key2bounds[key][0]
-            if self.key2bounds.get(key) is not None and parsed[key] > self.key2bounds[key][1]:
-                parsed[key] = self.key2bounds[key][1]
+            if cls.key2bounds.get(key) is not None and parsed[key] < cls.key2bounds[key][0]:
+                parsed[key] = cls.key2bounds[key][0]
+            if cls.key2bounds.get(key) is not None and parsed[key] > cls.key2bounds[key][1]:
+                parsed[key] = cls.key2bounds[key][1]
 
-    def parse(self, request):
+    @classmethod
+    def parse(cls, request):
         """
         parse form request
         request should have a field `sender` (`db-seeder`, `clusterer`, `tsneer`, ...)
@@ -140,16 +142,16 @@ class RequestParser:
         if sender is None:
             raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}\n'))
 
-        if self.sender2html.get(sender) is None:
+        if cls.sender2html.get(sender) is None:
             raise(KeyError(
                 f'"Sender" not recognized! '+\
-                f'Should be one of {list(self.sender2html.keys())}.\n'+\
+                f'Should be one of {list(cls.sender2html.keys())}.\n'+\
                 f'Got {sender}\n'+\
                 f'Received form: {request.form}\n'
             ))
 
-        parsed = self._parse_request(request, self.sender2html[sender])
-        self._fit_parsed_request_within_bounds(parsed) # modifies input
+        parsed = cls._parse_request(request, cls.sender2html[sender])
+        cls._fit_parsed_request_within_bounds(parsed) # modifies input
         return parsed
 
 def update_display_record(display, form):

@@ -8,10 +8,6 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.manifold import TSNE
 
-from flaskr.utils.formutils import (
-    RequestParser,
-)
-
 from flaskr.utils.nlputils import (
     StoryEmbedder,
     html2sentences,
