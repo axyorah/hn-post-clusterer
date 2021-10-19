@@ -21,19 +21,19 @@ class ColorHelper:
         )
 
     @staticmethod
-    def hex2rgb(hx):
+    def hex2rgb(hx: str) -> List[int]:
         r,g,b = [int(hx[i:i+2],16) for i in range(1,7,2)]
         return [r,g,b]
 
     @staticmethod
-    def rgb2hex(rgb):
+    def rgb2hex(rgb: List[int]) -> str:
         r,g,b = rgb
         return f'#{hex(r)[2:].zfill(2)}{hex(g)[2:].zfill(2)}{hex(b)[2:].zfill(2)}'
 
-    def get_rgb_colorseq(self, n):
+    def get_rgb_colorseq(self, n: int) -> List[List[int]]:
         return self.color_spline(np.linspace(0, 1, n)).astype(int)
 
-    def get_hex_colorseq(self, n):
+    def get_hex_colorseq(self, n: int) -> List[str]:
         return [self.rgb2hex(rgb) for rgb in self.get_rgb_colorseq(n)]
 
 
