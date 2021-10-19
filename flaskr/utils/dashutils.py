@@ -38,7 +38,7 @@ class DataHelper:
             return pd.DataFrame({'Cluster': [], 'Number of Posts': []})
 
         df = pd.read_csv(fname, sep='\t')
-        # return df
+        
         df_bar = df.groupby('label').count()
         df_bar['Cluster'] = df_bar.index
         df_bar['Number of Posts'] = df_bar['id']
@@ -131,13 +131,15 @@ class DataHelper:
     
 class FigureHelper:
     @classmethod
-    def get_cluster_barplot(cls, df: pd.DataFrame) -> go.Figure:
+    def get_cluster_barplot(cls, df: pd.DataFrame, continuous: bool = True) -> go.Figure:
+        if not continuous:
+            df['Cluster'] = df['Cluster'].map(str) # str vals -> discrete color scheme
     
         fig = px.bar(
             df,
             x='Cluster',
             y='Number of Posts',
-            color='Cluster'
+            color='Cluster',
         )
 
         update_fig_layout(fig)
@@ -145,9 +147,10 @@ class FigureHelper:
         return fig
 
     @classmethod
-    def get_daily_barplot(cls, df: pd.DataFrame) -> go.Figure:
+    def get_daily_barplot(cls, df: pd.DataFrame, continuous: bool = True) -> go.Figure:
 
-        #df['Cluster#'] = df['Cluster#'].map(str) # str vals -> discrete color scheme
+        if not continuous:
+            df['Cluster'] = df['Cluster'].map(str) # str vals -> discrete color scheme
 
         fig = px.bar(
             df,
@@ -161,18 +164,35 @@ class FigureHelper:
         return fig
 
     @classmethod
-    def get_scatterplot(cls, df: pd.DataFrame) -> go.Figure:
+    def get_scatterplot(cls, df: pd.DataFrame, continuous: bool = True) -> go.Figure:
+        #df['Label'] = df['Label'].astype(str) # str vals -> discrete color scheme (only works for plotly.express)
+
         fig = go.Figure()
-        fig.add_trace(
-            go.Scatter(
-                x=df['Axis-A'],
-                y=df['Axis-B'],
-                opacity=0.7,
-                mode='markers',
-                marker_color=df['Label'],
-                customdata=df[['Id', 'Title','Label']],
-                hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}'
-        ))
+        if continuous:
+            fig.add_trace(
+                go.Scatter(
+                    x=df['Axis-A'],
+                    y=df['Axis-B'],
+                    opacity=0.7,
+                    mode='markers',
+                    marker={'color': df['Label']},
+                    customdata=df[['Id', 'Title','Label']],
+                    hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}'
+            ))
+        else:   
+            for i in range(max(df['Label']) + 1):
+                df_cluster = df[df['Label'] == i]
+                fig.add_trace(
+                    go.Scatter(
+                        x=df_cluster['Axis-A'],
+                        y=df_cluster['Axis-B'],
+                        opacity=0.7,
+                        mode='markers',
+                        customdata=df_cluster[['Id', 'Title','Label']],
+                        hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}',
+                        name=str(i)
+                    )
+                )             
 
         fig.update_layout(
             xaxis_title='Axis-A',

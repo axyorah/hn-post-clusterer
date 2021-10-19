@@ -59,7 +59,7 @@ def init_dashboard(server):
     )
     def update_cluster_bar_plot(n_clicks):
         df = data.get_cluster_barplot_df()
-        return figs.get_cluster_barplot(df)
+        return figs.get_cluster_barplot(df, continuous=False)
 
     # daily cluster count bar plot
     daily_bar_plot = get_interactive_html_graph(
@@ -73,7 +73,7 @@ def init_dashboard(server):
     )
     def update_daily_bar_plot(n_clicks):
         df = data.get_daily_barplot_df()
-        return figs.get_daily_barplot(df)
+        return figs.get_daily_barplot(df, continuous=False)
 
     # 2d cluster scatter plot
     pca_cluster_scatter_plot = get_interactive_html_graph(
@@ -89,7 +89,7 @@ def init_dashboard(server):
     )
     def update_pca_scatter_plot(n_clicks):
         df = data.get_pca_embedding_df()
-        return figs.get_scatterplot(df)
+        return figs.get_scatterplot(df, continuous=False)
 
     # explained pca variance
     pca_explained_variance_plot = get_interactive_html_graph(
@@ -119,7 +119,7 @@ def init_dashboard(server):
     )
     def update_tsne_scatter_plot(n_clicks):
         df = data.get_tsne_embedding_df()
-        return figs.get_scatterplot(df)
+        return figs.get_scatterplot(df, continuous=False)
 
     # wordcloud subplots
     def get_wordcloud_dccgraph(freqs):
