@@ -50,7 +50,7 @@ def init_dashboard(server):
     # cluster count bar plot
     cluster_bar_plot = get_interactive_html_graph(
         'cluster-bar-plot', 
-        figs.get_cluster_barplot(pd.DataFrame(data={'Cluster#':[], 'Number of Posts':[]}))
+        figs.get_cluster_barplot(pd.DataFrame(data={'Cluster':[], 'Number of Posts':[]}))
     )
 
     @dash_app.callback(
@@ -64,7 +64,7 @@ def init_dashboard(server):
     # daily cluster count bar plot
     daily_bar_plot = get_interactive_html_graph(
         'daily-bar-plot',
-        figs.get_daily_barplot(pd.DataFrame(data={'Cluster#': [], 'Number of Posts': [], 'Date': []}))
+        figs.get_daily_barplot(pd.DataFrame(data={'Cluster': [], 'Number of Posts': [], 'Date': []}))
     )
 
     @dash_app.callback(

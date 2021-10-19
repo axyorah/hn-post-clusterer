@@ -35,12 +35,12 @@ class DataHelper:
 
         if not os.path.isfile(fname):
             print(f'{fname} not found!')
-            return pd.DataFrame({'Cluster#': [], 'Number of Posts': []})
+            return pd.DataFrame({'Cluster': [], 'Number of Posts': []})
 
         df = pd.read_csv(fname, sep='\t')
         # return df
         df_bar = df.groupby('label').count()
-        df_bar['Cluster#'] = df_bar.index
+        df_bar['Cluster'] = df_bar.index
         df_bar['Number of Posts'] = df_bar['id']
         
         return df_bar
@@ -56,10 +56,10 @@ class DataHelper:
 
         df_bar = df.groupby(['unix_time', 'label']).count()
         df_bar['Date'] = df_bar.index.map(lambda t: str(t[0]))
-        df_bar['Cluster#'] = df_bar.index.map(lambda t: t[1])
+        df_bar['Cluster'] = df_bar.index.map(lambda t: t[1])
         df_bar['Number of Posts'] = df_bar['id']
 
-        return df_bar[['Date', 'Cluster#', 'Number of Posts']]
+        return df_bar[['Date', 'Cluster', 'Number of Posts']]
 
     @classmethod
     def get_pca_embedding_df(cls) -> pd.DataFrame:
@@ -127,9 +127,9 @@ class FigureHelper:
     
         fig = px.bar(
             df,
-            x='Cluster#',
+            x='Cluster',
             y='Number of Posts',
-            color='Cluster#'
+            color='Cluster'
         )
 
         update_fig_layout(fig)
@@ -145,7 +145,7 @@ class FigureHelper:
             df,
             x='Date',
             y='Number of Posts',
-            color='Cluster#',
+            color='Cluster',
         )
 
         update_fig_layout(fig)
