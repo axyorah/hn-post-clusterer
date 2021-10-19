@@ -2,6 +2,7 @@ from typing import Any, List, Dict, Set, Optional, Union
 
 import os, json, re, datetime
 import numpy as np
+import scipy as sc
 import pandas as pd
 from itertools import accumulate
 
@@ -10,6 +11,31 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+
+class ColorHelper:
+    def __init__(self, colorscheme=px.colors.sequential.Plasma):
+        self.color_hex = colorscheme
+        self.color_rgb = np.array([self.hex2rgb(h) for h in self.color_hex])
+        self.color_spline = sc.interpolate.CubicSpline(
+            np.linspace(0,1,len(self.color_rgb)), self.color_rgb
+        )
+
+    @staticmethod
+    def hex2rgb(hx):
+        r,g,b = [int(hx[i:i+2],16) for i in range(1,7,2)]
+        return [r,g,b]
+
+    @staticmethod
+    def rgb2hex(rgb):
+        r,g,b = rgb
+        return f'#{hex(r)[2:].zfill(2)}{hex(g)[2:].zfill(2)}{hex(b)[2:].zfill(2)}'
+
+    def get_rgb_colorseq(self, n):
+        return self.color_spline(np.linspace(0, 1, n)).astype(int)
+
+    def get_hex_colorseq(self, n):
+        return [self.rgb2hex(rgb) for rgb in self.get_rgb_colorseq(n)]
+
 
 def update_fig_layout(fig: go.Figure) -> go.Figure:
     STYLE = {
@@ -127,11 +153,14 @@ class DataHelper:
 
         cummulative = list(accumulate(variance))
         return pd.DataFrame({'Variance': variance, 'Cummulative': cummulative})
-
     
 class FigureHelper:
+    ch = ColorHelper(px.colors.sequential.Plasma)
+
     @classmethod
     def get_cluster_barplot(cls, df: pd.DataFrame, continuous: bool = True) -> go.Figure:
+        n_clusters = len(df['Cluster'].unique())
+
         if not continuous:
             df['Cluster'] = df['Cluster'].map(str) # str vals -> discrete color scheme
     
@@ -140,6 +169,8 @@ class FigureHelper:
             x='Cluster',
             y='Number of Posts',
             color='Cluster',
+            color_discrete_sequence=cls.ch.get_hex_colorseq(n_clusters),
+            category_orders={'Cluster': [str(i) for i in range(n_clusters)]}
         )
 
         update_fig_layout(fig)
@@ -148,6 +179,7 @@ class FigureHelper:
 
     @classmethod
     def get_daily_barplot(cls, df: pd.DataFrame, continuous: bool = True) -> go.Figure:
+        n_clusters = len(df['Cluster'].unique())
 
         if not continuous:
             df['Cluster'] = df['Cluster'].map(str) # str vals -> discrete color scheme
@@ -157,6 +189,8 @@ class FigureHelper:
             x='Date',
             y='Number of Posts',
             color='Cluster',
+            color_discrete_sequence=cls.ch.get_hex_colorseq(n_clusters),
+            category_orders={'Cluster': [str(i) for i in range(n_clusters)]}
         )
 
         update_fig_layout(fig)

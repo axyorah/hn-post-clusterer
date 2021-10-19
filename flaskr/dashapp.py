@@ -89,7 +89,7 @@ def init_dashboard(server):
     )
     def update_pca_scatter_plot(n_clicks):
         df = data.get_pca_embedding_df()
-        return figs.get_scatterplot(df, continuous=False)
+        return figs.get_scatterplot(df, continuous=True)
 
     # explained pca variance
     pca_explained_variance_plot = get_interactive_html_graph(
@@ -119,7 +119,7 @@ def init_dashboard(server):
     )
     def update_tsne_scatter_plot(n_clicks):
         df = data.get_tsne_embedding_df()
-        return figs.get_scatterplot(df, continuous=False)
+        return figs.get_scatterplot(df, continuous=True)
 
     # wordcloud subplots
     def get_wordcloud_dccgraph(freqs):
