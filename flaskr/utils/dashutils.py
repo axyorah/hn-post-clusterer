@@ -27,7 +27,8 @@ def update_fig_layout(fig):
     return fig
 
 class DataHelper:
-    def get_cluster_barplot_df(self):
+    @classmethod
+    def get_cluster_barplot_df(cls):
         fname = 'data/df.csv'
 
         if not os.path.isfile(fname):
@@ -42,7 +43,8 @@ class DataHelper:
         
         return df_bar
 
-    def get_daily_barplot_df(self):
+    @classmethod
+    def get_daily_barplot_df(cls):
         fname = 'data/df.csv'
 
         df = pd.read_csv(fname, sep='\t')
@@ -57,7 +59,8 @@ class DataHelper:
 
         return df_bar[['Date', 'Cluster#', 'Number of Posts']]
 
-    def get_pca_embedding_df(self):
+    @classmethod
+    def get_pca_embedding_df(cls):
         fname = 'data/df.csv'
 
         if not os.path.isfile(fname):
@@ -69,7 +72,8 @@ class DataHelper:
         df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
         return df
 
-    def get_tsne_embedding_df(self):
+    @classmethod
+    def get_tsne_embedding_df(cls):
         fname = 'data/df_tsne.csv'
 
         if not os.path.isfile(fname):
@@ -81,7 +85,8 @@ class DataHelper:
         df['ax-1'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[1]))
         return df
 
-    def get_cluster_frequencies(self):
+    @classmethod
+    def get_cluster_frequencies(cls):
         fnames = [
             os.path.join('data', fname) 
             for fname in os.listdir('data') if 'freq' in fname
@@ -100,7 +105,8 @@ class DataHelper:
 
         return frequencies
 
-    def get_pca_explained_variance(self):
+    @classmethod
+    def get_pca_explained_variance(cls):
         fname = 'data/pca.txt'
 
         if not os.path.isfile(fname):
@@ -114,7 +120,8 @@ class DataHelper:
 
     
 class FigureHelper:
-    def get_cluster_barplot(self, df):
+    @classmethod
+    def get_cluster_barplot(cls, df):
     
         fig = px.bar(
             df,
@@ -127,7 +134,8 @@ class FigureHelper:
 
         return fig
 
-    def get_daily_barplot(self, df):
+    @classmethod
+    def get_daily_barplot(cls, df):
 
         #df['Cluster#'] = df['Cluster#'].map(str) # str vals -> discrete color scheme
 
@@ -135,15 +143,15 @@ class FigureHelper:
             df,
             x='Date',
             y='Number of Posts',
-            color='Cluster#', 
+            color='Cluster#',
         )
 
         update_fig_layout(fig)
 
         return fig
 
-
-    def get_scatterplot(self, df):
+    @classmethod
+    def get_scatterplot(cls, df):
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
@@ -164,8 +172,9 @@ class FigureHelper:
         update_fig_layout(fig)
 
         return fig
-
-    def get_pca_explained_variance_plot(self, df):
+    
+    @classmethod
+    def get_pca_explained_variance_plot(cls, df):
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
@@ -184,7 +193,8 @@ class FigureHelper:
 
         return fig
 
-    def get_wordclouds(self, frequencies):
+    @classmethod
+    def get_wordclouds(cls, frequencies):
         wcloud = WordCloud()
 
         fig = make_subplots(

@@ -13,12 +13,9 @@ import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 from flaskr.utils.dashutils import (
-    DataHelper,
-    FigureHelper
+    DataHelper as data,
+    FigureHelper as figs
 )
-
-data = DataHelper()
-figs = FigureHelper()
 
 def get_interactive_html_graph(graph_id, init_figure):
     return html.Div(
