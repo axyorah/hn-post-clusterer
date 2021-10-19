@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-def update_fig_layout(fig):
+def update_fig_layout(fig: go.Figure) -> go.Figure:
     STYLE = {
         'background_color': 'rgba(255,255,255,0.1)',
         'paper_color': 'rgb(76, 73, 82)',
@@ -49,6 +49,10 @@ class DataHelper:
     def get_daily_barplot_df(cls) -> pd.DataFrame:
         fname = 'data/df.csv'
 
+        if not os.path.isfile(fname):
+            print(f'{fname} not found!')
+            return pd.DataFrame({'Cluster': [], 'Number of Posts': []})
+
         df = pd.read_csv(fname, sep='\t')
         df['unix_time'] = df['unix_time'].map(
             lambda ts: datetime.datetime.utcfromtimestamp(int(ts)).date()
@@ -67,11 +71,13 @@ class DataHelper:
 
         if not os.path.isfile(fname):
             print('`data/df.csv` not found!')
-            return pd.DataFrame({'ax-0': [], 'ax-1': []})
+            return pd.DataFrame({'Axis-A': [], 'Axis-B': []})
 
         df = pd.read_csv(fname, sep='\t')
-        df['ax-0'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
-        df['ax-1'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
+        df['Axis-A'] = df['embedding'].map(lambda row: float(row.split(',')[0]))
+        df['Axis-B'] = df['embedding'].map(lambda row: float(row.split(',')[1]))
+        df.columns = [col.title() for col in df.columns]
+
         return df
 
     @classmethod
@@ -80,11 +86,13 @@ class DataHelper:
 
         if not os.path.isfile(fname):
             print('`data/df_tsne.csv` not found!')
-            return pd.DataFrame({'ax-0': [], 'ax-1': []})
+            return pd.DataFrame({'Axis-A': [], 'Axis-A': []})
 
         df = pd.read_csv(fname, sep='\t')
-        df['ax-0'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[0]))
-        df['ax-1'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[1]))
+        df['Axis-A'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[0]))
+        df['Axis-B'] = df['embedding_tsne'].map(lambda row: float(row.split(',')[1]))
+        df.columns = [col.title() for col in df.columns]
+
         return df
 
     @classmethod
@@ -157,12 +165,12 @@ class FigureHelper:
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
-                x=df['ax-0'],
-                y=df['ax-1'],
+                x=df['Axis-A'],
+                y=df['Axis-B'],
                 opacity=0.7,
                 mode='markers',
-                marker_color=df['label'],
-                customdata=df[['id', 'title','label']],
+                marker_color=df['Label'],
+                customdata=df[['Id', 'Title','Label']],
                 hovertemplate='Id: %{customdata[0]}<br>Title: %{customdata[1]}<br>Cluster: %{customdata[2]}'
         ))
 

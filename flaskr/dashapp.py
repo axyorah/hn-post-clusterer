@@ -79,7 +79,7 @@ def init_dashboard(server):
     pca_cluster_scatter_plot = get_interactive_html_graph(
         'pca-cluster-2d',
         figs.get_scatterplot(
-            pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
+            pd.DataFrame(data={'Id': [], 'Label': [], 'Title':[], 'Axis-A': [], 'Axis-B': []})
         )
     )
 
@@ -109,7 +109,7 @@ def init_dashboard(server):
     tsne_cluster_scatter_plot = get_interactive_html_graph(
         'tsne-cluster-2d',
         figs.get_scatterplot(
-            pd.DataFrame(data={'id': [], 'label': [], 'ax-0': [], 'ax-1': [], 'title': []})
+            pd.DataFrame(data={'Id': [], 'Label': [], 'Title':[], 'Axis-A': [], 'Axis-B': []})
         )
     )
 
