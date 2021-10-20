@@ -147,7 +147,7 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
         );
         return postData('/db/get', {
             'sender': 'db-lister',
-            'story_ids': filtered_ids,
+            'story_ids': filtered_ids.join(','), // TODO: adjust RequestParser to accept list!
         })
     })
     .then(res => checkForServerErrors(res))

@@ -14,12 +14,11 @@ async function postData(url, data) {
         credentials: 'same-origin', 
         headers: {
             'Accept': 'application/json, text/plain',
-            // 'Content-Type': 'application/json; charset=UTF-8'
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/json; charset=UTF-8'
       },
       redirect: 'follow', 
       referrerPolicy: 'no-referrer', 
-      body: urlify(data)//JSON.stringify(data) 
+      body: JSON.stringify(data)
     });
     return response.json(); 
 }

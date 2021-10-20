@@ -162,11 +162,8 @@ def query_db():
         try:
             form_request = rqparser.parse(request)
 
-            dbhelper = DBHelper()            
-            if request.form.get('sender') == 'db-lister':
-                story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
-            else:
-                story_dict = {}
+            dbhelper = DBHelper()
+            story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
             
             return jsonify({
                 "code": 200,
