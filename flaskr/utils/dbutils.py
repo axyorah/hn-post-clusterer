@@ -383,18 +383,24 @@ class DBHelper:
         """
         fields = [
             'story_id', 'author', 'unix_time', 'score', 
-            'title', 'url', 'num_comments', 'comment_embedding'
+            'title', 'url', 'num_comments', 'children',
+            'comment_embedding'
         ]
 
         if aslist:
             return [
-                {field: row.__getitem__(field) for field in fields} 
-                for row in rows
+                {
+                    field: row.__getitem__(field) 
+                    if field in row.keys() else None
+                    for field in fields
+                } for row in rows
             ]
         else:
             return {
                 row.__getitem__('story_id'): {
-                    field: row.__getitem__(field) for field in fields
+                    field: row.__getitem__(field) 
+                    if field in row.keys() else None
+                    for field in fields
                 } for row in rows
             }
 
@@ -413,13 +419,18 @@ class DBHelper:
 
         if aslist:
             return [
-                {field: row.__getitem__(field) for field in fields} 
-                for row in rows
+                {
+                    field: row.__getitem__(field) 
+                    if field in row.keys() else None 
+                    for field in fields
+                } for row in rows
             ]
         else:
             return {
                 row.__getitem__('story_id'): {
-                    field: row.__getitem__(field) for field in fields
+                    field: row.__getitem__(field) 
+                    if field in row.keys() else None 
+                    for field in fields
                 } for row in rows
             }
 
