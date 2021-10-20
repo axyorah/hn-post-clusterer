@@ -23,6 +23,113 @@ PCA_FNAME = os.path.join(CORPUS_DIR, 'pca.txt')
 def index():
     return render_template("index.html")
 
+# RESTful db routes for single story
+@app.route("/db/story/<string:id>")
+def get_story(id):
+    dbhelper = DBHelper()
+
+    story_rows = dbhelper.query("SELECT * FROM story WHERE story_id = ?", [id])
+        
+    if story_rows is not None:
+        return jsonify({
+            "code": 200,
+            "ok": True,
+            "message": "got story from db",
+            "data": dbhelper.story_rows_to_dicts(story_rows)[int(id)],
+            "path": "/db/story"
+        })
+    else: 
+        return jsonify({
+            "code": 500,
+            "ok": False,
+            "message": f"item {id} not found",
+            "path": "/db/story"
+    })
+
+@app.route("/db/story", methods=["POST"])
+def post_story():
+    pass
+
+@app.route("/db/story/<string:id>", methods=["DELETE"])
+def delete_story(id):
+    pass
+
+@app.route("/db/story/<string:id>", methods=["PUT"])
+def update_story(id):
+    pass
+
+# RESTful db routes for multiple stories
+@app.route("/db/stories")
+def get_stories():
+
+    # should be called as "/db/items?id=1,2,3"
+    id_list = [int(i) for i in request.args.get("id").split(",")]
+
+    if id_list:
+        dbhelper = DBHelper()
+
+        query = f"""
+        {dbhelper.story_pattern_without_where}
+        WHERE s.story_id IN ({", ".join("?" for _ in id_list)});
+        """
+        story_rows = dbhelper.query(query, id_list)
+        return jsonify({
+            "code": 200,
+            "ok": True,
+            "message": "got stories from db",
+            "data": dbhelper.story_rows_to_dicts(story_rows),
+            "path": "/db/stories"
+        })
+
+    else:
+        return jsonify({
+            "code": 500,
+            "ok": False,
+            "message": "could not understand the request; should be `/db/stories?id=1,2,3`",
+            "path": "/db/stories"
+        })
+
+
+# RESTful db routes for multiple items (stories + comments)
+@app.route("/db/items", methods=["POST"])
+def post_items():
+    form_request = rqparser.parse(request)
+    
+    dbhelper = DBHelper()
+    dbhelper.query_api_and_add_result_to_db(form_request)
+
+    return jsonify({
+        "code": 200,
+        "ok": True,
+        "message": "added new entries to database",
+        "path": "/db/items"
+    })
+
+@app.route("/db/items", methods=["DELETE"])
+def delete_items():
+    pass
+
+@app.route("/db/items", methods=["PUT"])
+def update_items():
+    pass
+
+# RESTful file routes
+@app.route("/file/<string:fname>")
+def read_file(fname):
+    # checks if present
+    # checks ext
+    # reads as txt, csv (with header) or json depending on ext
+    pass
+
+@app.route("/file/<string:fname>", methods=["DELETE"])
+def delete_file(fname):
+    # checks if exists
+    # check if data file (txt, csv, json)
+    # deletes if data file
+    pass
+
+
+
 @app.route("/db/add", methods=["POST"])
 def seed_db():
     if request.method == "POST":
