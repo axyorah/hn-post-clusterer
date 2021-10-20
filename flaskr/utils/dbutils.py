@@ -383,8 +383,32 @@ class DBHelper:
         """
         fields = [
             'story_id', 'author', 'unix_time', 'score', 
-            'title', 'url', 'num_comments', 'children',
-            'comment_embedding'
+            'title', 'url', 'num_comments', 'comment_embedding'
+        ]
+
+        if aslist:
+            return [
+                {field: row.__getitem__(field) for field in fields} 
+                for row in rows
+            ]
+        else:
+            return {
+                row.__getitem__('story_id'): {
+                    field: row.__getitem__(field) for field in fields
+                } for row in rows
+            }
+
+    def comment_rows_to_dicts(self, rows: List['Row'], aslist: bool = False) -> Union[Dict,List[Dict]]:
+        """
+        convert sql row objects corresponding to stories
+        into dicts with fields
+            story_id, author, unix_time, score, title, url, num_comments, children
+        return dictionary is aslist=False (default),
+        where keys are story ids and values are story dicts
+        or lists of story dicts in aslist=True
+        """
+        fields = [
+            'comment_id', 'author', 'unix_time', 'body', 'parent_id'
         ]
 
         if aslist:
