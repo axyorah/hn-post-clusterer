@@ -103,7 +103,7 @@ class RequestParser:
         
     @classmethod
     def _parse_request(cls, request: Request, htmls: List[str]) -> Dict:
-        form = request.form
+        form = request.form or request.get_json()
         parsed = dict()
         for html in htmls:
             key = cls._html2key.get(html)
@@ -134,10 +134,11 @@ class RequestParser:
         request should have a field `sender` (`db-seeder`, `clusterer`, `tsneer`, ...)
         which will be used to correctly parse the request
         """
-        sender = request.form.get('sender')
+        form = request.form or request.get_json()
+        sender = form.get('sender')
 
         if sender is None:
-            raise(KeyError(f'Field "sender" is not speciefied! Got {request.form}\n'))
+            raise(KeyError(f'Field "sender" is not specified! Got {form}\n'))
 
         if cls._sender2html.get(sender) is None:
             raise(KeyError(
