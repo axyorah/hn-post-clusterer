@@ -17,6 +17,8 @@ story_api2schema = {
     'num_comments': 'descendants',
     'kids': 'kids', # not in schema but we need it...
     'type': 'type', # not in schema,
+    'deleted': 'deleted',
+    'dead': 'dead'
 }
 
 comment_api2schema = {
@@ -62,14 +64,14 @@ def fetch_and_add_item_by_id(item_id: Union[int, str], commit: str = True) -> Op
 
     # get item
     item = query_api(item_id) # raw response
-
+    item = translate_response_api2schema(item) # fields are now the same as in schema (+)
+    
     # skip if empty/deleted/dead
     if item is None or item.get('deleted',False) or item.get('dead',False):
         print('got empty, deleted or dead...')
         return
     
-    item = translate_response_api2schema(item) # fields are now the same as in schema (+)
-
+    
     # add to db if not empty
     print(
         f'got {item.get("type", "UNKNOWN")} ' +\
