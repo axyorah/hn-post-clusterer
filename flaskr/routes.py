@@ -7,7 +7,7 @@ from flask import request, make_response, Response
 from flask.json import jsonify
 
 from flaskr.utils.formutils import RequestParser as rqparser
-from flaskr.utils.dbutils import DBHelper
+#from flaskr.utils.dbutils import DBHelper
 from flaskr.utils.db_utils import (
     DBHelper as dbh,
     query_hn_and_add_result_to_db
@@ -142,6 +142,7 @@ def get_stories():
 # db routes for multiple items (stories + comments)
 @app.route("/db/items", methods=["POST"])
 def post_items():
+    """add items from the id range to db"""
     try:
         form_request = rqparser.parse(request)
     
@@ -313,142 +314,142 @@ def delete_file():
 
 
 # --- old routes ---
-@app.route("/db/add", methods=["POST"])
-def seed_db():
-    if request.method == "POST":
-        try:
-            form_request = rqparser.parse(request)
+# @app.route("/db/add", methods=["POST"])
+# def seed_db():
+#     if request.method == "POST":
+#         try:
+#             form_request = rqparser.parse(request)
 
-            dbhelper = DBHelper()
-            dbhelper.query_api_and_add_result_to_db(form_request)
+#             dbhelper = DBHelper()
+#             dbhelper.query_api_and_add_result_to_db(form_request)
 
-            return jsonify({
-                "code": 200,
-                "ok": True,
-                "message": "added new entries to database",
-                "path": "/db/add"
-            })
-        except Exception as e:
-            print(f'[ERR: /db/add] {e}')
-            return jsonify({
-                "errors": e.args[0],
-                "code": 500,
-                "path": "/db/add",
-                "ok": False
-            }), 500
+#             return jsonify({
+#                 "code": 200,
+#                 "ok": True,
+#                 "message": "added new entries to database",
+#                 "path": "/db/add"
+#             })
+#         except Exception as e:
+#             print(f'[ERR: /db/add] {e}')
+#             return jsonify({
+#                 "errors": e.args[0],
+#                 "code": 500,
+#                 "path": "/db/add",
+#                 "ok": False
+#             }), 500
 
 
 
-@app.route("/db/get", methods=["POST"])
-def query_db():
-    if request.method == "POST":
-        try:
-            form_request = rqparser.parse(request)
+# @app.route("/db/get", methods=["POST"])
+# def query_db():
+#     if request.method == "POST":
+#         try:
+#             form_request = rqparser.parse(request)
 
-            dbhelper = DBHelper()
-            story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
+#             dbhelper = DBHelper()
+#             story_dict = dbhelper.get_stories_with_children_from_id_list(form_request)
             
-            return jsonify({
-                "code": 200,
-                "ok": True,
-                "message": f"fetched stories from db",
-                "data": story_dict,
-                "path": "/db/get"
-            })
-        except Exception as e:
-            print(f'[ERR: /db/get] {e}')
-            return jsonify({
-                "errors": e.args[0],
-                "code": 500,
-                "path": "/db/get",
-                "ok": False
-            }), 500
+#             return jsonify({
+#                 "code": 200,
+#                 "ok": True,
+#                 "message": f"fetched stories from db",
+#                 "data": story_dict,
+#                 "path": "/db/get"
+#             })
+#         except Exception as e:
+#             print(f'[ERR: /db/get] {e}')
+#             return jsonify({
+#                 "errors": e.args[0],
+#                 "code": 500,
+#                 "path": "/db/get",
+#                 "ok": False
+#             }), 500
 
-@app.route("/file/readtxt", methods=["POST"])
-def txt_reader():
-    if request.method == "POST":
-        try:
-            form_request = rqparser.parse(request)
-            with open(form_request["fname"], "r") as f:
-                lines = f.read().splitlines()
-            return jsonify({
-                "code": 200,
-                "ok": True,
-                "message": f"read {form_request['fname']}",
-                "data": lines,
-                "path": "/file/readtxt"
-            })
-        except Exception as e:
-            print(f'[ERR: /file/readtxt] {e}')
-            return jsonify({
-                "errors": e.args[0],
-                "code": 500,
-                "path": "/file/readtxt",
-                "ok": False
-            }), 500
+# @app.route("/file/readtxt", methods=["POST"])
+# def txt_reader():
+#     if request.method == "POST":
+#         try:
+#             form_request = rqparser.parse(request)
+#             with open(form_request["fname"], "r") as f:
+#                 lines = f.read().splitlines()
+#             return jsonify({
+#                 "code": 200,
+#                 "ok": True,
+#                 "message": f"read {form_request['fname']}",
+#                 "data": lines,
+#                 "path": "/file/readtxt"
+#             })
+#         except Exception as e:
+#             print(f'[ERR: /file/readtxt] {e}')
+#             return jsonify({
+#                 "errors": e.args[0],
+#                 "code": 500,
+#                 "path": "/file/readtxt",
+#                 "ok": False
+#             }), 500
 
-@app.route("/file/readcsv", methods=["POST"])
-def csv_reader():
-    if request.method == "POST":
-        try:
-            form_request = rqparser.parse(request)
-            with open(form_request["fname"], "r") as f:
-                lines = f.read().splitlines()
+# @app.route("/file/readcsv", methods=["POST"])
+# def csv_reader():
+#     if request.method == "POST":
+#         try:
+#             form_request = rqparser.parse(request)
+#             with open(form_request["fname"], "r") as f:
+#                 lines = f.read().splitlines()
         
-            idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
-            contents = {field: [] for field in idx2field.values()}
-            for line in lines[1:]:
-                for i,val in enumerate(line.split("\t")):
-                    contents[idx2field[i]].append(val)
+#             idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
+#             contents = {field: [] for field in idx2field.values()}
+#             for line in lines[1:]:
+#                 for i,val in enumerate(line.split("\t")):
+#                     contents[idx2field[i]].append(val)
         
-            return jsonify({
-                "code": 200,
-                "ok": True,
-                "message": f"read {form_request['fname']} as dataframe",
-                "data": contents,
-                "path": "/file/readcsv"
-            })
-        except Exception as e:
-            print(f'[ERR: /file/readcsv] {e}')
-            return jsonify({
-                "errors": e.args[0],
-                "code": 500,
-                "path": "/file/readcsv",
-                "ok": False
-            }), 500
+#             return jsonify({
+#                 "code": 200,
+#                 "ok": True,
+#                 "message": f"read {form_request['fname']} as dataframe",
+#                 "data": contents,
+#                 "path": "/file/readcsv"
+#             })
+#         except Exception as e:
+#             print(f'[ERR: /file/readcsv] {e}')
+#             return jsonify({
+#                 "errors": e.args[0],
+#                 "code": 500,
+#                 "path": "/file/readcsv",
+#                 "ok": False
+#             }), 500
 
-@app.route("/file/delete", methods=["POST"])
-def delete_serialized():
-    if request.method == "POST":
-        try:
-            form_request = rqparser.parse(request)
+# @app.route("/file/delete", methods=["POST"])
+# def delete_serialized():
+#     if request.method == "POST":
+#         try:
+#             form_request = rqparser.parse(request)
         
-            print(f"[INFO] deleting...", end=" ")        
-            for pattern in form_request["fnames"]:
-                # only data-files can be deleted!
-                ext = pattern.split('.')[-1]
-                if ext not in ["txt", "csv", "json"]:
-                    continue
-                fnames = glob.glob(pattern)
-                for fname in fnames:
-                    print(fname, end=", ")
-                    os.remove(fname)
-            print("")                
+#             print(f"[INFO] deleting...", end=" ")        
+#             for pattern in form_request["fnames"]:
+#                 # only data-files can be deleted!
+#                 ext = pattern.split('.')[-1]
+#                 if ext not in ["txt", "csv", "json"]:
+#                     continue
+#                 fnames = glob.glob(pattern)
+#                 for fname in fnames:
+#                     print(fname, end=", ")
+#                     os.remove(fname)
+#             print("")                
         
-            return jsonify({
-                "code": 200,
-                "ok": True,
-                "message": f"deleted files: {form_request['fnames']}",
-                "path": "/file/delete"
-            })
-        except Exception as e:
-            print(f'[ERR: /file/delete] {e}')
-            return jsonify({
-                "errors": e.args[0],
-                "code": 500,
-                "path": "/file/delete",
-                "ok": False
-            }), 500
+#             return jsonify({
+#                 "code": 200,
+#                 "ok": True,
+#                 "message": f"deleted files: {form_request['fnames']}",
+#                 "path": "/file/delete"
+#             })
+#         except Exception as e:
+#             print(f'[ERR: /file/delete] {e}')
+#             return jsonify({
+#                 "errors": e.args[0],
+#                 "code": 500,
+#                 "path": "/file/delete",
+#                 "ok": False
+#             }), 500
 
 @app.route("/cluster/run", methods=["POST"])
 def cluster_posts_and_serialize_results():

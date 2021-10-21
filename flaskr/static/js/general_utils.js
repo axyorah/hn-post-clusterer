@@ -5,10 +5,10 @@ function urlify(json) {
     return entries.join('&')
 }
 
-async function postData(url, data) {
+async function postData(url, data, method='POST') {
     // Default options are marked with *
     const response = await fetch(url, {
-        method: 'POST', 
+        method: method, 
         mode: 'cors', 
         cache: 'no-cache', 
         credentials: 'same-origin', 

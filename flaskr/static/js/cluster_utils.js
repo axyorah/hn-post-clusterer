@@ -15,16 +15,28 @@ function addGraphFromRouteToNode(node, route) {
 
 function reset() {
     // clear old data files
-    const deletable = {
-        "sender": "deleter",
-        "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt,data/freq_*.json"
+    const fnamesToBeDeleted = [
+        'data/df.csv','data/df_tsne.csv','data/pca.txt','data/freq_*.json'
+    ];
+    for (let fname of fnamesToBeDeleted) {
+        postData('/file', {'sender': 'deleter', 'fname': fname}, method='DELETE')
+        .then(res => checkForServerErrors(res))
+        .catch(err => {
+            console.log(err);
+            addAlertMessage(err);
+        });
     }
-    postData('/file/delete', deletable)
-    .then(res => checkForServerErrors(res))
-    .catch(err => {
-        console.log(err);
-        addAlertMessage(err);
-    });
+
+    // const deletable = {
+    //     "sender": "deleter",
+    //     "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt,data/freq_*.json"
+    // }
+    // postData('/file/delete', deletable)
+    // .then(res => checkForServerErrors(res))
+    // .catch(err => {
+    //     console.log(err);
+    //     addAlertMessage(err);
+    // });
 
     // clear figures
     removeAllNodeChildren(clusterBarPlotRoot);
@@ -133,11 +145,13 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     tableRoot.style.display = "";
 
     // read all labels
-    postData('/file/readcsv', {
-        'sender': 'reader',
-        'fname': 'data/df.csv'
-    })
+    // postData('/file/readcsv', {
+    //     'sender': 'reader',
+    //     'fname': 'data/df.csv'
+    // })
+    fetch('/file?fname=data/df.csv')
     .then(res => checkForServerErrors(res))
+    .then(res => res.json())
     .then(res => {
         // filters post ids based on the target label
         filtered_ids = filterAbyBwhereBisC(
@@ -145,12 +159,14 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
             res.data['label'],
             targetLabel
         );
-        return postData('/db/get', {
-            'sender': 'db-lister',
-            'story_ids': filtered_ids.join(','), // TODO: adjust RequestParser to accept list!
-        })
+        // return postData('/db/get', {
+        //     'sender': 'db-lister',
+        //     'story_ids': filtered_ids.join(','), // TODO: adjust RequestParser to accept list!
+        // })
+        return fetch(`/db/stories?ids=${filtered_ids.join(',')}`)
     })
     .then(res => checkForServerErrors(res))
+    .then(res => res.json())
     .then(res => {
         // display filtered posts in a new table
         const table = getNewHNPostTable(); // no morePostsBtn!
