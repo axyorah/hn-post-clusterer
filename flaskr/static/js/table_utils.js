@@ -49,22 +49,20 @@ function appendDataToHNPostTable(table, data) {
             td.setAttribute('class', `col_${i}`);
 
             if (fields[i] === 'unix_time') {
-                const date = new Date(data[storyId][fields[i]] * 1000);
+                const date = new Date(data[storyId]['unix_time'] * 1000);
                 td.innerText = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+            } else if (fields[i] === 'title') {
+                const url = data[storyId]['url'] != null ? data[storyId]['url'] : `https://news.ycombinator.com/item?id=${data[storyId]['story_id']}`;
+                td.innerHTML = 
+                    `<a href=${url} target='_blank'>${data[storyId]['title']}</a> by ${data[storyId]['author']}`;
             } else {
                 td.innerText = data[storyId][fields[i]];
-            }
-            if (fields[i] === 'title') {
-                td.innerHTML = 
-                    (data[storyId]['url'] != null ? `<a href=${data[storyId]['url']} target='_blank'>${data[storyId][fields[i]]}</a>` : data[storyId][fields[i]]) + 
-                    ` by ${data[storyId]['author']}`
             }
             tr.appendChild(td);
         }
         // add comments as details or popup
         const td = document.createElement('td');
         td.setAttribute('class', `col_${fields.length}`);
-        // td.appendChild(getHTMLDetails('show', data[storyId]['children']));
         td.appendChild(getPopup(data[storyId]['children']));
         tr.appendChild(td);        
         
