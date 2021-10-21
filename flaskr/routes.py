@@ -8,7 +8,11 @@ from flask.json import jsonify
 
 from flaskr.utils.formutils import RequestParser as rqparser
 from flaskr.utils.dbutils import DBHelper
-from flaskr.utils.generalutils import BatchedPipeliner
+from flaskr.utils.db_utils import (
+    DBHelper as dbh,
+    query_hn_and_add_result_to_db
+)
+from flaskr.utils.general_utils import BatchedPipeliner
 from flaskr.utils.nlputils import ClusterFrequencyCounter
 from flaskr.utils.clusterutils import TSNEer
 
@@ -23,19 +27,18 @@ PCA_FNAME = os.path.join(CORPUS_DIR, 'pca.txt')
 def index():
     return render_template("index.html")
 
-# RESTful db routes for single story
+# db routes for single story
 @app.route("/db/story/<string:id>")
 def get_story(id):
-    dbhelper = DBHelper()
 
-    story_rows = dbhelper.query("SELECT * FROM story WHERE story_id = ?", [id])
+    story_rows = dbh.get_query("SELECT * FROM story WHERE story_id = ?", [id])
         
-    if story_rows is not None:
+    if story_rows:
         return jsonify({
             "code": 200,
             "ok": True,
             "message": "got story from db",
-            "data": dbhelper.story_rows_to_dicts(story_rows)[int(id)],
+            "data": dbh.rows2dicts(story_rows)[0],
             "path": "/db/story"
         })
     else: 
@@ -44,92 +47,272 @@ def get_story(id):
             "ok": False,
             "message": f"item {id} not found",
             "path": "/db/story"
-    })
+        }), 500
 
 @app.route("/db/story", methods=["POST"])
 def post_story():
-    pass
+    return jsonify({
+        "code": 500,
+        "ok": False,
+        "message": f"this route is currently unavailable",
+        "path": "/db/story/<id>"
+    }), 500
 
 @app.route("/db/story/<string:id>", methods=["DELETE"])
 def delete_story(id):
-    pass
+    return jsonify({
+        "code": 500,
+        "ok": False,
+        "message": f"this route is currently unavailable",
+        "path": "/db/story/<id>"
+    }), 500
 
 @app.route("/db/story/<string:id>", methods=["PUT"])
 def update_story(id):
-    pass
+    return jsonify({
+        "code": 500,
+        "ok": False,
+        "message": f"this route is currently unavailable",
+        "path": "/db/story/<id>"
+    }), 500
 
-# RESTful db routes for multiple stories
-@app.route("/db/stories")
-def get_stories():
+## db routes for single comment
+@app.route("/db/comment/<string:id>")
+def get_comment(id):
 
-    # should be called as "/db/items?id=1,2,3"
-    id_list = [int(i) for i in request.args.get("id").split(",")]
-
-    if id_list:
-        dbhelper = DBHelper()
-
-        query = f"""
-        {dbhelper.story_pattern_without_where}
-        WHERE s.story_id IN ({", ".join("?" for _ in id_list)});
-        """
-        story_rows = dbhelper.query(query, id_list)
+    comment_rows = dbh.get_query("SELECT * FROM comment WHERE comment_id = ?", [id])
+        
+    if comment_rows:
+        print(comment_rows)
         return jsonify({
             "code": 200,
             "ok": True,
-            "message": "got stories from db",
-            "data": dbhelper.story_rows_to_dicts(story_rows),
-            "path": "/db/stories"
+            "message": "got comment from db",
+            "data": dbh.rows2dicts(comment_rows)[0],
+            "path": "/db/comment"
         })
+    else: 
+        return jsonify({
+            "code": 404,
+            "ok": False,
+            "message": f"item {id} not found",
+            "path": "/db/comment"
+    }), 404
+
+# db routes for multiple stories
+@app.route("/db/stories")
+def get_stories():
+    # called as "/db/stories?ids=1,2,3"
+
+    # TODO: should be parsed properly
+    id_list = [int(i) for i in request.args.get("ids").split(",") if i.isnumeric()]
+
+    if id_list:
+        try:
+            query = f"""
+            {dbh.STORY_PATTERN_WITHOUT_WHERE}
+            WHERE s.story_id IN ({", ".join("?" for _ in id_list)});
+            """
+            story_rows = dbh.get_query(query, id_list)
+            return jsonify({
+                "code": 200,
+                "ok": True,
+                "message": "got stories from db",
+                "data": dbh.rows2dicts(story_rows),
+                "path": "/db/stories"
+            })
+        except Exception as e:
+            return jsonify({
+                "code": 500,
+                "ok": True,
+                "message": "couldn't get stories from db",
+                "errors": e.args[0],
+                "path": "/db/stories"
+            }), 500
 
     else:
         return jsonify({
-            "code": 500,
+            "code": 400,
             "ok": False,
             "message": "could not understand the request; should be `/db/stories?id=1,2,3`",
             "path": "/db/stories"
-        })
+        }), 400
 
 
-# RESTful db routes for multiple items (stories + comments)
+# db routes for multiple items (stories + comments)
 @app.route("/db/items", methods=["POST"])
 def post_items():
-    form_request = rqparser.parse(request)
+    try:
+        form_request = rqparser.parse(request)
     
-    dbhelper = DBHelper()
-    dbhelper.query_api_and_add_result_to_db(form_request)
+        query_hn_and_add_result_to_db(form_request)
 
-    return jsonify({
-        "code": 200,
-        "ok": True,
-        "message": "added new entries to database",
-        "path": "/db/items"
-    })
+        return jsonify({
+            "code": 200,
+            "ok": True,
+            "message": "added new entries to database",
+            "path": "/db/items"
+        })
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "ok": False,
+            "message": "couldn't get items from hn and add them to db",
+            "errors": e.args[0],
+            "path": "/db/items"
+        }), 500
 
 @app.route("/db/items", methods=["DELETE"])
 def delete_items():
-    pass
+    return jsonify({
+        "code": 500,
+        "ok": False,
+        "message": f"this route is currently unavailable",
+        "path": "/db/items"
+    }), 500
 
 @app.route("/db/items", methods=["PUT"])
 def update_items():
-    pass
+    return jsonify({
+        "code": 500,
+        "ok": False,
+        "message": f"this route is currently unavailable",
+        "path": "/db/items"
+    }), 500
 
-# RESTful file routes
-@app.route("/file/<string:fname>")
-def read_file(fname):
-    # checks if present
+# file routes
+@app.route("/file")
+def read_file():
+    # use as: /file?fname=<fname>
+    fname = request.args.get("fname")
+
+    # checks if present   
+    if not os.path.isfile(fname):
+        return jsonify({
+            "code": 404,
+            "ok": False,
+            "message": f"file {fname} not found",
+            "path": "/file/<fname>"
+        }), 404
+
     # checks ext
+    ext = fname.split(".")[-1]
+    if ext not in ["txt", "csv", "json"]:
+        return jsonify({
+            "code": 400,
+            "ok": False,
+            "message": f"file extension should be one of: txt, csv or json",
+            "path": "/file/<fname>"
+        }), 400
+
     # reads as txt, csv (with header) or json depending on ext
-    pass
+    try:    
+        if ext == "txt":
+            with open(fname, "r") as f:
+                lines = f.read().splitlines()
+                return jsonify({
+                    "code": 200,
+                    "ok": True,
+                    "message": f"read {fname} as txt",
+                    "data": lines,
+                    "path": "/file"
+                })
+        elif ext == "json":
+            with open(fname, "f") as f:
+                return jsonify({
+                    "code": 200,
+                    "ok": True,
+                    "message": f"read {fname} as json",
+                    "data": json.load(f),
+                    "path": "/file"
+                })
+        elif ext == "csv":
+            with open(fname, "r") as f:
+                lines = f.read().splitlines()
 
-@app.route("/file/<string:fname>", methods=["DELETE"])
-def delete_file(fname):
-    # checks if exists
-    # check if data file (txt, csv, json)
-    # deletes if data file
-    pass
+            idx2field = {i:name for i,name in enumerate(lines[0].split("\t"))}
+            contents = {field: [] for field in idx2field.values()}
+            for line in lines[1:]:
+                for i,val in enumerate(line.split("\t")):
+                    contents[idx2field[i]].append(val)
+        
+            return jsonify({
+                "code": 200,
+                "ok": True,
+                "message": f"read {fname} as dataframe",
+                "data": contents,
+                "path": "/file"
+            })
+    except Exception as e:
+        print(f'[ERR: /file/readcsv] {e}')
+        return jsonify({
+            "errors": e.args[0],
+            "code": 500,
+            "path": "/file",
+            "ok": False
+        }), 500
+
+@app.route("/file", methods=["DELETE"])
+def delete_file():
+    # `fname` should be passed in request body and can be a pattern, e.g., `data/*.txt`
+    fname_pattern = request.get_json().get("fname")
+    if fname_pattern is None:
+        return jsonify({
+            "code": 400,
+            "ok": False,
+            "message": f"specify file to be deleted at `fname` key",
+            "path": "/file"
+        }), 400
+
+    # checks ext
+    ext = fname_pattern.split(".")[-1]
+    if ext not in ["txt", "csv", "json"]:
+        return jsonify({
+            "code": 400,
+            "ok": False,
+            "message": f"file extension should be one of: txt, csv or json",
+            "path": "/file"
+        }), 400
+
+    # check location
+    subdir = fname_pattern.split("/")[0]
+    if subdir != "data":
+        return jsonify({
+            "code": 400,
+            "ok": False,
+            "message": f"only files located in `data` subdir can be deleted",
+            "path": "/file"
+        }), 400
+
+    # delete all files that match pattern
+    try:
+        fnames = glob.glob(fname_pattern)
+        for fname in fnames:
+            print(fname, end=", ")
+            os.remove(fname)
+        print("")
+        
+        return jsonify({
+            "code": 200,
+            "ok": True,
+            "message": f"deleted files: {','.join(fnames)}",
+            "path": "/file"
+        })
+
+    except Exception as e:
+        print(f'[ERR: /file] {e}')
+        return jsonify({
+            "errors": e.args[0],
+            "code": 500,
+            "path": "/file",
+            "ok": False
+        }), 500
 
 
 
+
+
+# --- old routes ---
 @app.route("/db/add", methods=["POST"])
 def seed_db():
     if request.method == "POST":
