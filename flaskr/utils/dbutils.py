@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Set, Optional, Generator, Union
+import sqlite3
 
 from flaskr.db import get_db
 import requests as rq
@@ -91,7 +92,7 @@ class DBHelper:
         FROM story AS s
         """
 
-    def query(self, query_pattern: str, params: List) -> List['Row']:
+    def query(self, query_pattern: str, params: List) -> sqlite3.Row:
         return self.db.execute(query_pattern, tuple(params)).fetchall()
 
     def is_story_id_in_db(self, item_id: Union[int, str]) -> bool:
@@ -223,11 +224,6 @@ class DBHelper:
 
     def fetch_and_add_item_by_id(self, item_id: Union[int, str], commit: str = True) -> Optional[Dict]:
         print(f'[INFO] getting {item_id}...', end=' ')
-        
-        # skip if item already in db
-        #if self.is_story_id_in_db(item_id) or self.is_comment_id_in_db(item_id):
-        #    print('already in db, skipping...')
-        #    return
 
         # skip if comment and already in db
         # keep is story and already in db -> update it later
@@ -321,7 +317,7 @@ class DBHelper:
             for field in fields
         }
 
-    def get_story_rows_with_children_from_id_range(self, form_request: Dict) -> List['Row']:
+    def get_story_rows_with_children_from_id_range(self, form_request: Dict) -> sqlite3.Row:
 
         """
         filters the stories by the id range, #comments and score;
@@ -385,7 +381,7 @@ class DBHelper:
             tuple(form_request['story_ids'])
         ).fetchall()
 
-    def story_rows_to_dicts(self, rows: List['Row'], aslist: bool = False) -> Union[Dict,List[Dict]]:
+    def story_rows_to_dicts(self, rows: sqlite3.Row, aslist: bool = False) -> Union[Dict,List[Dict]]:
         """
         convert sql row objects corresponding to stories
         into dicts with fields
@@ -417,7 +413,7 @@ class DBHelper:
                 } for row in rows
             }
 
-    def comment_rows_to_dicts(self, rows: List['Row'], aslist: bool = False) -> Union[Dict,List[Dict]]:
+    def comment_rows_to_dicts(self, rows: sqlite3.Row, aslist: bool = False) -> Union[Dict,List[Dict]]:
         """
         convert sql row objects corresponding to stories
         into dicts with fields
