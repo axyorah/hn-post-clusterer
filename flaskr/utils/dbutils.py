@@ -13,7 +13,7 @@ story_api2schema = {
     'url': 'url',
     'score': 'score',
     'title': 'title',
-    'num_comments': 'descentants',
+    'num_comments': 'descendants',
     'kids': 'kids', # not in schema but we need it...
     'type': 'type' # not in schema
 }
@@ -223,11 +223,20 @@ class DBHelper:
 
     def fetch_and_add_item_by_id(self, item_id: Union[int, str], commit: str = True) -> Optional[Dict]:
         print(f'[INFO] getting {item_id}...', end=' ')
-
+        
         # skip if item already in db
-        if self.is_story_id_in_db(item_id) or self.is_comment_id_in_db(item_id):
-            print('already in db, skipping...')
+        #if self.is_story_id_in_db(item_id) or self.is_comment_id_in_db(item_id):
+        #    print('already in db, skipping...')
+        #    return
+
+        # skip if comment and already in db
+        # keep is story and already in db -> update it later
+        story_needs_update = False
+        if self.is_comment_id_in_db(item_id):
+            print('')
             return
+        if self.is_story_id_in_db(item_id):
+            story_needs_update = True
 
         # get item
         item = query_api(item_id) # raw response
@@ -244,7 +253,10 @@ class DBHelper:
             f'from {str(datetime.datetime.fromtimestamp(int(item.get("unix_time") | 0))).split(" ")[0]}, ' +\
             f'adding to db...'
         )
-        self.add_item_to_db(item, commit=commit)
+        if story_needs_update:
+            self.update_story_in_db(item, commit=commit)
+        else:
+            self.add_item_to_db(item, commit=commit)
 
         return item
 
@@ -261,7 +273,7 @@ class DBHelper:
         # add/update all items in the requested range
         print(f'<<< REQUESTING ITEMS FROM {form_request["begin_id"]} TO {form_request["end_id"]} >>>')
         for item_id in range(form_request['begin_id'], form_request['end_id']+1):
-            item = self.fetch_and_add_item_by_id(item_id, commit=False)
+            item = self.fetch_and_add_item_by_id(item_id, commit=True)
 
             # for stories only: record comments (kids) outside requested range
             if item is not None and item.get('kids', None) is not None:
@@ -271,21 +283,22 @@ class DBHelper:
                 ])
 
             # commit db every `delta_commit`
-            if not (item_id - form_request['begin_id']) % delta_commit:
-                self.db.commit()
+            # if not (item_id - form_request['begin_id']) % delta_commit:
+            #     print('committing!')
+            #     #self.db.commit()
     
         # add comments outside the requested range
         # if they are parented by the stories withing the requested range
         print('<<< REQUESTING MORE ITEMS! >>>')
         for i,item_id in enumerate(extra_comment_ids):
-            self.fetch_and_add_item_by_id(item_id, commit=False)
+            self.fetch_and_add_item_by_id(item_id, commit=True)
             
             # commit db every `delta_commit`
-            if not (i % delta_commit):
-                self.db.commit()
+            # if not (i % delta_commit):
+            #     self.db.commit()
 
         # final db commit
-        self.db.commit()
+        #self.db.commit()
 
     
     def get_story_with_children_by_id(self, story_id: Union[int, str]) -> Dict:
@@ -427,7 +440,7 @@ class DBHelper:
             ]
         else:
             return {
-                row.__getitem__('story_id'): {
+                row.__getitem__('comment_id'): {
                     field: row.__getitem__(field) 
                     if field in row.keys() else None 
                     for field in fields
