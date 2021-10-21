@@ -15,7 +15,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, LancasterStemmer
 
-from flaskr.utils.dbutils import DBHelper
+from flaskr.utils.db_utils import DBHelper as dbh
 
 nltk.download('stopwords')
 stop_words = stopwords.words('english')
@@ -121,7 +121,6 @@ class Tokenizer:
 
 class ClusterFrequencyCounter:
     def __init__(self):
-        self.dbhelper = DBHelper()
         self.tokenizer = Tokenizer()
         self.frequencies = dict()
 
@@ -134,16 +133,24 @@ class ClusterFrequencyCounter:
             self.frequencies[label][token] += 1
 
     def count_serialized_cluster_frequencies(self, fname: str) -> Dict:
+        get_query = f'''
+            {dbh.STORY_PATTERN_WITHOUT_WHERE}
+            WHERE s.story_id = ?
+        '''
+
         for i,line in enumerate(open(fname)):
             if not i:
                 field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
                 continue
+            if not i % 50:
+                print(f'[INFO] processed {i} stories for wordcloud')
 
             vals = line.split('\t')
             story_id = vals[field2idx['id']]
             label = vals[field2idx['label']]
-
-            story = self.dbhelper.get_story_with_children_by_id(story_id)
+            
+            story_rows = dbh.get_query(get_query, (story_id,))
+            story = dbh.rows2dicts(story_rows)[0]
             comments = html2text(story['children'])
             tokens = self.tokenizer.tokenize(comments)
 
