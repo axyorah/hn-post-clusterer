@@ -27,17 +27,6 @@ function reset() {
         });
     }
 
-    // const deletable = {
-    //     "sender": "deleter",
-    //     "fnames": "data/df.csv,data/df_tsne.csv,data/pca.txt,data/freq_*.json"
-    // }
-    // postData('/file/delete', deletable)
-    // .then(res => checkForServerErrors(res))
-    // .catch(err => {
-    //     console.log(err);
-    //     addAlertMessage(err);
-    // });
-
     // clear figures
     removeAllNodeChildren(clusterBarPlotRoot);
     removeAllNodeChildren(dailyBarPlotRoot);
@@ -144,11 +133,6 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
     // make table visible
     tableRoot.style.display = "";
 
-    // read all labels
-    // postData('/file/readcsv', {
-    //     'sender': 'reader',
-    //     'fname': 'data/df.csv'
-    // })
     fetch('/file?fname=data/df.csv')
     .then(res => checkForServerErrors(res))
     .then(res => res.json())
@@ -159,10 +143,6 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
             res.data['label'],
             targetLabel
         );
-        // return postData('/db/get', {
-        //     'sender': 'db-lister',
-        //     'story_ids': filtered_ids.join(','), // TODO: adjust RequestParser to accept list!
-        // })
         return fetch(`/db/stories?ids=${filtered_ids.join(',')}`)
     })
     .then(res => checkForServerErrors(res))
