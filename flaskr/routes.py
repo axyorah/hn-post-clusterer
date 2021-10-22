@@ -6,14 +6,14 @@ from flask import Flask, render_template, redirect, url_for
 from flask import request, make_response, Response
 from flask.json import jsonify
 
-from flaskr.utils.formutils import RequestParser as rqparser
+from flaskr.utils.form_utils import RequestParser as rqparser
 from flaskr.utils.db_utils import (
     DBHelper as dbh,
     query_hn_and_add_result_to_db
 )
 from flaskr.utils.general_utils import BatchedPipeliner
-from flaskr.utils.nlputils import ClusterFrequencyCounter
-from flaskr.utils.clusterutils import TSNEer
+from flaskr.utils.nlp_utils import ClusterFrequencyCounter
+from flaskr.utils.cluster_utils import TSNEer
 
 # set globals
 CORPUS_DIR = 'data'

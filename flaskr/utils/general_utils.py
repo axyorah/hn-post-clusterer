@@ -10,7 +10,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.manifold import TSNE
 
-from flaskr.utils.nlputils import (
+from flaskr.utils.nlp_utils import (
     StoryEmbedder,
     html2sentences,
 )
@@ -19,7 +19,7 @@ from flaskr.utils.db_utils import (
     DBHelper as dbh,
 )
 
-from flaskr.utils.clusterutils import (
+from flaskr.utils.cluster_utils import (
     copy_and_measure_generator,
     copy_and_measure_batch_generator,
     BatchedGeneratorStandardizer

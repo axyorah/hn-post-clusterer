@@ -12,7 +12,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-from flaskr.utils.dashutils import (
+from flaskr.utils.dash_utils import (
     DataHelper as data,
     FigureHelper as figs
 )

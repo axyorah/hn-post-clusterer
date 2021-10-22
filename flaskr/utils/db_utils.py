@@ -69,8 +69,7 @@ def fetch_and_add_item_by_id(item_id: Union[int, str], commit: str = True) -> Op
     # skip if empty/deleted/dead
     if item is None or item.get('deleted',False) or item.get('dead',False):
         print('got empty, deleted or dead...')
-        return
-    
+        return    
     
     # add to db if not empty
     print(
