@@ -1,9 +1,11 @@
 import os, json, glob
 from smart_open import open
 
-from flask import current_app as app
-from flask import Flask, render_template, redirect, url_for
-from flask import request, make_response, Response
+from flask import (
+    current_app as app,
+    render_template,
+    request,
+)
 from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
