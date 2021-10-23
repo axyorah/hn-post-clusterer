@@ -16,6 +16,7 @@ from flaskr.utils.db_utils import (
 from flaskr.utils.general_utils import BatchedPipeliner
 from flaskr.utils.nlp_utils import ClusterFrequencyCounter
 from flaskr.utils.cluster_utils import TSNEer
+from flaskr.utils.date_utils import get_first_id_on_day
 
 # set globals
 CORPUS_DIR = 'data'
@@ -146,6 +147,76 @@ def get_stories():
             "message": "could not understand the request; should be `/db/stories?ids=1,2,3`",
             "path": "/db/stories"
         }), 400
+
+@app.route("/db/stories/stats")
+def get_stories_stats():
+    """
+    returns basic stats about stories in db under `data` field:
+    {
+        "num": <number of stories in db>,
+        "min": <min story id>,
+        "max": <max story id>
+    }
+    """
+    num_query = "SELECT COUNT(*) as num FROM story;"
+    min_query = "SELECT MIN(story_id) as min FROM story;"
+    max_query = "SELECT MAX(story_id) as max FROM story;"
+    
+    try:
+        result = {
+            "num": dbh.get_query(num_query, [])[0].__getitem__("num"),
+            "min": dbh.get_query(min_query, [])[0].__getitem__("min"),
+            "max": dbh.get_query(max_query, [])[0].__getitem__("max")
+        }
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "ok": False,
+            "errors": e.args[0],
+            "path": "/db/stories/stats"
+        })
+
+    return jsonify({
+        "code": 200,
+        "ok": True,
+        "data": result,
+        "path": "/db/stories/stats"
+    })
+
+@app.route("/db/comments/stats")
+def get_comments_stats():
+    """
+    returns basic stats about comments in db under `data` field:
+    {
+        "num": <number of comments in db>,
+        "min": <min comment id>,
+        "max": <max comment id>
+    }
+    """
+    num_query = "SELECT COUNT(*) as num FROM comment;"
+    min_query = "SELECT MIN(comment_id) as min FROM comment;"
+    max_query = "SELECT MAX(comment_id) as max FROM comment;"
+    
+    try:
+        result = {
+            "num": dbh.get_query(num_query, [])[0].__getitem__("num"),
+            "min": dbh.get_query(min_query, [])[0].__getitem__("min"),
+            "max": dbh.get_query(max_query, [])[0].__getitem__("max")
+        }
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "ok": False,
+            "errors": e.args[0],
+            "path": "/db/comments/stats"
+        })
+
+    return jsonify({
+        "code": 200,
+        "ok": True,
+        "data": result,
+        "path": "/db/comments/stats"
+    })
 
 # db routes for multiple items (stories + comments)
 @app.route("/db/items", methods=["POST"])
@@ -336,6 +407,33 @@ def delete_file():
             "path": "/file",
             "ok": False
         }), 500
+
+# time and date routes
+@app.route("/time/first_id_on")
+def get_first_hn_it_on_date():
+    """
+    use as "/time/first_id_on?year=2021&month=12&day=31
+    """
+    try:
+        date = {
+            "year": int(request.args.get("year")) or 2021,
+            "month": int(request.args.get("month")) or 10,
+            "day": int(request.args.get("day")) or 17
+        }
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "errors": e.args[0],
+            "path": "/time/first_id_on",
+            "ok": False
+        }), 500
+
+    return jsonify({
+        "code": 200,
+        "ok": True,
+        "data": {"id": get_first_id_on_day(**date)},
+        "path": "/time/first_id_on"
+    })
 
 # cluster routes
 @app.route("/cluster/run", methods=["POST"])
