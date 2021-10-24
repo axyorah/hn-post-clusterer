@@ -40,45 +40,30 @@ def get_story(id):
         
     if story_rows:
         return jsonify({
-            "code": 200,
-            "ok": True,
             "message": "got story from db",
             "data": dbh.rows2dicts(story_rows)[0],
-            "path": "/db/story/<id>"
         })
     else: 
         return jsonify({
-            "code": 500,
-            "ok": False,
             "message": f"item {id} not found",
-            "path": "/db/story/<id>"
-        }), 500
+        }), 404
 
 @app.route("/db/story/<string:id>", methods=["POST"])
 def post_story():
     return jsonify({
-        "code": 500,
-        "ok": False,
         "message": f"this route is currently unavailable",
-        "path": "/db/story/<id>"
     }), 500
 
 @app.route("/db/story/<string:id>", methods=["DELETE"])
 def delete_story(id):
     return jsonify({
-        "code": 500,
-        "ok": False,
         "message": f"this route is currently unavailable",
-        "path": "/db/story/<id>"
     }), 500
 
 @app.route("/db/story/<string:id>", methods=["PUT"])
 def update_story(id):
     return jsonify({
-        "code": 500,
-        "ok": False,
         "message": f"this route is currently unavailable",
-        "path": "/db/story/<id>"
     }), 500
 
 ## db routes for single comment
@@ -92,18 +77,12 @@ def get_comment(id):
     if comment_rows:
         print(comment_rows)
         return jsonify({
-            "code": 200,
-            "ok": True,
             "message": "got comment from db",
             "data": dbh.rows2dicts(comment_rows)[0],
-            "path": "/db/comment/<id>"
         })
     else: 
         return jsonify({
-            "code": 404,
-            "ok": False,
             "message": f"item {id} not found",
-            "path": "/db/comment/<id>"
     }), 404
 
 # db routes for multiple stories
@@ -115,6 +94,11 @@ def get_stories():
     use as `/db/stories?ids=1,2,3`
     """
     # TODO: should be parsed properly
+    if request.args.get("ids") is None:
+        return jsonify({
+            "message": "could not understand the request; should be `/db/stories?ids=1,2,3`",
+        }), 400
+
     id_list = [int(i) for i in request.args.get("ids").split(",") if i.isnumeric()]
 
     if id_list:
@@ -125,28 +109,20 @@ def get_stories():
             """
             story_rows = dbh.get_query(query, id_list)
             return jsonify({
-                "code": 200,
-                "ok": True,
                 "message": "got stories from db",
                 "data": dbh.rows2dicts(story_rows),
-                "path": "/db/stories"
             })
         except Exception as e:
             return jsonify({
-                "code": 500,
-                "ok": True,
                 "message": "couldn't get stories from db",
                 "errors": e.args[0],
-                "path": "/db/stories"
             }), 500
 
     else:
         return jsonify({
-            "code": 400,
-            "ok": False,
-            "message": "could not understand the request; should be `/db/stories?ids=1,2,3`",
-            "path": "/db/stories"
-        }), 400
+            "message": "stories with speicifed ids not found",
+        }), 404
+        
 
 @app.route("/db/stories/stats")
 def get_stories_stats():
@@ -170,17 +146,12 @@ def get_stories_stats():
         }
     except Exception as e:
         return jsonify({
-            "code": 500,
-            "ok": False,
+            "message": "couldn't get story stats",
             "errors": e.args[0],
-            "path": "/db/stories/stats"
         })
 
     return jsonify({
-        "code": 200,
-        "ok": True,
         "data": result,
-        "path": "/db/stories/stats"
     })
 
 @app.route("/db/comments/stats")
@@ -205,17 +176,12 @@ def get_comments_stats():
         }
     except Exception as e:
         return jsonify({
-            "code": 500,
-            "ok": False,
+            "message": "couldn't get comment stats",
             "errors": e.args[0],
-            "path": "/db/comments/stats"
-        })
+        }), 500
 
     return jsonify({
-        "code": 200,
-        "ok": True,
         "data": result,
-        "path": "/db/comments/stats"
     })
 
 # db routes for multiple items (stories + comments)
@@ -237,36 +203,24 @@ def post_items():
         query_hn_and_add_result_to_db(form_request)
 
         return jsonify({
-            "code": 200,
-            "ok": True,
-            "message": "added new entries to database",
-            "path": "/db/items"
+            "message": "updated database with new entries",
         })
     except Exception as e:
         return jsonify({
-            "code": 500,
-            "ok": False,
-            "message": "couldn't get items from hn and add them to db",
+            "message": "couldn't get items from hn and add them to database",
             "errors": e.args[0],
-            "path": "/db/items"
         }), 500
 
 @app.route("/db/items", methods=["DELETE"])
 def delete_items():
     return jsonify({
-        "code": 500,
-        "ok": False,
         "message": f"this route is currently unavailable",
-        "path": "/db/items"
     }), 500
 
 @app.route("/db/items", methods=["PUT"])
 def update_items():
     return jsonify({
-        "code": 500,
-        "ok": False,
         "message": f"this route is currently unavailable",
-        "path": "/db/items"
     }), 500
 
 # file routes
@@ -281,20 +235,14 @@ def read_file():
     # checks if present   
     if not os.path.isfile(fname):
         return jsonify({
-            "code": 404,
-            "ok": False,
             "message": f"file {fname} not found",
-            "path": "/file"
         }), 404
 
     # checks ext
     ext = fname.split(".")[-1]
     if ext not in ["txt", "csv", "json"]:
         return jsonify({
-            "code": 400,
-            "ok": False,
             "message": f"file extension should be one of: txt, csv or json",
-            "path": "/file"
         }), 400
 
     # reads as txt, csv (with header) or json depending on ext
@@ -303,20 +251,14 @@ def read_file():
             with open(fname, "r") as f:
                 lines = f.read().splitlines()
                 return jsonify({
-                    "code": 200,
-                    "ok": True,
                     "message": f"read {fname} as txt",
                     "data": lines,
-                    "path": "/file"
                 })
         elif ext == "json":
             with open(fname, "f") as f:
                 return jsonify({
-                    "code": 200,
-                    "ok": True,
                     "message": f"read {fname} as json",
                     "data": json.load(f),
-                    "path": "/file"
                 })
         elif ext == "csv":
             with open(fname, "r") as f:
@@ -329,19 +271,13 @@ def read_file():
                     contents[idx2field[i]].append(val)
         
             return jsonify({
-                "code": 200,
-                "ok": True,
                 "message": f"read {fname} as dataframe",
                 "data": contents,
-                "path": "/file"
             })
     except Exception as e:
         print(f'[ERR: /file] {e}')
         return jsonify({
             "errors": e.args[0],
-            "code": 500,
-            "path": "/file",
-            "ok": False
         }), 500
 
 @app.route("/file", methods=["DELETE"])
@@ -358,30 +294,21 @@ def delete_file():
     fname_pattern = request.get_json().get("fname")
     if fname_pattern is None:
         return jsonify({
-            "code": 400,
-            "ok": False,
             "message": f"specify file to be deleted at `fname` key",
-            "path": "/file"
         }), 400
 
     # checks ext
     ext = fname_pattern.split(".")[-1]
     if ext not in ["txt", "csv", "json"]:
         return jsonify({
-            "code": 400,
-            "ok": False,
             "message": f"file extension should be one of: txt, csv or json",
-            "path": "/file"
         }), 400
 
     # check location
     subdir = fname_pattern.split("/")[0]
     if subdir != "data":
         return jsonify({
-            "code": 400,
-            "ok": False,
             "message": f"only files located in `data` subdir can be deleted",
-            "path": "/file"
         }), 400
 
     # delete all files that match pattern
@@ -393,19 +320,13 @@ def delete_file():
         print("")
         
         return jsonify({
-            "code": 200,
-            "ok": True,
             "message": f"deleted files: {','.join(fnames)}",
-            "path": "/file"
         })
 
     except Exception as e:
         print(f'[ERR: /file] {e}')
         return jsonify({
             "errors": e.args[0],
-            "code": 500,
-            "path": "/file",
-            "ok": False
         }), 500
 
 # time and date routes
@@ -422,17 +343,11 @@ def get_first_hn_it_on_date():
         }
     except Exception as e:
         return jsonify({
-            "code": 500,
             "errors": e.args[0],
-            "path": "/time/first_id_on",
-            "ok": False
         }), 500
 
     return jsonify({
-        "code": 200,
-        "ok": True,
         "data": {"id": get_first_id_on_day(**date)},
-        "path": "/time/first_id_on"
     })
 
 # cluster routes
@@ -467,18 +382,12 @@ def cluster_posts_and_serialize_results():
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
         return jsonify({
-            "code": 200,
-            "ok": True,
             "message": f"ran clustering pipeline and serialized results",
-            "path": "/cluster/run"
         })
     except Exception as e:
         print(f'[ERR: /cluster/run] {e}')
         return jsonify({
             "errors": e.args[0],
-            "code": 500,
-            "path": "/cluster/run",
-            "ok": False
         }), 500
 
 @app.route("/cluster/visuals/wordcloud", methods=["POST"])
@@ -496,20 +405,14 @@ def serialize_data_for_wordcloud():
         counter.serialize_cluster_frequencies(data_dir=CORPUS_DIR, min_freq=2)
 
         return jsonify({
-            "code": 200,
-            "ok": True,
             "message": f"calculated token frequencies required for wordcloud and serialized result",
             "data": {"num_clusters": len(counter.frequencies.keys())},
-            "path": "/cluster/visuals/wordcloud"
         })
 
     except Exception as e:
         print(f'[ERR: /cluster/visuals/wordcloud] {e}')
         return jsonify({
             "errors": e.args[0],
-            "code": 500,
-            "path": "/cluster/visuals/wordcloud",
-            "ok": False
         }), 500
 
 @app.route("/cluster/visuals/tsne", methods=["POST"])
@@ -543,17 +446,11 @@ def serialize_data_for_tsne():
         tsneer.serialize_results(DFT_FNAME)
 
         return jsonify({
-            "code": 200,
-            "ok": True,
-            "message": f"calculated 2D embedding visualization with t-SNE",
-            "path": "/cluster/visuals/tsne"
+            "message": f"calculated 2D embedding visualization with t-SNE and serialized results",
         })
             
     except Exception as e:
         print(f'[ERR: /cluster/visuals/tsne] {e}')
         return jsonify({
             "errors": e.args[0],
-            "code": 500,
-            "path": "/cluster/visuals/tsne",
-            "ok": False
         }), 500
