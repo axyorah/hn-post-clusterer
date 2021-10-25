@@ -17,6 +17,8 @@ from flaskr.utils.nlp_utils import (
 
 from flaskr.utils.db_utils import (
     DBHelper as dbh,
+    Story, 
+    StoryList
 )
 
 from flaskr.utils.cluster_utils import (
@@ -84,7 +86,7 @@ class BatchedPipeliner:
         print('[INFO] fetching data from db...')
 
         get_query = f'''
-            {dbh.STORY_PATTERN_WITHOUT_WHERE}
+            {Story.RECURSIVE_CTE_WITHOUT_WHERE}
             WHERE 
                 s.story_id BETWEEN ? AND ? AND
                 s.num_comments BETWEEN ? AND ? AND

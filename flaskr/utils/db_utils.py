@@ -4,7 +4,6 @@ import sqlite3
 from flaskr.db import get_db, close_db
 import requests as rq
 import datetime
-import json
 
 story_api2schema = {
     'story_id': 'id',
@@ -54,13 +53,6 @@ def fetch_and_add_item_by_id(item_id: Union[int, str], commit: str = True) -> Op
 
     # skip if comment and already in db
     # keep is story and already in db -> update it later
-    # story_needs_update = False
-    # if DBHelper.find_comment_by_id(item_id):
-    #     print('')
-    #     return
-    # if DBHelper.find_story_by_id(item_id):
-    #     story_needs_update = True
-
     story_needs_update = False
     if Comment.find_by_id(item_id):
         print('already in db, skipping...')
@@ -85,15 +77,12 @@ def fetch_and_add_item_by_id(item_id: Union[int, str], commit: str = True) -> Op
     )
 
     if story_needs_update:
-        #DBHelper.update_story_in_db(item, commit=commit)
         story = Story(**item)
         story.update()
     elif item.get('type') == 'story':
-        #DBHelper.add_story_to_db(item, commit=commit)
         story = Story(**item)
         story.add()
     elif item.get('type') == 'comment':
-        #DBHelper.add_comment_to_db(item, commit=commit)
         comment = Comment(**item)
         comment.add()
 
@@ -125,68 +114,7 @@ def query_hn_and_add_result_to_db(form_request: Dict) -> None:
         for i,item_id in enumerate(extra_comment_ids):
             fetch_and_add_item_by_id(item_id, commit=True)
 
-class DBHelper:
-    STORY_FIELDS = [
-        "story_id", 
-        "author", 
-        "unix_time", 
-        "body", 
-        "url", 
-        "score", 
-        "title", 
-        "num_comments", 
-        "comment_embedding"
-    ]
-
-    COMMENT_FIELDS = [
-        "comment_id",
-        "author",
-        "unix_time",
-        "body",
-        "parent_id"
-    ]
-
-    STORY_PATTERN_WITHOUT_WHERE = """
-        WITH RECURSIVE tab(id, parent_id, root_id, level, title, body) AS (
-            SELECT 
-                s.story_id, 
-                s.story_id,
-                s.story_id,
-                1,
-                s.title,
-                s.title
-            FROM story AS s
-
-            UNION
-
-            SELECT
-                c.comment_id, 
-                c.parent_id,
-                tab.root_id,
-                tab.level + 1,
-                c.author,
-                c.body
-            FROM tab, comment as c WHERE c.parent_id = tab.id
-        ) 
-
-        SELECT 
-            s.story_id,
-            s.author, 
-            s.unix_time,
-            s.score,
-            s.title, 
-            s.url,
-            s.num_comments,
-            s.comment_embedding,
-            (
-                SELECT COALESCE(GROUP_CONCAT(body, "<br><br>"), " ")
-                FROM tab
-                WHERE root_id = s.story_id
-                GROUP BY root_id
-            ) AS children
-        FROM story AS s
-        """
-
+class DBHelper:    
     @classmethod
     def get_connection(cls) -> sqlite3.Cursor:
         return get_db()
@@ -212,114 +140,6 @@ class DBHelper:
                 for field in row.keys()
             } for row in rows
         ]
-    
-    @classmethod
-    def find_story_by_id(cls, story_id: Union[str, int]) -> Optional[Dict]:
-        db = cls.get_connection()
-        get_query = """
-            SELECT * FROM story WHERE story_id = ?;
-        """
-        row = db.execute(get_query, (story_id,)).fetchone()
-        cls.close_connection()
-        return cls.row2dict(row) if row is not None else None
-
-    @classmethod
-    def find_comment_by_id(cls, comment_id: Union[str, int]) -> Optional[Dict]:
-        db = cls.get_connection()
-        get_query = """
-            SELECT * FROM comment WHERE comment_id = ?;
-        """
-        row = db.execute(get_query, (comment_id,)).fetchone()
-        cls.close_connection()
-        return cls.row2dict(row) if row is not None else None
-
-    @classmethod
-    def add_story_to_db(cls, story: Dict, commit: bool = True) -> None:
-        db = cls.get_connection()
-
-        # add to `story` table
-        add_story_query = """
-            INSERT INTO story
-            (story_id, author, unix_time, body, url, score, title, num_comments, comment_embedding)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """
-        story_params = tuple([story.get(field) for field in cls.STORY_FIELDS])
-        db.execute(add_story_query, story_params)
-
-        # add to `parent` table
-        add_parent_query = """
-            INSERT INTO parent
-            (parent_id, parent_type)
-            VALUES (?, ?)
-        """
-        parent_params = ( story.get('story_id'), 'story')
-        db.execute(add_parent_query, parent_params)
-
-        if commit:
-            db.commit()
-        cls.close_connection()
-
-    @classmethod
-    def add_comment_to_db(cls, comment: Dict, commit: bool = True) -> None:
-        db = cls.get_connection()
-
-        # add to `comment` table
-        add_comment_query = """
-            INSERT INTO comment
-            (comment_id, author, unix_time, body, parent_id)
-            VALUES (?, ?, ?, ?, ?)
-        """
-        comment_params = tuple([comment.get(field) for field in cls.COMMENT_FIELDS])
-        db.execute(add_comment_query, comment_params) 
-
-        # add to `parent` table
-        parent_query = """
-            INSERT INTO parent
-            (parent_id, parent_type)
-            VALUES (?, ?)
-        """
-        parent_params = (comment.get('commen_id'),'comment')
-        db.execute(parent_query, parent_params)
-
-        if commit:
-            db.commit()
-        cls.close_connection()
-
-    @classmethod
-    def update_story_in_db(cls, story: Dict, commit: bool = True) -> None:
-        db = cls.get_connection()
-
-        update_story_query = """
-            UPDATE story
-            SET 
-                author = ?, 
-                unix_time = ?, 
-                body = ?, 
-                url = ?, 
-                score = ?, 
-                title = ?, 
-                num_comments = ?,
-                comment_embedding = ?
-            WHERE story_id = ?
-        """
-
-        update_story_params = (
-            story.get('author'), 
-            story.get('unix_time'), 
-            story.get('body'),
-            story.get('url'), 
-            story.get('score'), 
-            story.get('title'), 
-            story.get('num_comments'),
-            story.get('comment_embedding'),
-            story.get('story_id'),
-        )
-
-        db.execute(update_story_query, update_story_params) 
-
-        if commit:
-            db.commit()
-        cls.close_connection()        
 
     @classmethod
     def get_query(cls, query_pattern: str, params: Union[List,Tuple]) -> List[Optional[sqlite3.Row]]:
