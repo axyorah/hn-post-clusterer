@@ -139,6 +139,93 @@ for (let filterBy of ['id', 'comm', 'score']) {
     }
 }
 
+function addDateToNode(date, node) {
+    console.log(date);
+    console.log(node);
+    const [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()];
+
+    const selectYear = document.createElement('select');
+    selectYear.setAttribute('id', node.id + '-year');
+    selectYear.setAttribute('class', 'box');
+    for (let y = 2006; y <= year; y++) {
+        let opt = document.createElement('option');
+        if (y == year) {
+            opt.setAttribute('selected', true);
+        }
+        opt.setAttribute('value', y);
+        opt.setAttribute('class', 'box');
+        opt.innerText = y;
+        selectYear.appendChild(opt);
+    }
+
+    const selectMonth = document.createElement('select');
+    selectMonth.setAttribute('id', node.id + '-month');
+    selectMonth.setAttribute('class', 'box');
+    const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    for (let i = 0; i < 12; i++) {
+        let opt = document.createElement('option');
+        if (i+1 == month) {
+            opt.setAttribute('selected', true);
+        }
+        opt.setAttribute('value', i+1);
+        opt.setAttribute('class', 'box');
+        opt.innerText = months[i];
+        selectMonth.appendChild(opt);
+    }
+
+    const selectDay = document.createElement('select');
+    selectDay.setAttribute('id', node.id + '-day');
+    selectDay.setAttribute('class', 'box');
+    for (let d = 1; d <= 31; d++) {
+        let opt = document.createElement('option');
+        if (d == day) {
+            opt.setAttribute('selected', true);
+        }   
+        opt.setAttribute('value', d);
+        opt.setAttribute('class', 'box');
+        opt.innerText = d;
+        selectDay.appendChild(opt);
+    }
+
+    node.appendChild(selectYear);
+    node.appendChild(selectMonth);
+    node.appendChild(selectDay);
+}
+
+function setupDateFilter(toRoot, fromRoot) {
+    // set to: today
+    const toDate = new Date();
+    addDateToNode(toDate, toRoot);    
+
+    // set from: mindate or today - 7days
+    let fromDate;
+    fetch('/db/stories/stats')
+    .then(res => res.json())
+    .then(res => {
+        if (res === undefined || res.data === undefined || res.data.num === 0) {
+            throw new Error('db is empty!');
+        }
+        return fetch(`https://hacker-news.firebaseio.com/v0/item/${res.data.min}.json?print=pretty`)        
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.time) {
+            fromDate = new Date(res.time * 1000);
+        } else {
+            throw new Error('no timestep provided');
+        }
+    })
+    .catch(err => {
+        console.log(`Error: ${err}`);
+        if (fromDate === undefined) {
+            fromDate = new Date(toDate - 7*24*60*60*1000);
+        }
+    })
+    .finally(res => {
+        addDateToNode(fromDate, fromRoot);
+    });
+}
+
 window.addEventListener('load', (evt) => {
     for (let filterBy of ['date', 'id']) {
         config[filterBy](
@@ -148,6 +235,8 @@ window.addEventListener('load', (evt) => {
             filterBy === 'id' ? true : false
         )
     }
+
+    setupDateFilter(seedDateBeginRoot, seedDateEndRoot);
 })
 
 window.addEventListener('load', (evt) => {
