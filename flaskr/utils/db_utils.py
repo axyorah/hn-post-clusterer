@@ -580,7 +580,7 @@ class StoryList:
     def find_by_ids(cls, id_list: List[int]) -> List[Story]:
         get_query = f"""
             SELECT * FROM story 
-            WHERE story_in IN ({', '.join('?' for _ in id_list)})
+            WHERE story_id IN ({', '.join('?' for _ in id_list)})
         """
         rows = DBHelper.get_query(get_query, id_list)
         stories = DBHelper.rows2dicts(rows)
@@ -590,7 +590,7 @@ class StoryList:
     def find_by_ids_with_children(cls, id_list: List[int]) -> List[Story]:
         get_query = f"""
             {Story.RECURSIVE_CTE_WITHOUT_WHERE} 
-            WHERE story_in IN ({', '.join('?' for _ in id_list)})
+            WHERE story_id IN ({', '.join('?' for _ in id_list)})
         """
         rows = DBHelper.get_query(get_query, id_list)
         stories = DBHelper.rows2dicts(rows)
