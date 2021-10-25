@@ -10,7 +10,11 @@ from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
 from flaskr.utils.db_utils import (
-    DBHelper as dbh,
+    Story,
+    Comment,
+    StoryList,
+    query_api,
+    translate_response_api2schema,
     query_hn_and_add_result_to_db
 )
 from flaskr.utils.general_utils import BatchedPipeliner
@@ -36,12 +40,12 @@ def get_story(id):
     """
     gets story with specified is from db, returns under json's `data` field
     """
-    story_rows = dbh.get_query("SELECT * FROM story WHERE story_id = ?", [id])
-        
-    if story_rows:
+    story = Story.find_by_id(id)        
+    if story:
         return jsonify({
             "message": "got story from db",
-            "data": dbh.rows2dicts(story_rows)[0],
+            "data": story.json(),
+            "ok": True
         })
     else: 
         return jsonify({
@@ -50,21 +54,84 @@ def get_story(id):
 
 @app.route("/db/story/<string:id>", methods=["POST"])
 def post_story():
-    return jsonify({
-        "message": f"this route is currently unavailable",
-    }), 500
+    story = Story.find_by_id(id)        
+    if story:
+        return jsonify({
+            "message": "story is already in a database",
+        }), 400
+    else:
+        try:
+            item = query_api(id)
+            if item.get("type") != "story":
+                return jsonify({
+                    "message": f"item {id} is not hn story"
+                }), 400
+            item = translate_response_api2schema(item)
+            story = Story(**item)
+            story.add()
+            return jsonify({
+                "message": f"item {id} added to db",
+                "ok": True
+            })
+        except Exception as e:
+            return jsonify({
+                "message": f"couldn't fetch item {id} from hn and add it to db",
+                "errors": e.args[0]
+            }), 500
 
 @app.route("/db/story/<string:id>", methods=["DELETE"])
 def delete_story(id):
-    return jsonify({
-        "message": f"this route is currently unavailable",
-    }), 500
+    try:
+        story = Story.find_by_id(id)
+        comment = Comment.find_by_id(id)
+        if story or (not story and not comment):
+            story.delete()
+            return jsonify({
+                "message": f"item {id} deleted",
+                "ok": True
+            })
+        elif comment:
+            return jsonify({
+                "message": f"item {id} is a comment"
+            }), 400
+    except Exception as e:
+        return jsonify({
+            "message": f"couldn't delete item {id}",
+            "errors": e.args[0]
+        })
+
 
 @app.route("/db/story/<string:id>", methods=["PUT"])
 def update_story(id):
-    return jsonify({
-        "message": f"this route is currently unavailable",
-    }), 500
+    try:
+        story = Story.find_by_id(id)
+        item = query_api(id)
+        if item.get("type") != "story":
+            return jsonify({
+                "message": f"item {id} is not a story"
+            }), 400
+        item = translate_response_api2schema(item)    
+        if story:        
+            story = Story(**item)
+            story.update()
+            return jsonify({
+                "message": f"story {id} updated",
+                "data": story.json(),
+                "ok": True
+            })
+        else:
+            story = Story(**item)
+            story.add()
+            return jsonify({
+                "message": f"story {id} added",
+                "data": story.json(),
+                "ok": True
+            })
+    except Exception as e:
+        return jsonify({
+            "message": f"couldn't add/update story {id}",
+            "errors": e.args[0]
+        }), 500
 
 ## db routes for single comment
 @app.route("/db/comment/<string:id>")
@@ -72,13 +139,13 @@ def get_comment(id):
     """
     gets comment with specified is from db, returns under json's `data` field
     """
-    comment_rows = dbh.get_query("SELECT * FROM comment WHERE comment_id = ?", [id])
+    comment = Comment.find_by_id(id)
         
-    if comment_rows:
-        print(comment_rows)
+    if comment:
         return jsonify({
             "message": "got comment from db",
-            "data": dbh.rows2dicts(comment_rows)[0],
+            "data": comment.json(),
+            "ok": True
         })
     else: 
         return jsonify({
@@ -87,10 +154,11 @@ def get_comment(id):
 
 # db routes for multiple stories
 @app.route("/db/stories")
-def get_stories():
+def get_stories_with_children():
     """
     fetches stories with specified ids from db;
     stories are returned in json's `data` field;
+    stories contain additional field `children` with all comments in a single html;
     use as `/db/stories?ids=1,2,3`
     """
     # TODO: should be parsed properly
@@ -103,14 +171,11 @@ def get_stories():
 
     if id_list:
         try:
-            query = f"""
-                {dbh.STORY_PATTERN_WITHOUT_WHERE}
-                WHERE s.story_id IN ({", ".join("?" for _ in id_list)});
-            """
-            story_rows = dbh.get_query(query, id_list)
+            stories = StoryList.find_by_ids_with_children(id_list)
             return jsonify({
                 "message": "got stories from db",
-                "data": dbh.rows2dicts(story_rows),
+                "data": [story.json() for story in stories],
+                "ok": True
             })
         except Exception as e:
             return jsonify({
@@ -133,27 +198,19 @@ def get_stories_stats():
         "min": <min story id>,
         "max": <max story id>
     }
-    """
-    num_query = "SELECT COUNT(*) as num FROM story;"
-    min_query = "SELECT MIN(story_id) as min FROM story;"
-    max_query = "SELECT MAX(story_id) as max FROM story;"
-    
+    """    
     try:
-        result = {
-            "num": dbh.get_query(num_query, [])[0].__getitem__("num"),
-            "min": dbh.get_query(min_query, [])[0].__getitem__("min"),
-            "max": dbh.get_query(max_query, [])[0].__getitem__("max")
-        }
+        return jsonify({
+            "data": Story.stats(),
+            "ok": True
+        })
     except Exception as e:
         return jsonify({
             "message": "couldn't get story stats",
             "errors": e.args[0],
         })
 
-    return jsonify({
-        "data": result,
-    })
-
+    
 @app.route("/db/comments/stats")
 def get_comments_stats():
     """
@@ -163,26 +220,17 @@ def get_comments_stats():
         "min": <min comment id>,
         "max": <max comment id>
     }
-    """
-    num_query = "SELECT COUNT(*) as num FROM comment;"
-    min_query = "SELECT MIN(comment_id) as min FROM comment;"
-    max_query = "SELECT MAX(comment_id) as max FROM comment;"
-    
+    """    
     try:
-        result = {
-            "num": dbh.get_query(num_query, [])[0].__getitem__("num"),
-            "min": dbh.get_query(min_query, [])[0].__getitem__("min"),
-            "max": dbh.get_query(max_query, [])[0].__getitem__("max")
-        }
+        return jsonify({
+            "data": Comment.stats(),
+            "ok": True
+        })
     except Exception as e:
         return jsonify({
             "message": "couldn't get comment stats",
             "errors": e.args[0],
         }), 500
-
-    return jsonify({
-        "data": result,
-    })
 
 # db routes for multiple items (stories + comments)
 @app.route("/db/items", methods=["POST"])
@@ -204,6 +252,7 @@ def post_items():
 
         return jsonify({
             "message": "updated database with new entries",
+            "ok": True
         })
     except Exception as e:
         return jsonify({
@@ -253,12 +302,14 @@ def read_file():
                 return jsonify({
                     "message": f"read {fname} as txt",
                     "data": lines,
+                    "ok": True
                 })
         elif ext == "json":
             with open(fname, "f") as f:
                 return jsonify({
                     "message": f"read {fname} as json",
                     "data": json.load(f),
+                    "ok": True
                 })
         elif ext == "csv":
             with open(fname, "r") as f:
@@ -273,6 +324,7 @@ def read_file():
             return jsonify({
                 "message": f"read {fname} as dataframe",
                 "data": contents,
+                "ok": True
             })
     except Exception as e:
         print(f'[ERR: /file] {e}')
@@ -321,6 +373,7 @@ def delete_file():
         
         return jsonify({
             "message": f"deleted files: {','.join(fnames)}",
+            "ok": True
         })
 
     except Exception as e:
@@ -348,6 +401,7 @@ def get_first_hn_it_on_date():
 
     return jsonify({
         "data": {"id": get_first_id_on_day(**date)},
+        "ok": True
     })
 
 # cluster routes
@@ -383,6 +437,7 @@ def cluster_posts_and_serialize_results():
         
         return jsonify({
             "message": f"ran clustering pipeline and serialized results",
+            "ok": True
         })
     except Exception as e:
         print(f'[ERR: /cluster/run] {e}')
@@ -407,6 +462,7 @@ def serialize_data_for_wordcloud():
         return jsonify({
             "message": f"calculated token frequencies required for wordcloud and serialized result",
             "data": {"num_clusters": len(counter.frequencies.keys())},
+            "ok": True
         })
 
     except Exception as e:
@@ -447,6 +503,7 @@ def serialize_data_for_tsne():
 
         return jsonify({
             "message": f"calculated 2D embedding visualization with t-SNE and serialized results",
+            "ok": True
         })
             
     except Exception as e:
