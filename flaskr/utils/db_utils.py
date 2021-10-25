@@ -31,10 +31,9 @@ comment_api2schema = {
 }
 
 def query_api(item_id: Union[int, str]) -> str:
-    # TODO: rename api fields to schema fields
     url = f'https://hacker-news.firebaseio.com/v0/item/{item_id}.json?print=pretty'
     res = rq.get(url)
-    return json.loads(res.text)
+    return res.json()
 
 def translate_response_api2schema(res: Dict) -> Dict:
     if res is None:
@@ -422,6 +421,18 @@ class Story:
             "comment_embedding": self.comment_embedding,
             "children": self.children
         }
+    
+    @classmethod
+    def stats(cls) -> Dict:
+        num_query = "SELECT COUNT(*) as num FROM story;"
+        min_query = "SELECT MIN(story_id) as min FROM story;"
+        max_query = "SELECT MAX(story_id) as max FROM story;"
+
+        return {
+            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
+            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
+            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
+        }
 
     @classmethod
     def find_by_id(cls, story_id: int) -> Optional['Story']:
@@ -520,6 +531,18 @@ class Comment:
             "unix_time": self.unix_time,
             "body": self.body,
             "parent_id": self.parent_id
+        }
+
+    @classmethod
+    def stats(cls) -> Dict:
+        num_query = "SELECT COUNT(*) as num FROM comment;"
+        min_query = "SELECT MIN(comment_id) as min FROM comment;"
+        max_query = "SELECT MAX(comment_id) as max FROM comment;"
+
+        return {
+            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
+            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
+            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
         }
 
     @classmethod
