@@ -15,7 +15,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, LancasterStemmer
 
-from flaskr.utils.db_utils import DBHelper as dbh
+from flaskr.utils.db_utils import Story
 
 nltk.download('stopwords')
 stop_words = stopwords.words('english')
@@ -133,11 +133,6 @@ class ClusterFrequencyCounter:
             self.frequencies[label][token] += 1
 
     def count_serialized_cluster_frequencies(self, fname: str) -> Dict:
-        get_query = f'''
-            {dbh.STORY_PATTERN_WITHOUT_WHERE}
-            WHERE s.story_id = ?
-        '''
-
         for i,line in enumerate(open(fname)):
             if not i:
                 field2idx = {field:idx for idx,field in enumerate(line.split('\t'))}
@@ -149,9 +144,8 @@ class ClusterFrequencyCounter:
             story_id = vals[field2idx['id']]
             label = vals[field2idx['label']]
             
-            story_rows = dbh.get_query(get_query, (story_id,))
-            story = dbh.rows2dicts(story_rows)[0]
-            comments = html2text(story['children'])
+            story = Story.find_by_id_with_children(story_id)
+            comments = html2text(story.children)
             tokens = self.tokenizer.tokenize(comments)
 
             self.update_cluster_frequencies(label, tokens)
