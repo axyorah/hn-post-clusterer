@@ -80,12 +80,14 @@ function addWordCloud( num_clusters ) {
     wordcloudPlotRef.style.height = `${100 + 200 * numRows}px`;
 }
 
+
+
 semanticClusterBtn.addEventListener('click', function (evt) {
     // store params for db query
     const params = {
         'sender': 'clusterer',
-        'show-id-begin-range': show.id.begin.range.value,
-        'show-id-end-range': show.id.end.range.value,
+        'show-ts-begin-range': getTimestampFromDateNode(showDateBeginRoot),
+        'show-ts-end-range': getTimestampFromDateNode(showDateEndRoot),
         'show-comm-begin-range': show.comm.begin.range.value,
         'show-comm-end-range': show.comm.end.range.value,
         'show-score-begin-range': show.score.begin.range.value,

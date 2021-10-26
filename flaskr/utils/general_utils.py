@@ -74,7 +74,7 @@ class BatchedPipeliner:
         - serialize result
         """
 
-    def get_story_batches(self, delta_id: int = 10000) -> Generator:
+    def get_story_batches(self, delta_ts: int = 80000) -> Generator:
         """
         queries db based on form request,
         recursively collects all comments for each story,
@@ -88,20 +88,20 @@ class BatchedPipeliner:
         get_query = f'''
             {Story.RECURSIVE_CTE_WITHOUT_WHERE}
             WHERE 
-                s.story_id BETWEEN ? AND ? AND
+                s.unix_time BETWEEN ? AND ? AND
                 s.num_comments BETWEEN ? AND ? AND
                 s.score BETWEEN ? AND ?
             ;
         '''
 
-        begin_id = int(self.request_form["begin_id"])
-        end_id = int(self.request_form["end_id"])
+        begin_ts = int(self.request_form["begin_ts"])
+        end_ts = int(self.request_form["end_ts"])
 
-        def batch_generator(begin_id: int, end_id: int, delta_id: int) -> List:
+        def batch_generator(begin_ts: int, end_ts: int, delta_ts: int) -> List:
             num = 0
-            for b_id in range(begin_id, end_id, delta_id):                
+            for b_ts in range(begin_ts, end_ts, delta_ts):                
                 params = (
-                    b_id, min(b_id + delta_id, end_id),
+                    b_ts, min(b_ts + delta_ts, end_ts),
                     self.request_form['begin_comm'], self.request_form['end_comm'],
                     self.request_form['begin_score'], self.request_form['end_score']
                 )
@@ -114,7 +114,7 @@ class BatchedPipeliner:
             print(f'[INFO] got {num} stories!')
         
         # get stories
-        gen = batch_generator(begin_id, end_id, delta_id)
+        gen = batch_generator(begin_ts, end_ts, delta_ts)
 
         # rebatch stories
         gen = rebatch_generator(gen, self._min_batch_size)

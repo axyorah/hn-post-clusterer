@@ -49,3 +49,15 @@ function getDateFromDateNode(node) {
         throw new Error('date is not specified');
     }
 }
+
+function getTimestampFromDateNode(node) {
+    /*
+    attempts to read year/month/day from the date node 
+    and adjusts node inner html to reflect the *actual* date
+    (e.g., if 2021/feb/31 was selected it would be corrected to 2021/3/3);
+    on success returns timestamp in seconds(!);
+    on fail throws `date is not specified` error and returns undefined
+    */
+    const date = getDateFromDateNode(node);
+    return isFinite(date.valueOf()) ? parseInt(date.valueOf() / 1000) : undefined;
+}

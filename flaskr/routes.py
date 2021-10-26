@@ -412,8 +412,8 @@ def cluster_posts_and_serialize_results():
     request body should be:
     {
         "sender": "clusterer",
-        "show-id-begin-range": <min item id>, 
-        "show-id-end-range": <max item id>,
+        "show-ts-begin-range": <min item timestamp in seconds>, 
+        "show-ts-end-range": <max item timestamp in seconds>,
         "show-comm-begin-range": <min number of comments>,
         "show-comm-end-range": <max number of comment>,
         "show-score-begin-range": <min score>,
