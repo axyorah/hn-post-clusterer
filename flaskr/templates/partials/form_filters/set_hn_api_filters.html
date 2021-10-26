@@ -1,6 +1,6 @@
 <div class="controls">
     <div class="hor">
-        <div id="seed-filter-by-id">
+        <div id="seed-filter-by-id"> <!--style="display: none;">-->
             <b>Filter by Id</b>
             <div class="hor-item">
                 <div>
@@ -18,22 +18,22 @@
             </div>
         </div>
 
-        <div id="seed-filter-by-date" style="visibility: hidden;">
+        <div id="seed-filter-by-date" class="date-selector"><!--style="display: none;"-->
             <b>Filter by Date</b>
-            <div class="hor-item">
+            <div class="hor-item" style="display: none;">
                 <div>
-                    <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label>
-                    <br>
-                    <input type="range" name="seed-date-begin-range" id="seed-date-begin-range" min="1" , max="10" ,
-                        value="1">
+                    <label for="seed-date-begin-range" id="seed-date-begin-label">From:</label><br>
+                    <input type="range" name="seed-date-begin-range" id="seed-date-begin-range">
                 </div>
                 <div>
-                    <label for="seed-date-end-range" id="seed-date-end-label">To:</label>
-                    <br>
-                    <input type="range" name="seed-date-end-range" id="seed-date-end-range" min="1" , max="10" ,
-                        value="10">
+                    <label for="seed-date-end-range" id="seed-date-end-label">To:</label><br>
+                    <input type="range" name="seed-date-end-range" id="seed-date-end-range">
                 </div>
             </div>
+            
+            <div id="seed-date-begin-root" class="hor-item">From: <br></div>
+            <div id="seed-date-end-root" class="hor-item">To: <br></div>
+
         </div>
     </div>
     

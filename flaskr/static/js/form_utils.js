@@ -192,7 +192,7 @@ function addDateToNode(date, node) {
     node.appendChild(selectDay);
 }
 
-function setupDateFilter(toRoot, fromRoot) {
+function setupDateFilter(fromRoot, toRoot) {
     // set to: today
     const toDate = new Date();
     addDateToNode(toDate, toRoot);    
@@ -248,4 +248,6 @@ window.addEventListener('load', (evt) => {
             filterBy === 'id' ? true : false
         )
     }
+
+    setupDateFilter(showDateBeginRoot, showDateEndRoot);
 })

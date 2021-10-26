@@ -67,6 +67,8 @@
                 seed[filterBy][loc]["label"] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
             }
         }
+        const seedDateBeginRoot = document.querySelector("#seed-date-begin-root");
+        const seedDateEndRoot = document.querySelector("#seed-date-end-root");
         const seedSubmitBtn = document.querySelector("#seed-submit-btn");
 
         // Filters - DB
@@ -83,6 +85,8 @@
                 show[filterBy][loc]["label"] = document.querySelector(`#show-${filterBy}-${loc}-label`);
             }
         }
+        const showDateBeginRoot = document.querySelector("#show-date-begin-root");
+        const showDateEndRoot = document.querySelector("#show-date-end-root");
 
         // Filters - clustering
         const clustersNum = document.querySelector("#num-clusters-num");
@@ -91,7 +95,6 @@
         
         // Figures
         const figureRoot = document.querySelector("#figure-root");
-        //const semanticClusterPlotRoot = document.querySelector("#semantic-cluster-plot-root");
         const clusterBarPlotRoot = document.querySelector("#cluster-bar-plot-root");
         const dailyBarPlotRoot = document.querySelector("#daily-bar-plot-root");
         

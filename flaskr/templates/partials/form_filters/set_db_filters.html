@@ -5,18 +5,31 @@
             <b>Filter by Id</b>
             <div class="hor-item">
                 <div>
-                    <label for="show-id-begin-range" id="show-id-begin-label">From:</label>
-                    <br>
-                    <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1" , max="10" ,
-                        value="1">
+                    <label for="show-id-begin-range" id="show-id-begin-label">From:</label><br>
+                    <input type="range" name="show-id-begin-range" id="show-id-begin-range" min="1", max="10", value="1">
                 </div>
                 <div>
-                    <label for="show-id-end-range" id="show-id-end-label">To:</label>
-                    <br>
-                    <input type="range" name="show-id-end-range" id="show-id-end-range" min="1" , max="10" ,
-                        value="10">
+                    <label for="show-id-end-range" id="show-id-end-label">To:</label><br>
+                    <input type="range" name="show-id-end-range" id="show-id-end-range" min="1", max="10", value="10">
                 </div>
             </div>
+        </div>
+
+        <div id="show-filter-by-date">
+            <b>Filter by Date</b>
+            <div class="hor-item" style="display: none;">
+                <div>
+                    <label for="show-date-begin-range" id="show-date-begin-label">From:</label><br>
+                    <input type="range" name="show-date-begin-range" id="show-date-begin-range">
+                </div>
+                <div>
+                    <label for="show-date-end-range" id="show-date-end-label">To:</label><br>
+                    <input type="range" name="show-date-end-range" id="show-date-end-range">
+                </div>
+            </div>
+
+            <div id="show-date-begin-root" class="hor-item">From: <br></div>
+            <div id="show-date-end-root" class="hor-item">To: <br></div>
         </div>
 
         <div id="show-filter-by-comments">
