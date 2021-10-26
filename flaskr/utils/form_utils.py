@@ -8,6 +8,8 @@ class RequestParser:
         'seed-id-end-range': 'end_id',
         'show-id-begin-range': 'begin_id',
         'show-id-end-range': 'end_id',
+        'show-ts-begin-range': 'begin_ts',
+        'show-ts-end-range': 'end_ts',
         'show-comm-begin-range': 'begin_comm',
         'show-comm-end-range': 'end_comm',
         'show-score-begin-range': 'begin_score',
@@ -29,7 +31,7 @@ class RequestParser:
         'reader': ['fname'],
         'deleter': ['fnames'],
         'clusterer': [
-            'show-id-begin-range', 'show-id-end-range', 
+            'show-ts-begin-range', 'show-ts-end-range', 
             'show-comm-begin-range', 'show-comm-end-range', 
             'show-score-begin-range', 'show-score-end-range',
             'num-clusters', 'model-name'
@@ -40,6 +42,7 @@ class RequestParser:
     _key2type = {
         **{key: 'int' for key in [
             'begin_id', 'end_id', 
+            'begin_ts', 'end_ts', 
             'begin_comm', 'end_comm', 
             'begin_score', 'end_score', 
             'num_topics', 'n_clusters',
@@ -54,6 +57,8 @@ class RequestParser:
     _key2description = {
         'begin_id': 'minimal post id',
         'end_id': 'maximal post id',
+        'begin_ts': 'minimal post timestamp',
+        'end_ts': 'maximal post timestamp',
         'begin_comm': 'minimal number of comments',
         'end_comm': 'maximal number of comments',
         'begin_score': 'minimal score',
@@ -69,6 +74,8 @@ class RequestParser:
     _key2bounds = {
         'begin_id': [1, 99999999],
         'end_id': [2, 100000000],
+        'begin_ts': [1160418111, 2000000000],
+        'end_ts': [1160418112, 1999999999],
         'begin_comm': [5, 299],
         'end_comm': [6, 300],
         'begin_score': [0, 299],
@@ -126,6 +133,23 @@ class RequestParser:
                 parsed[key] = cls._key2bounds[key][0]
             if cls._key2bounds.get(key) is not None and parsed[key] > cls._key2bounds[key][1]:
                 parsed[key] = cls._key2bounds[key][1]
+            
+    @classmethod
+    def _check_if_ranges_are_valid(cls, parsed: Dict) -> None:
+        """
+        for all `begin_X` - `end_X` paires check if `begin_X` is lower or equal than `end_X`;        
+        otherwise raises value error
+        """
+        for key in parsed.keys():
+            if 'begin' in key:
+                name = key.split('_')[1]
+                paired_key = f'end_{name}'
+                if parsed[key] >= parsed[paired_key]:
+                    raise ValueError(
+                        f'Value of `{cls._key2description[key]}` is higher or equal than ' + \
+                        f'value of `{cls._key2description[paired_key]}`: ' + \
+                        f'{parsed[key]} >= {parsed[paired_key]}'
+                    )
 
     @classmethod
     def parse(cls, request: Request) -> Dict:
@@ -150,4 +174,5 @@ class RequestParser:
 
         parsed = cls._parse_request(request, cls._sender2html[sender])
         cls._fit_parsed_request_within_bounds(parsed) # modifies input
+        cls._check_if_ranges_are_valid(parsed) # doesn't return anything or raises error
         return parsed
