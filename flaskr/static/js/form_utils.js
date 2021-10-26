@@ -139,6 +139,21 @@ for (let filterBy of ['id', 'comm', 'score']) {
     }
 }
 
+function addOptionsToSelect(selectNode, optVals, optNames, selectedVal) {
+    for (let i = 0; i < optNames.length; i++) {
+        const name = optNames[i];
+        const val = optVals[i];
+        let opt = document.createElement('option');
+        if (selectedVal !== undefined && val == selectedVal) {
+            opt.setAttribute('selected', true);
+        }
+        opt.setAttribute('value', val);
+        opt.setAttribute('class', 'box');
+        opt.innerText = name;
+        selectNode.appendChild(opt);
+    }
+}
+
 function addDateToNode(date, node) {
     console.log(date);
     console.log(node);
@@ -147,45 +162,22 @@ function addDateToNode(date, node) {
     const selectYear = document.createElement('select');
     selectYear.setAttribute('id', node.id + '-year');
     selectYear.setAttribute('class', 'box');
-    for (let y = 2006; y <= year; y++) {
-        let opt = document.createElement('option');
-        if (y == year) {
-            opt.setAttribute('selected', true);
-        }
-        opt.setAttribute('value', y);
-        opt.setAttribute('class', 'box');
-        opt.innerText = y;
-        selectYear.appendChild(opt);
-    }
+    let years = [];
+    for (let y = 2006; y <= year; y++) years.push(y);
+    addOptionsToSelect(selectYear, years, years, year);
 
     const selectMonth = document.createElement('select');
     selectMonth.setAttribute('id', node.id + '-month');
     selectMonth.setAttribute('class', 'box');
     const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-    for (let i = 0; i < 12; i++) {
-        let opt = document.createElement('option');
-        if (i+1 == month) {
-            opt.setAttribute('selected', true);
-        }
-        opt.setAttribute('value', i+1);
-        opt.setAttribute('class', 'box');
-        opt.innerText = months[i];
-        selectMonth.appendChild(opt);
-    }
+    const indices = [...Array(months.length).keys()].map(val => val + 1);
+    addOptionsToSelect(selectMonth, indices, months, month);
 
     const selectDay = document.createElement('select');
     selectDay.setAttribute('id', node.id + '-day');
     selectDay.setAttribute('class', 'box');
-    for (let d = 1; d <= 31; d++) {
-        let opt = document.createElement('option');
-        if (d == day) {
-            opt.setAttribute('selected', true);
-        }   
-        opt.setAttribute('value', d);
-        opt.setAttribute('class', 'box');
-        opt.innerText = d;
-        selectDay.appendChild(opt);
-    }
+    const days = [...Array(31).keys()].map(val => val+1);
+    addOptionsToSelect(selectDay, days, days, day);
 
     node.appendChild(selectYear);
     node.appendChild(selectMonth);
