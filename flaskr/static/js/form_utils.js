@@ -114,6 +114,13 @@ update.score = update.general;
 
 
 // Date Helpers
+function getSelectElement(id) {
+    const select = document.createElement('select');
+    select.setAttribute('id', (id === undefined) ? 'selector' : id);
+    select.setAttribute('class', 'box');
+    return select;
+}
+
 function addOptionsToSelect(selectNode, optVals, optNames, selectedVal) {
     for (let i = 0; i < optNames.length; i++) {
         const name = optNames[i];
@@ -132,23 +139,17 @@ function addOptionsToSelect(selectNode, optVals, optNames, selectedVal) {
 function addDateToNode(date, node) {
     const [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()];
 
-    const selectYear = document.createElement('select');
-    selectYear.setAttribute('id', node.id + '-year');
-    selectYear.setAttribute('class', 'box');
+    const selectYear = getSelectElement(node.id + '-year');
     let years = [];
     for (let y = 2006; y <= year; y++) years.push(y);
     addOptionsToSelect(selectYear, years, years, year);
 
-    const selectMonth = document.createElement('select');
-    selectMonth.setAttribute('id', node.id + '-month');
-    selectMonth.setAttribute('class', 'box');
+    const selectMonth = getSelectElement(node.id + '-month');
     const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
     const indices = [...Array(months.length).keys()].map(val => val + 1);
     addOptionsToSelect(selectMonth, indices, months, month);
 
-    const selectDay = document.createElement('select');
-    selectDay.setAttribute('id', node.id + '-day');
-    selectDay.setAttribute('class', 'box');
+    const selectDay = getSelectElement(node.id + '-day');
     const days = [...Array(31).keys()].map(val => val+1);
     addOptionsToSelect(selectDay, days, days, day);
 
@@ -158,11 +159,11 @@ function addDateToNode(date, node) {
 }
 
 function setupDateFilter(fromRoot, toRoot) {
-    // set to: today
+    // set `to`-date: today
     const toDate = new Date();
     addDateToNode(toDate, toRoot);    
 
-    // set from: mindate or today - 7days
+    // set `from`-date: min-date or today - 7days
     let fromDate;
     fetch('/db/stories/stats')
     .then(res => res.json())
