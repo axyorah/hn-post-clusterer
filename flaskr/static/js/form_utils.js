@@ -21,7 +21,7 @@ const range = {
     }
 }
 
-// Helpers
+// General Helpers
 const config = {
     date: function (beginRange, endRange, beginLabel, endLabel, minVal, maxVal) {
         beginRange.min = minVal;
@@ -113,32 +113,7 @@ update.comm = update.general;
 update.score = update.general;
 
 
-// Event Listeners 
-for (let filterBy of ['date', 'id']) {
-    for (let loc of ['begin', 'end']) {
-        seed[filterBy][loc].range.addEventListener('change', (evt) => {
-            update[filterBy][loc](
-                seed[filterBy].begin.range, seed[filterBy].end.range, 
-                seed[filterBy].begin.label, seed[filterBy].end.label,
-                filterBy === 'id' ? true : false
-            );
-        })
-
-    }
-}
-
-for (let filterBy of ['id', 'comm', 'score']) {
-    for (let loc of ['begin', 'end']) {
-        show[filterBy][loc].range.addEventListener('change', (evt) => {
-            update[filterBy][loc](
-                show[filterBy].begin.range, show[filterBy].end.range, 
-                show[filterBy].begin.label, show[filterBy].end.label,
-                filterBy === 'id' ? true : false
-            );
-        })
-    }
-}
-
+// Date Helpers
 function addOptionsToSelect(selectNode, optVals, optNames, selectedVal) {
     for (let i = 0; i < optNames.length; i++) {
         const name = optNames[i];
@@ -155,8 +130,6 @@ function addOptionsToSelect(selectNode, optVals, optNames, selectedVal) {
 }
 
 function addDateToNode(date, node) {
-    console.log(date);
-    console.log(node);
     const [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()];
 
     const selectYear = document.createElement('select');
@@ -216,6 +189,33 @@ function setupDateFilter(fromRoot, toRoot) {
     .finally(res => {
         addDateToNode(fromDate, fromRoot);
     });
+}
+
+
+// Event Listeners 
+for (let filterBy of ['date', 'id']) {
+    for (let loc of ['begin', 'end']) {
+        seed[filterBy][loc].range.addEventListener('change', (evt) => {
+            update[filterBy][loc](
+                seed[filterBy].begin.range, seed[filterBy].end.range, 
+                seed[filterBy].begin.label, seed[filterBy].end.label,
+                filterBy === 'id' ? true : false
+            );
+        })
+
+    }
+}
+
+for (let filterBy of ['id', 'comm', 'score']) {
+    for (let loc of ['begin', 'end']) {
+        show[filterBy][loc].range.addEventListener('change', (evt) => {
+            update[filterBy][loc](
+                show[filterBy].begin.range, show[filterBy].end.range, 
+                show[filterBy].begin.label, show[filterBy].end.label,
+                filterBy === 'id' ? true : false
+            );
+        })
+    }
 }
 
 window.addEventListener('load', (evt) => {
