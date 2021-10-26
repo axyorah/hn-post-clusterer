@@ -1,10 +1,5 @@
 // Vars
 const range = {
-    id: {
-        min: 27700000,//27750741,27758000,27776268
-        max: 27975530//27752765
-    },
-
     comm: {
         min: 5,
         max: 300
@@ -33,7 +28,6 @@ const config = {
         }
     }, 
 };
-config.id = config.general;
 config.comm = config.general;
 config.score = config.general;
 
@@ -64,7 +58,6 @@ const update = {
         }
     },
 }
-update.id = update.general;
 update.comm = update.general;
 update.score = update.general;
 
@@ -150,25 +143,23 @@ function setupDateFilter(fromRoot, toRoot) {
 
 
 // Event Listeners 
-for (let filterBy of ['id', 'comm', 'score']) {
+for (let filterBy of ['comm', 'score']) {
     for (let loc of ['begin', 'end']) {
         show[filterBy][loc].range.addEventListener('change', (evt) => {
             update[filterBy][loc](
                 show[filterBy].begin.range, show[filterBy].end.range, 
-                show[filterBy].begin.label, show[filterBy].end.label,
-                filterBy === 'id' ? true : false
+                show[filterBy].begin.label, show[filterBy].end.label
             );
         })
     }
 }
 
 window.addEventListener('load', (evt) => {
-    for (let filterBy of ['id', 'comm', 'score']) {            
+    for (let filterBy of ['comm', 'score']) {            
         config[filterBy](
             show[filterBy].begin.range, show[filterBy].end.range, 
             show[filterBy].begin.label, show[filterBy].end.label,
-            range[filterBy].min, range[filterBy].max,
-            filterBy === 'id' ? true : false
+            range[filterBy].min, range[filterBy].max
         )
     }
 
