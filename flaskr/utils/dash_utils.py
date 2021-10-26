@@ -81,7 +81,7 @@ class DataHelper:
 
         df = pd.read_csv(fname, sep='\t')
         df['unix_time'] = df['unix_time'].map(
-            lambda ts: datetime.datetime.utcfromtimestamp(int(ts)).date()
+            lambda ts: datetime.datetime.fromtimestamp(int(ts)).date()
         )
 
         df_bar = df.groupby(['unix_time', 'label']).count()
