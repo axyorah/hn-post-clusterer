@@ -54,19 +54,6 @@
         const alertRoot = document.querySelector("#alert-root");
 
         // Filter - HN api
-        const seed = new Object();
-        for (let filterBy of ["date", "id"]) {
-            if (seed[filterBy] === undefined) {
-                seed[filterBy] = new Object();
-            }
-            for (let loc of ["begin", "end"]) {
-                if (seed[filterBy][loc] === undefined) {
-                    seed[filterBy][loc] = new Object();
-                }
-                seed[filterBy][loc]["range"] = document.querySelector(`#seed-${filterBy}-${loc}-range`);
-                seed[filterBy][loc]["label"] = document.querySelector(`#seed-${filterBy}-${loc}-label`);
-            }
-        }
         const seedDateBeginRoot = document.querySelector("#seed-date-begin-root");
         const seedDateEndRoot = document.querySelector("#seed-date-end-root");
         const seedSubmitBtn = document.querySelector("#seed-submit-btn");
