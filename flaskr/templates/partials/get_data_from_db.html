@@ -47,7 +47,7 @@
                                 Comments</a>,
                             <a href="https://github.com/afader/oqa#wikianswers-corpus">WikiAnswers</a> and
                             <a href="https://www.kaggle.com/soumikrakshit/yahoo-answers-dataset">Yahoo Answers</a>,
-                            so we can expect that it should perform reasonably well on our data, too.
+                            so we can exoect it to perform reasonably well on our data, too.
                         </p>
                     </li>
                     <li>
@@ -75,7 +75,21 @@
             </p>
 
         </details>
-        
+
+        <details>
+            <summary class="mb-3">
+                Do notice that the results of clustering would differ between the runs. 
+            </summary>
+            <p> 
+                The "quality" of your clusters 
+                (how similar are the posts clustered together from a "human" perspective) 
+                would depend among others on the set number of clusters and 
+                suitability of the embedding model for the data that are clustered. 
+                For this project we use general-purpose 
+                <a href="https://huggingface.co/sentence-transformers/all-distilroberta-v1">DistilRoBERTa</a> 
+                to generate the embeddings. The number of clusters, however, you can set yourself.
+            </p>
+        </details>
 
         {% include "partials/form_filters/set_clustering_filters.html" %}
 
