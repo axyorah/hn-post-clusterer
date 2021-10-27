@@ -40,6 +40,14 @@ a {
     justify-content: space-between;
 }
 
+.inpt {
+    height: 2.5rem;
+    width: 4rem;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 .controls {
     background-color: rgba(255,255,255,0.1);
     border-radius: 2px;
@@ -97,7 +105,7 @@ button:hover {
     background-color: rgba(0,0,0,0.1)
 }
 
-@media all and (max-width: 959px) {
+@media all and (max-width: 976px) {
     .col_0, .col_1, .col_4, .col_5 {
         display: none;
         width:0;
@@ -107,7 +115,7 @@ button:hover {
     } 
 }
 
-@media (max-width: 499px) {
+@media (max-width: 756px) {
     .hor {
         flex-direction: column;
     }
@@ -117,12 +125,12 @@ button:hover {
     }
 }
 
-@media (max-width: 368px) {
+/* @media (max-width: 368px) {
     .hor-item {
         display: flex;
         flex-direction: column;
     }
-}
+} */
 
 .popup .popuptext {
     position: absolute;

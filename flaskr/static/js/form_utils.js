@@ -66,7 +66,7 @@ update.score = update.general;
 function getSelectElement(id) {
     const select = document.createElement('select');
     select.setAttribute('id', (id === undefined) ? 'selector' : id);
-    select.setAttribute('class', 'box');
+    select.setAttribute('class', 'box inpt');
     return select;
 }
 
