@@ -74,7 +74,7 @@ class BatchedPipeliner:
         - serialize result
         """
 
-    def get_story_batches(self, delta_ts: int = 80000) -> Generator:
+    def get_story_batches(self, delta_ts: int = 100000) -> Generator:
         """
         queries db based on form request,
         recursively collects all comments for each story,
