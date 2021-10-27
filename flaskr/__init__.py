@@ -27,7 +27,13 @@ def create_app(test_config=None):
     db.init_app(app)
 
     with app.app_context():
-        from . import routes
-        from .dashapp import init_dashboard
+        from flaskr.routes import (
+            page_routes,
+            db_routes,
+            io_routes,
+            date_routes,
+            cluster_routes
+        )
+        from flaskr.dashapp import init_dashboard
         app = init_dashboard(app)
         return app
