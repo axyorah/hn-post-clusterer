@@ -32,9 +32,13 @@ def get_first_id_on_day(year, month, day):
         return res.json()['time']
     
     target_ts = date2ts(year, month, day)
-    maxid = rq.get(URL_MAXID).json()
+    max_id = rq.get(URL_MAXID).json()
+    max_ts = helper(max_id)
+
+    if target_ts > max_ts:
+        raise ValueError('Specified date is out of range')
     
-    lo, hi = 1, maxid    
+    lo, hi = 1, max_id    
     while lo <= hi:
         mi = (lo + hi) // 2        
         ts = helper(mi)
