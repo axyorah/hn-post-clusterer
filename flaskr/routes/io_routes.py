@@ -42,7 +42,7 @@ def read_file():
                     "ok": True
                 })
         elif ext == "json":
-            with open(fname, "f") as f:
+            with open(fname, "r") as f:
                 return jsonify({
                     "message": f"read {fname} as json",
                     "data": json.load(f),
