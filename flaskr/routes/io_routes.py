@@ -80,7 +80,18 @@ def delete_file():
     }
     `fname` can be a pattern, e.g., `data/*.txt`
     """
-    fname_pattern = request.get_json().get("fname")
+    try:
+        request_form = rqparser.parse(request)
+    except (KeyError, ValueError, NameError) as e:
+        return jsonify({
+            "message": (
+                'couldn not understand the request; should be ' + 
+                '{"sender": "deleter", "fname": <fname pattern>}'
+            ),
+            "errors": e.args[0]
+        }), 400
+    
+    fname_pattern = request_form.get('fname')
     if fname_pattern is None:
         return jsonify({
             "message": f"specify file to be deleted at `fname` key",

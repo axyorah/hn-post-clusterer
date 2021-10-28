@@ -29,7 +29,7 @@ class RequestParser:
         'db-seeder': ['seed-id-begin-range', 'seed-id-end-range'],
         'db-lister': ['story_ids'],
         'reader': ['fname'],
-        'deleter': ['fnames'],
+        'deleter': ['fname'],
         'clusterer': [
             'show-ts-begin-range', 'show-ts-end-range', 
             'show-comm-begin-range', 'show-comm-end-range', 
@@ -159,8 +159,10 @@ class RequestParser:
         which will be used to correctly parse the request
         """
         form = request.form or request.get_json()
-        sender = form.get('sender')
+        if form is None:
+            raise ValueError('Request body is not form or json')
 
+        sender = form.get('sender')
         if sender is None:
             raise(KeyError(f'Field "sender" is not specified! Got {form}\n'))
 
