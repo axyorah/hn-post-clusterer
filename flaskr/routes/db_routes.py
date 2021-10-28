@@ -18,7 +18,7 @@ from flaskr.utils.db_utils import (
 @app.route("/db/story/<string:id>")
 def get_story(id):
     """
-    gets story with specified is from db, returns under json's `data` field
+    gets story with specified id from db, returns under json's `data` field
     """
     story = Story.find_by_id(id)        
     if story:
@@ -29,11 +29,14 @@ def get_story(id):
         })
     else: 
         return jsonify({
-            "message": f"item {id} not found",
+            "message": f"item `{id}` not found",
         }), 404
 
 @app.route("/db/story/<string:id>", methods=["POST"])
-def post_story():
+def post_story(id):
+    """
+    fetches story with specified if from hn and posts it in db
+    """
     story = Story.find_by_id(id)        
     if story:
         return jsonify({
@@ -42,9 +45,13 @@ def post_story():
     else:
         try:
             item = query_api(id)
+            if item is None:
+                return jsonify({
+                    "message": f"couldn't fetch item with id `{id}` from hn"
+                }), 400
             if item.get("type") != "story":
                 return jsonify({
-                    "message": f"item {id} is not hn story"
+                    "message": f"item `{id}` is not hn story"
                 }), 400
             item = translate_response_api2schema(item)
             story = Story(**item)
@@ -129,7 +136,7 @@ def get_comment(id):
         })
     else: 
         return jsonify({
-            "message": f"item {id} not found",
+            "message": f"item `{id}` not found",
     }), 404
 
 # db routes for multiple stories
@@ -188,7 +195,7 @@ def get_stories_stats():
         return jsonify({
             "message": "couldn't get story stats",
             "errors": e.args[0],
-        })
+        }), 500
 
     
 @app.route("/db/comments/stats")
@@ -234,7 +241,13 @@ def post_items():
             "message": "updated database with new entries",
             "ok": True
         })
+    except (KeyError, ValueError) as e:
+        return jsonify({
+            "message": "couldn't get items from hn and add them to database",
+            "errors": e.args[0]
+        }), 400
     except Exception as e:
+        print(e.args)
         return jsonify({
             "message": "couldn't get items from hn and add them to database",
             "errors": e.args[0],
