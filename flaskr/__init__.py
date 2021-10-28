@@ -17,11 +17,14 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    # ensure the instance folder exists
+    # ensure the instance dir exists
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    # create data dir if not present
+    os.makedirs('data', exist_ok=True)
 
     # register db with the app
     db.init_app(app)
