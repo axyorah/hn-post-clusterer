@@ -83,11 +83,11 @@ def test_post_to_db_fail(client):
         data=json.dumps(params))
     assert rv.status_code == 400
 
-# def test_first_id_on_date_ok(client):
-#     url = '/time/first_id_on?year={}&month={}&day={}'
-#     rv = client.get(url.format(2021, 7, 1))
-#     res = rv.json
-#     assert rv.status_code == 200 and res.get('data') and res.get('data').get('id') == 27693892
+def test_first_id_on_date_ok(client):
+    url = '/time/first_id_on?year={}&month={}&day={}'
+    rv = client.get(url.format(2021, 7, 1))
+    res = rv.json
+    assert rv.status_code == 200 and res.get('data') and res.get('data').get('id') == 27693892
 
 def test_first_id_on_date_fail(client):
     url = '/time/first_id_on?year={}&month={}&day={}'
