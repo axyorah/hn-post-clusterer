@@ -83,6 +83,30 @@ def test_post_to_db_fail(client):
         data=json.dumps(params))
     assert rv.status_code == 400
 
+def test_get_stories_ok(client):
+    rv = client.get('/db/stories?ids=27700200,27700210')
+    res = rv.json
+    assert rv.status_code == 200 and len(res.get('data')) == 2 and \
+        res.get('data')[0].get('story_id') == 27700200 and res.get('data')[0].get('unix_time') == 1625153690 and \
+        res.get('data')[1].get('story_id') == 27700210 and res.get('data')[1].get('unix_time') == 1625153743
+
+def test_get_stories_fail(client):
+    # query string is badly formatted 1
+    rv = client.get('/db/stories?id=27700200,27700210')
+    assert rv.status_code == 400
+
+    # query string is badly formatted 1
+    rv = client.get('/db/stories?ids=27700200;27700210')
+    assert rv.status_code == 404
+
+    # ids correspond to comments
+    rv = client.get('/db/stories?ids=27700201,27700211')
+    assert rv.status_code == 200 and not len(rv.json.get('data'))
+
+    # ids are not numeric
+    rv = client.get('/db/stories?ids=abc,def')
+    assert rv.status_code == 404
+
 def test_first_id_on_date_ok(client):
     url = '/time/first_id_on?year={}&month={}&day={}'
     rv = client.get(url.format(2021, 7, 1))

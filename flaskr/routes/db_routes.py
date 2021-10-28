@@ -159,6 +159,7 @@ def get_stories_with_children():
     if id_list:
         try:
             stories = StoryList.find_by_ids_with_children(id_list)
+            # if no stories found - empty list returned but no error is raised
             return jsonify({
                 "message": "got stories from db",
                 "data": [story.json() for story in stories],
