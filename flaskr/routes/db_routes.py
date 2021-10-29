@@ -18,6 +18,22 @@ from flaskr.utils.db_utils import (
 # general db stuff
 @app.route("/db/stats")
 def get_db_stats():
+    """
+    returns basic stats about stories and comments in db under `data` field:
+    {
+        "stories": {
+            "num": <number of stories in db>,
+            "min": <min story id>,
+            "max": <max story id>
+        },
+        "comments": {
+            "num": <number of comments in db>,
+            "min": <min commentid>,
+            "max": <max commentid>
+        }
+    }
+    
+    """
     try:
         return jsonify({
             "data": {
@@ -193,50 +209,6 @@ def get_stories_with_children():
         return jsonify({
             "message": "stories with speicifed ids not found",
         }), 404
-        
-
-@app.route("/db/stories/stats")
-def get_stories_stats():
-    """
-    returns basic stats about stories in db under `data` field:
-    {
-        "num": <number of stories in db>,
-        "min": <min story id>,
-        "max": <max story id>
-    }
-    """    
-    try:
-        return jsonify({
-            "data": StoryList.stats(),
-            "ok": True
-        })
-    except Exception as e:
-        return jsonify({
-            "message": "couldn't get story stats",
-            "errors": e.args[0],
-        }), 500
-
-    
-@app.route("/db/comments/stats")
-def get_comments_stats():
-    """
-    returns basic stats about comments in db under `data` field:
-    {
-        "num": <number of comments in db>,
-        "min": <min comment id>,
-        "max": <max comment id>
-    }
-    """    
-    try:
-        return jsonify({
-            "data": CommentList.stats(),
-            "ok": True
-        })
-    except Exception as e:
-        return jsonify({
-            "message": "couldn't get comment stats",
-            "errors": e.args[0],
-        }), 500
 
 # db routes for multiple items (stories + comments)
 @app.route("/db/items", methods=["POST"])
