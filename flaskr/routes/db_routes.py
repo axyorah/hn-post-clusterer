@@ -15,6 +15,23 @@ from flaskr.utils.db_utils import (
     query_hn_and_add_result_to_db
 )
 
+# general db stuff
+@app.route("/db/stats")
+def get_db_stats():
+    try:
+        return jsonify({
+            "data": {
+                "stories": StoryList.stats(),
+                "comments": CommentList.stats()
+            },
+            "ok": True
+        })
+    except Exception as e:
+        return jsonify({
+            "message": "couldn't get basic stats on stories and comments",
+            "errors": e.args[0]
+        }), 500
+
 # db routes for single story
 @app.route("/db/story/<string:id>")
 def get_story(id):
