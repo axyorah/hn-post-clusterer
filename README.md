@@ -23,11 +23,12 @@ The exact procedure is as follows:
 - cluster these reduced post embeddings with a help of k-Means clustering.
 
 ### Stack
-This is essentially a Flask app, so all the server side is written in python, 
-while all the client side uses JavaScript. Metadata on HN posts and comments is stored locally in SQLite database. All figures are rendered with the help of plotly/dash.
+This is essentially a [Flask](https://flask.palletsprojects.com/en/2.0.x/) app, so all the server side is written in python, 
+while all the client side uses JavaScript. Metadata on HN posts and comments is stored locally in SQLite database. All figures are rendered with the help of [plotly/dash](https://plotly.com/dash/). General page layout is prettified with the help of [Boostrap](https://getbootstrap.com/).
 
 ## Setup
-You need to have [python](https://www.python.org/downloads/).
+You need to have [python3.7](https://www.python.org/downloads/) or higher. Additionally, 
+sentence transformer used in this project to generate comment embeddings is quite demanding on memory, so you'd need to have at least 8GB RAM.
 
 To set this project up locally open your terminal/command prompt and run the following commands:
 - clone this repo:
@@ -35,7 +36,7 @@ To set this project up locally open your terminal/command prompt and run the fol
 $ git clone https://github.com/axyorah/hn-post-clusterer.git
 ```
 
-- create fresh python virtual environment for this project by going to the project root the running:
+- create fresh python virtual environment for this project by; to do that go to the project root and run:
   - if you're on Linux or Mac:
   ```bash
   $ python3 -m venv venv
@@ -76,4 +77,4 @@ $ venv/bin/pip3 install -r requirements.txt
   flask run
   ```
 
-- in your browser go to `localhost:5000` and follow the instructions
+- in your browser go to `localhost:5000` and follow the instructions. Do note that to begin with clustering you'd first need to populate your local database with at least 100 posts with 5+ comments. It might take a while to fetch them over internet. Luckily, you'd only need to do it once.
