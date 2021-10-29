@@ -9,6 +9,7 @@ from flaskr.utils.db_utils import (
     Story,
     Comment,
     StoryList,
+    CommentList, 
     query_api,
     translate_response_api2schema,
     query_hn_and_add_result_to_db
@@ -189,7 +190,7 @@ def get_stories_stats():
     """    
     try:
         return jsonify({
-            "data": Story.stats(),
+            "data": StoryList.stats(),
             "ok": True
         })
     except Exception as e:
@@ -211,7 +212,7 @@ def get_comments_stats():
     """    
     try:
         return jsonify({
-            "data": Comment.stats(),
+            "data": CommentList.stats(),
             "ok": True
         })
     except Exception as e:

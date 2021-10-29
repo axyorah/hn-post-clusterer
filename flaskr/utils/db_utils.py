@@ -241,18 +241,6 @@ class Story:
             "comment_embedding": self.comment_embedding,
             "children": self.children
         }
-    
-    @classmethod
-    def stats(cls) -> Dict:
-        num_query = "SELECT COUNT(*) as num FROM story;"
-        min_query = "SELECT MIN(story_id) as min FROM story;"
-        max_query = "SELECT MAX(story_id) as max FROM story;"
-
-        return {
-            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
-            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
-            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
-        }
 
     @classmethod
     def find_by_id(cls, story_id: int) -> Optional['Story']:
@@ -354,18 +342,6 @@ class Comment:
         }
 
     @classmethod
-    def stats(cls) -> Dict:
-        num_query = "SELECT COUNT(*) as num FROM comment;"
-        min_query = "SELECT MIN(comment_id) as min FROM comment;"
-        max_query = "SELECT MAX(comment_id) as max FROM comment;"
-
-        return {
-            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
-            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
-            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
-        }
-
-    @classmethod
     def find_by_id(cls, comment_id: int) -> Optional['Comment']:
         get_query = """
             SELECT * FROM comment WHERE comment_id = ?
@@ -420,6 +396,18 @@ class Comment:
 
 class StoryList:
     @classmethod
+    def stats(cls) -> Dict:
+        num_query = "SELECT COUNT(*) as num FROM story;"
+        min_query = "SELECT MIN(story_id) as min FROM story;"
+        max_query = "SELECT MAX(story_id) as max FROM story;"
+
+        return {
+            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
+            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
+            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
+        }
+
+    @classmethod
     def find_by_ids(cls, id_list: List[int]) -> List[Story]:
         get_query = f"""
             SELECT * FROM story 
@@ -427,7 +415,7 @@ class StoryList:
         """
         rows = DBHelper.get_query(get_query, id_list)
         stories = DBHelper.rows2dicts(rows)
-        return [Story(**story) for story in stories] # or leave dict
+        return [Story(**story) for story in stories]
 
     @classmethod
     def find_by_ids_with_children(cls, id_list: List[int]) -> List[Story]:
@@ -438,3 +426,26 @@ class StoryList:
         rows = DBHelper.get_query(get_query, id_list)
         stories = DBHelper.rows2dicts(rows)
         return [Story(**story) for story in stories]
+
+class CommentList:
+    @classmethod
+    def stats(cls) -> Dict:
+        num_query = "SELECT COUNT(*) as num FROM comment;"
+        min_query = "SELECT MIN(comment_id) as min FROM comment;"
+        max_query = "SELECT MAX(comment_id) as max FROM comment;"
+
+        return {
+            "num": DBHelper.get_query(num_query, [])[0].__getitem__("num"),
+            "min": DBHelper.get_query(min_query, [])[0].__getitem__("min"),
+            "max": DBHelper.get_query(max_query, [])[0].__getitem__("max")
+        }
+
+    @classmethod
+    def find_by_ids(cls, id_list: List[int]) -> List[Comment]:
+        get_query = f"""
+            SELECT * FROM comment 
+            WHERE comment_id IN ({', '.join('?' for _ in id_list)})
+        """
+        rows = DBHelper.get_query(get_query, id_list)
+        comments = DBHelper.rows2dicts(rows)
+        return [Comment(**comment) for comment in comments]
