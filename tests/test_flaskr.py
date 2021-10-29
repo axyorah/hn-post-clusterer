@@ -14,9 +14,10 @@ def test_index_ok(client):
 def test_empty_db(client):
     """Start with a blank database."""
 
-    rv = client.get('/db/stories/stats')
+    rv = client.get('/db/stats')
     res = rv.json
-    assert rv.status_code == 200 and res.get('data') and not res.get('data').get('num')
+    assert rv.status_code == 200 and res.get('data') and res.get('data').get("stories") and \
+        not res.get('data').get("stories").get('num')
 
 def test_post_to_db_ok(client):
     # fetch items from hn and post them to db
@@ -28,16 +29,16 @@ def test_post_to_db_ok(client):
             'seed-id-end-range': 27700210
     }))
     assert rv.status_code == 200
+    
+    rv = client.get('/db/stats')
+    res = rv.json
+    assert rv.status_code == 200 and res.get('data') and res.get('data')
 
     # there should be 3 new storeis
-    rv = client.get('/db/stories/stats')
-    res = rv.json
-    assert rv.status_code == 200 and res.get('data') and res.get('data').get('num') == 3
+    assert res.get('data').get("stories").get('num') == 3
 
     # there should be 8 new comments
-    rv = client.get('/db/comments/stats')
-    res = rv.json
-    assert rv.status_code == 200 and res.get('data') and res.get('data').get('num') == 8
+    assert res.get('data').get("comments").get('num') == 8
 
 def test_post_to_db_fail(client):    
     # sender not specified
