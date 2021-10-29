@@ -4,10 +4,19 @@ function adjustDateNodeDisplay(node, date) {
     e.g., if 2021/feb/31 was selected
     it would be corrected to 2021/3/3
     */
-    node.innerHTML = 
-        node.innerHTML.split(':')[0] + ': ' +
-        `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ` +
-        node.innerHTML.split(':')[1];
+    const pattern = /[0-9]+\/[0-9]+\/[0-9]+/;
+    const r = pattern.exec(node.innerHTML);
+    if (r) {
+        node.innerHTML = 
+            node.innerHTML.replace(
+                r[0], `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
+            );
+    } else {
+        node.innerHTML =     
+            node.innerHTML.split(':')[0] + ': ' +
+            `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ` +
+            node.innerHTML.split(':')[1];
+    }
 }
  
 
