@@ -6,13 +6,14 @@ URL_ID = 'https://hacker-news.firebaseio.com/v0/item/{}.json?print=pretty'
 URL_MAXID = 'https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty'
 
 def check(year, month, day, item_id):
-    def helper(item_id):
+    def id2ts(item_id):
         res = rq.get(URL_ID.format(item_id))
         while not res.ok or not res.json().get('time'):
-            res = rq.get(URL_ID.format(item_id + 1))
+            item_id += 1
+            res = rq.get(URL_ID.format(item_id))
         return res.json()['time']
 
-    ts = helper(item_id)
+    ts = id2ts(item_id)
     d = datetime.datetime.fromtimestamp(ts)    
     print(f'first id on {year}/{month}/{day}: {item_id} ({d.year}/{d.month}/{d.day})')            
 
