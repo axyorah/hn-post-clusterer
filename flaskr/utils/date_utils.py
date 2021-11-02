@@ -25,15 +25,16 @@ def date2ts(year, month, day):
     return int(time.mktime(timetpl))
 
 def get_first_id_on_day(year, month, day):
-    def helper(item_id):
+    def id2ts(item_id):
         res = rq.get(URL_ID.format(item_id))
         while not res.ok or not res.json().get('time'):
-            res = rq.get(URL_ID.format(item_id + 1))
+            item_id += 1
+            res = rq.get(URL_ID.format(item_id))
         return res.json()['time']
     
     target_ts = date2ts(year, month, day)
     max_id = rq.get(URL_MAXID).json()
-    max_ts = helper(max_id)
+    max_ts = id2ts(max_id)
 
     if target_ts > max_ts:
         raise ValueError('Specified date is out of range')
@@ -41,7 +42,7 @@ def get_first_id_on_day(year, month, day):
     lo, hi = 1, max_id    
     while lo <= hi:
         mi = (lo + hi) // 2        
-        ts = helper(mi)
+        ts = id2ts(mi)
         if target_ts > ts:
             lo = mi + 1
         else:
