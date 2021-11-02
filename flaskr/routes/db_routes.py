@@ -9,7 +9,9 @@ from flaskr.utils.db_utils import (
     Story,
     Comment,
     StoryList,
-    CommentList, 
+    CommentList    
+)
+from flaskr.utils.hn_utils import (
     query_api,
     translate_response_api2schema,
     query_hn_and_add_result_to_db
