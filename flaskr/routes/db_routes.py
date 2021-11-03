@@ -5,16 +5,19 @@ from flask import (
 from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
-from flaskr.utils.db_utils import (
-    Story,
-    Comment,
-    StoryList,
-    CommentList    
-)
+
 from flaskr.utils.hn_utils import (
     query_api,
     translate_response_api2schema,
     query_hn_and_add_result_to_db
+)
+from flaskr.models.story import (
+    Story,
+    StoryList,
+)
+from flaskr.models.comment import (
+    Comment,
+    CommentList,
 )
 
 # general db stuff

@@ -15,7 +15,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, LancasterStemmer
 
-from flaskr.utils.db_utils import Story
+from flaskr.models.story import Story
 
 nltk.download('stopwords')
 stop_words = stopwords.words('english')

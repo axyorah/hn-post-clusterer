@@ -15,17 +15,14 @@ from flaskr.utils.nlp_utils import (
     html2sentences,
 )
 
-from flaskr.utils.db_utils import (
-    DBHelper as dbh,
-    Story, 
-    StoryList
-)
-
 from flaskr.utils.cluster_utils import (
     copy_and_measure_generator,
     copy_and_measure_batch_generator,
     BatchedGeneratorStandardizer
 )
+
+from flaskr.utils.db_utils import DBHelper as dbh
+from flaskr.models.story import Story
 
 def rebatch_generator(batches: Generator, min_batch_size: int):
     """

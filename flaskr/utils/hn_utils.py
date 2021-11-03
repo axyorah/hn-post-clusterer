@@ -3,10 +3,8 @@ from typing import Any, Dict, List, Tuple, Set, Optional, Generator, Union
 import requests as rq
 import datetime
 
-from flaskr.utils.db_utils import (
-    Story, 
-    Comment
-)
+from flaskr.models.story import Story
+from flaskr.models.comment import Comment
 
 story_api2schema = {
     'story_id': 'id',
