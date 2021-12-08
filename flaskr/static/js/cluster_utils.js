@@ -54,7 +54,7 @@ semanticClusterBtn.addEventListener('click', function (evt) {
     // clear all figures and hide tabs
     reset();
 
-    postData('/cluster/run', params)
+    postData('/cluster/new', params)
         .then(res => checkForServerErrors(res))
         .then(res => {
             semanticClusterBtn.innerHTML = `Cluster Posts`;

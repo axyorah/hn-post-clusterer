@@ -19,7 +19,7 @@ PCA_FNAME = os.path.join(CORPUS_DIR, 'pca.txt')
 
 
 # cluster routes
-@app.route("/cluster/run", methods=["POST"])
+@app.route("/cluster/new", methods=["POST"])
 def cluster_posts_and_serialize_results():
     """
     runs preprocessing and clustering pipeline and serializes results on disk;
@@ -54,7 +54,7 @@ def cluster_posts_and_serialize_results():
             "ok": True
         })
     except Exception as e:
-        print(f'[ERR: /cluster/run] {e}')
+        print(f'[ERR: /cluster/new] {e}')
         return jsonify({
             "errors": e.args[0],
         }), 500
