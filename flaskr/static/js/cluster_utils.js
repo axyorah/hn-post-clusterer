@@ -45,27 +45,42 @@ function reset() {
 
 function addClusterBarPlot() {
     removeAllNodeChildren(clusterBarPlotRoot);
-    addGraphFromRouteToNode(clusterBarPlotRoot, '/dashapp/cluster-bar-plot');
+    addGraphFromRouteToNode(
+        clusterBarPlotRoot, 
+        '/dashapp/cluster-bar-plot'
+    );
 }
 
 function addDailyBarPlot() {
     removeAllNodeChildren(dailyBarPlotRoot);
-    addGraphFromRouteToNode(dailyBarPlotRoot, '/dashapp/daily-bar-plot');
+    addGraphFromRouteToNode(
+        dailyBarPlotRoot, 
+        '/dashapp/daily-bar-plot'
+    );
 }
 
 function addPcaEmbeddings() {
     removeAllNodeChildren(embedPcaPlotRoot);
-    addGraphFromRouteToNode(embedPcaPlotRoot, '/dashapp/embeddings-pca-scatter-plot');
+    addGraphFromRouteToNode(
+        embedPcaPlotRoot, 
+        '/dashapp/embeddings-pca-scatter-plot'
+    );
 }
 
 function addPcaExplainedVariance() {
     removeAllNodeChildren(pcaExplainedVarianceRoot);
-    addGraphFromRouteToNode(pcaExplainedVarianceRoot, '/dashapp/pca-explained-variance-plot');
+    addGraphFromRouteToNode(
+        pcaExplainedVarianceRoot, 
+        '/dashapp/pca-explained-variance-plot'
+    );
 }
 
 function addTsneEmbeddings() {
     removeAllNodeChildren(embedTsnePlotRoot);
-    addGraphFromRouteToNode(embedTsnePlotRoot, '/dashapp/embeddings-tsne-scatter-plot');
+    addGraphFromRouteToNode(
+        embedTsnePlotRoot, 
+        '/dashapp/embeddings-tsne-scatter-plot'
+    );
 
     embedTsneBtn.innerHTML = 'Prettify with t-SNE';
 }
@@ -74,7 +89,10 @@ function addWordCloud( num_clusters ) {
     wordcloudInfo.innerHTML = '';
 
     removeAllNodeChildren(wordcloudPlotRoot);
-    wordcloudPlotRef = addGraphFromRouteToNode(wordcloudPlotRoot,'/dashapp/wordcloud-plot');
+    wordcloudPlotRef = addGraphFromRouteToNode(
+        wordcloudPlotRoot,
+        '/dashapp/wordcloud-plot'
+    );
 
     const numRows = Math.ceil(num_clusters / 2);
     wordcloudPlotRef.style.height = `${100 + 200 * numRows}px`;
