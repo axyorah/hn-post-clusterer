@@ -70,3 +70,72 @@ function getTimestampFromDateNode(node) {
     const date = getDateFromDateNode(node);
     return isFinite(date.valueOf()) ? parseInt(date.valueOf() / 1000) : undefined;
 }
+
+function date2ts(year, month, day) {
+    /* returns timestamp (in seconds) corresponding to specified date */
+    const dateObj = new Date(year, month-1, day);
+    return Math.floor(dateObj.getTime() / 1000);
+}
+
+async function id2ts(itemId) {
+    /* returns timestamp (in seconds) of hn item with specified id */
+    const url = `https://hacker-news.firebaseio.com/v0/item/${itemId}.json`;
+    const res = await fetch(url)
+        .then(res => res.json())
+        .catch(err => console.log(err));
+    
+    if (res && res['time']) {
+        return res['time'];
+    } else {
+        return await id2ts(itemId - 1)
+        .then(res => res.json());
+    }
+}
+
+async function fetchFirstIdOnDay(year, month, day) {
+    /*
+    returns first hn item id (story or comment) on specified date;
+    date specified as as (year, month, day) tuple if ints (1-based indexing), 
+    e.g. (2021, 1, 1) is 1st January 2021;
+    impossible dates (e.g., 31st February 2021) will be resolved
+    (e.g. 31st February 2021 -> 3rd March 2021), 
+    future dates (e.g., 1st January 3021) will raise errors
+    
+    use:
+        const firstId = await fetchFirstIdOnDay(...);
+    */
+    URL_MAXID = 'https://hacker-news.firebaseio.com/v0/maxitem.json';
+
+    const targetTs = date2ts(year, month, day);
+
+    let maxId, maxTs;
+    return await fetch(URL_MAXID)
+    .then(res => res.json())
+    .then(res => maxId = res)
+    .then(res => (async function (){        
+        await id2ts(maxId).then(res => {maxTs = res}); // await!!!
+        if (targetTs > maxTs) {
+            throw new Error('Specified date is out of range');
+        } 
+    })())    
+    .then(res => (async function () {
+        // use binsearch to find first id higher than timestamp
+        let lo = 1;
+        let hi = maxId;
+        let mi, ts;
+        while (lo <= hi) {
+            mi = Math.floor((lo + hi) / 2);
+            
+            await id2ts(mi).then(res => {ts = res}); // await!!!
+            //console.log(`lo: ${lo}, hi: ${hi}, targetTs: ${targetTs}, ts: ${ts}`);
+            
+            if (targetTs > ts) {
+                lo = mi + 1;
+            } else {
+                hi = mi - 1;
+            }
+        }        
+        return hi + 1;
+    })())
+    .catch(err => console.log(err));
+}
