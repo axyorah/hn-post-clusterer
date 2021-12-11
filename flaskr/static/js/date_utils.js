@@ -95,12 +95,12 @@ async function id2ts(itemId) {
 async function fetchFirstIdOnDay(year, month, day) {
     /*
     returns first hn item id (story or comment) on specified date;
-    date specified as as (year, month, day) tuple if ints (1-based indexing), 
+    date specified as as (year, month, day) tuple if ints (1-based indexing),
     e.g. (2021, 1, 1) is 1st January 2021;
     impossible dates (e.g., 31st February 2021) will be resolved
-    (e.g. 31st February 2021 -> 3rd March 2021), 
+    (e.g. 31st February 2021 -> 3rd March 2021),
     future dates (e.g., 1st January 3021) will raise errors
-    
+
     use:
         const firstId = await fetchFirstIdOnDay(...);
     */
@@ -112,13 +112,13 @@ async function fetchFirstIdOnDay(year, month, day) {
     return await fetch(URL_MAXID)
     .then(res => res.json())
     .then(res => maxId = res)
-    .then(res => (async function (){        
+    .then(async (res) => {        
         await id2ts(maxId).then(res => {maxTs = res}); // await!!!
         if (targetTs > maxTs) {
             throw new Error('Specified date is out of range');
         } 
-    })())    
-    .then(res => (async function () {
+    })    
+    .then(async (res) => {
         // use binsearch to find first id higher than timestamp
         let lo = 1;
         let hi = maxId;
@@ -136,6 +136,6 @@ async function fetchFirstIdOnDay(year, month, day) {
             }
         }        
         return hi + 1;
-    })())
+    })
     .catch(err => console.log(err));
 }
