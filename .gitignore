@@ -7,6 +7,8 @@ instance/
 
 .pytest_cache/
 .coverage
+.metals/
+.vscode/
 htmlcov/
 
 dist/
