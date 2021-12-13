@@ -26,6 +26,24 @@ from flaskr.utils.db_utils import DBHelper as dbh
 from flaskr.models.story import Story
 
 
+def rebatch_generator(batches: Generator, min_batch_size: int):
+    """
+    resamples generator of batches so that 
+    new batches have atleast `min_batch_size` elements
+    """
+    prev, curr = [], []
+    for batch in batches:
+        curr += batch
+        if len(curr) >= min_batch_size:
+            if prev:
+                yield prev
+            prev = curr.copy()
+            curr = []
+
+    # last batch
+    yield prev + curr
+
+
 class Pipeliner:
     def __init__(self):
         self.pipe = []
@@ -33,31 +51,11 @@ class Pipeliner:
     def add(self, fun: FunctionType, params: Optional[Dict]=None):
         self.pipe.append((fun, params or {}))
 
-    def run(self, inpt):
+    def run(self, inpt: Any) -> Any:
         x = inpt
         for fun, params in self.pipe:
             x = fun(x, **params)
         return x
-
-
-class Batcher:
-    @classmethod
-    def rebatch_generator(cls, batches: Generator, min_batch_size: int):
-        """
-        resamples generator of batches so that 
-        new batches have atleast `min_batch_size` elements
-        """
-        prev, curr = [], []
-        for batch in batches:
-            curr += batch
-            if len(curr) >= min_batch_size:
-                if prev:
-                    yield prev
-                prev = curr.copy()
-                curr = []
-
-        # last batch
-        yield prev + curr
 
 
 class ClustererBuilder:
@@ -100,7 +98,7 @@ class ClustererBuilder:
         self.clusterer._end_score = val
         return self
 
-    def build(self):
+    def build(self) -> 'Clusterer':
         return self.clusterer
 
 
@@ -132,7 +130,7 @@ class Clusterer:
         self.centroids = None
 
     @property
-    def set(self):
+    def set(self) -> ClustererBuilder:
         return ClustererBuilder(self)
 
     def _story_batch_generator(self, delta_ts: int = 100000) -> Generator:
@@ -164,7 +162,7 @@ class Clusterer:
                 yield story_dicts
         print(f'[INFO] got {num} stories!')
 
-    def _read_or_generate_story_embeddings(self, story_list: List[Dict]):
+    def _read_or_generate_story_embeddings(self, story_list: List[Dict]) -> List[np.ndarray]:
         """
         returns the list of embeddings; each embedding corresponds
         to a story in `story_list` and is calculated
@@ -233,7 +231,7 @@ class Clusterer:
         gen = self._story_batch_generator(delta_ts=delta_ts)
 
         # rebatch stories
-        gen = Batcher.rebatch_generator(gen, self._min_batch_size)
+        gen = rebatch_generator(gen, self._min_batch_size)
 
         # copy genrator: save one copy, return another
         print('[INFO] copying story generator...')
@@ -244,7 +242,10 @@ class Clusterer:
 
         return batches[1]
 
-    def _get_embedding_batches(self, story_batches: Optional[Generator] = None) -> Generator:
+    def _get_embedding_batches(
+        self, 
+        story_batches: Optional[Generator] = None
+    ) -> Generator:
         """
         each element of a batch is a (batch_size, embed_dim) numpy array
         (embed_dim is 768 for default bert transformers and 384 for minis)
@@ -273,7 +274,11 @@ class Clusterer:
         return batches[1]
 
 
-    def _standardize_embedding_batches(self, embedding_batches: Optional[Generator] = None) -> Generator:
+    def _standardize_embedding_batches(
+        self, 
+        embedding_batches: Optional[Generator] = None
+    ) -> Generator:
+
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to standardize! '+\
@@ -287,7 +292,11 @@ class Clusterer:
 
         return batches[1]
 
-    def _reduce_embedding_dimensionality_by_batches(self, embedding_batches: Optional[Generator] = None) -> Generator:
+    def _reduce_embedding_dimensionality_by_batches(
+        self, 
+        embedding_batches: Optional[Generator] = None
+    ) -> Generator:
+
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to reduce yet! ' +\
@@ -322,7 +331,10 @@ class Clusterer:
         self._embeddings = lowdim_batches[0]
         return lowdim_batches[1]
 
-    def _cluster_embedding_batches(self, embedding_batches: Optional[Generator] = None) -> None:
+    def _cluster_embedding_batches(
+        self, 
+        embedding_batches: Optional[Generator] = None
+    ) -> None:
         if embedding_batches is None and self._embeddings is None:
             raise RuntimeError(
                 'There is nothing to cluster yet! ' +\
@@ -346,6 +358,7 @@ class Clusterer:
                 yield self.kmeans.predict(batch)
 
         self._labels = cluster(batches[1])
+        return self._labels
 
     def run(self):
         # we need to create dummy fun,
