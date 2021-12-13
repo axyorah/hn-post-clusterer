@@ -59,11 +59,6 @@ def cluster_posts_and_serialize_results():
             .build()\
             .run()
         
-        #serializer.serialize_clustering_result(DF_FNAME)
-        #serializer.serialize_pca_explained_variance(PCA_FNAME)
-
-        # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
-        
         return jsonify({
             "message": f"ran clustering pipeline and serialized results",
             "ok": True
