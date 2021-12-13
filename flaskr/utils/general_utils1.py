@@ -58,12 +58,6 @@ class Batcher:
         # last batch
         yield prev + curr
 
-
-class Serializer:
-    # observer
-    pass
-
-
 class ClustererBuilder:
     def __init__(self, clusterer: 'Clusterer'):
         self.clusterer = clusterer
@@ -370,3 +364,91 @@ class Clusterer:
         return self
 
     
+class Serializer:
+    # TODO: make it an Observer
+    def __init__(self, clusterer: 'Clusterer'):
+        self.clusterer = clusterer
+
+    def serialize_clustering_result(self, fname: str = './data/df.csv') -> bool:
+        # check if all the necessary data is available
+        if self.clusterer.kmeans is None or self.clusterer._embeddings is None:
+            raise RuntimeError(
+                'There is nothing to serialize yet. ' +\
+                'You must obtain and cluster embeddings first!'
+            )
+
+        print('[INFO] copying stories...')
+        story_batches, (l,_) = copy_and_measure_generator(self.clusterer._stories, num_copies=2)
+        self.clusterer._stories = story_batches[0]
+        if not l:
+            raise RuntimeError(
+                'Story generator is empty! ' +\
+                'Consider rerunning .get_story_batches()'
+            )
+        
+        print('[INFO] copying embeddings...')
+        emb_batches, (l,_) = copy_and_measure_generator(self.clusterer._embeddings, num_copies=2)
+        self.clusterer._embeddings = emb_batches[0]
+        if not l:
+            raise RuntimeError(
+                'Embedding generator is empty! ' +\
+                'Consider rerunning .get_embedding_batches()'
+            )
+
+        if not self.clusterer._labels:
+            raise RuntimeError(
+                'There are no labels to serialize! ' +\
+                'Consider running .cluster_story_batches()'
+            )     
+
+        # --- project to low-dim space if it wasn't done already ---
+        # embeds were not projected to low-dim space if num_stories < n_pca_dim
+        if self.clusterer.pca is None:
+            n_dims = min(
+                self.clusterer._num_stories, 
+                self.clusterer._n_pca_dims
+            )
+            self.clusterer.pca = PCA(n_components=n_dims)
+            self.clusterer.pca.fit(self.kmeans.cluster_centers_)
+            print(f'[INFO] pca dim set to {n_dims}')
+
+        # --- serialize ---
+        print(f'[INFO] serializing result to {fname}...')
+        fields = ['id', 'title', 'url', 'unix_time', 'label', 'embedding']
+        with open(fname, 'w') as f:
+            f.write('\t'.join(fields) + '\n')
+
+        for st_batch, emb_batch, lbl_batch in zip(
+            story_batches[1], emb_batches[1], self.clusterer._labels
+        ):
+            # reduce dimensionality with pca if it hasn't already been done
+            # otehrwise take n_dims first eigenvecs
+            emb_proj = self.clusterer.pca.transform(emb_batch) \
+                if emb_batch.shape[1] > self.clusterer._n_pca_dims \
+                else emb_batch
+            
+            for st, emb, lbl in zip(st_batch, emb_proj, lbl_batch):
+                with open(fname, 'a') as f:
+                    f.write(
+                        '\t'.join([
+                            str(st.get('story_id')),
+                            st.get('title') or '',
+                            st.get('url') or '', # nullable
+                            str(st.get('unix_time')),
+                            str(lbl),
+                            ','.join(str(val) for val in emb)
+                        ]) + '\n'
+                    )
+
+        return True
+
+    def serialize_pca_explained_variance(self, fname: int = 'data/pca.txt') -> bool:
+        if self.clusterer.pca is None:
+            return False
+        
+        with open(fname, 'w') as f:
+            f.write('\n'.join(
+                str(val) for val in self.clusterer.pca.explained_variance_ratio_
+            ))
+
+        return True
