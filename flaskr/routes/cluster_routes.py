@@ -7,9 +7,10 @@ from flask import (
 from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
-from flaskr.utils.general_utils import BatchedPipeliner
+from flaskr.utils.general_utils import Clusterer, Serializer
 from flaskr.utils.nlp_utils import ClusterFrequencyCounter
 from flaskr.utils.cluster_utils import TSNEer
+
 
 # set globals
 CORPUS_DIR = 'data'
@@ -38,14 +39,23 @@ def cluster_posts_and_serialize_results():
     try:
         request_form = rqparser.parse(request)
 
-        pipe = BatchedPipeliner(request_form)
-        stories = pipe.get_story_batches()
-        embeddings = pipe.get_embedding_batches(stories)
-        embeddings = pipe.standardize_embedding_batches(embeddings)
-        embeddings = pipe.reduce_embedding_dimensionality(embeddings, n_dims=100)
-        pipe.cluster_story_batches(embeddings)
-        pipe.serialize_result(fname=DF_FNAME)
-        pipe.serialize_pca_explained_variance(fname=PCA_FNAME)
+        clusterer = Clusterer()\
+            .set\
+                .n_clusters(request_form['n_clusters'])\
+                .n_pca_dims(100)\
+                .min_batch_size(100)\
+                .begin_timestep(request_form['begin_ts'])\
+                .end_timestep(request_form['end_ts'])\
+                .begin_comments(request_form['begin_comm'])\
+                .end_comments(request_form['end_comm'])\
+                .begin_score(request_form['begin_score'])\
+                .end_score(request_form['end_score'])\
+            .build()\
+            .run()
+
+        serializer = Serializer(clusterer)
+        serializer.serialize_clustering_result(DF_FNAME)
+        serializer.serialize_pca_explained_variance(PCA_FNAME)
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
