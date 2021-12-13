@@ -7,7 +7,8 @@ from flask import (
 from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
-from flaskr.utils.general_utils import Clusterer, Serializer
+from flaskr.utils.general_utils import Clusterer
+from flaskr.utils.io_utils import ClustererSerializer
 from flaskr.utils.nlp_utils import ClusterFrequencyCounter
 from flaskr.utils.cluster_utils import TSNEer
 
@@ -39,7 +40,12 @@ def cluster_posts_and_serialize_results():
     try:
         request_form = rqparser.parse(request)
 
-        clusterer = Clusterer()\
+        clusterer = Clusterer()
+        serializer = ClustererSerializer(clusterer)
+        serializer.add(serializer.serialize_clustering_result(DF_FNAME))
+        serializer.add(serializer.serialize_pca_explained_variance(PCA_FNAME))
+
+        clusterer\
             .set\
                 .n_clusters(request_form['n_clusters'])\
                 .n_pca_dims(100)\
@@ -52,10 +58,9 @@ def cluster_posts_and_serialize_results():
                 .end_score(request_form['end_score'])\
             .build()\
             .run()
-
-        serializer = Serializer(clusterer)
-        serializer.serialize_clustering_result(DF_FNAME)
-        serializer.serialize_pca_explained_variance(PCA_FNAME)
+        
+        #serializer.serialize_clustering_result(DF_FNAME)
+        #serializer.serialize_pca_explained_variance(PCA_FNAME)
 
         # FROM CLIENT: plot cluster histogram and embeddings (PCA or tSNE)
         
