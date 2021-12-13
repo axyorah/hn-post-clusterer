@@ -17,14 +17,14 @@ class Observable:
         self.change = Event()
 
 class Observer:
-    def __init__(self, observable):
+    def __init__(self, observable: Observable):
         self.observable = observable
 
 class Serializer(Observer):
-    def __init__(self, observable):
+    def __init__(self, observable: Observable):
         super().__init__(observable)
 
-    def add(self, fun):
+    def add(self, fun: FunctionType) -> None:
         self.observable.change.append(fun)
 
 class ClustererSerializer(Serializer):
@@ -33,6 +33,21 @@ class ClustererSerializer(Serializer):
         self.clusterer = clusterer
 
     def serialize_clustering_result(self, fname: str) -> FunctionType:
+        """
+        clusterer change event is called as `Clusterer().change(name, val)`;
+        however we also need to specify `fname` for serialization;
+        `this` high order fun takes `fname` as arg and returns 
+        a function handle for fun that is called as `fun(name, val)`
+        which complies with `Clusterer().change(.)`;
+        we can `add` this inner fun as a trigger for serializer as follows:
+        ```
+        clusterer = Clusterer()
+        serializer = ClustererSerializer(clusterer)
+        serializer.add(serializer.serialize_clustering_result(fname))
+        ```
+        (recall that `serializer.serialize_clustering_result(fname)` 
+        returns fun handle for fun that takes (name, val) as args)
+        """
         def helper(name, val):
             if name == 'labels':
                 print('LABEL SERIALIZER TRIGGERED')
@@ -40,6 +55,21 @@ class ClustererSerializer(Serializer):
         return helper
 
     def serialize_pca_explained_variance(self, fname: str) -> FunctionType:
+        """
+        clusterer change event is called as `Clusterer().change(name, val)`;
+        however we also need to specify `fname` for serialization;
+        `this` high order fun takes `fname` as arg and returns 
+        a function handle for fun that is called as `fun(name, val)`
+        which complies with `Clusterer().change(.)`;
+        we can `add` this inner fun as a trigger for serializer as follows:
+        ```
+        clusterer = Clusterer()
+        serializer = ClustererSerializer(clusterer)
+        serializer.add(serializer.serialize_pca_explained_variance(fname))
+        ```
+        (recall that `serializer.serialize_pca_explained_variance(fname)` 
+        returns fun handle for fun that takes (name, val) as args)
+        """
         def helper(name, val):
             if name == 'lowdim_embeddings':
                 print('PCA SERIALIZER TRIGGERED')
