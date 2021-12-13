@@ -7,7 +7,7 @@ from flask import (
 from flask.json import jsonify
 
 from flaskr.utils.form_utils import RequestParser as rqparser
-from flaskr.utils.general_utils import Clusterer
+from flaskr.utils.clusterpipe_utils import Clusterer
 from flaskr.utils.io_utils import ClustererSerializer
 from flaskr.utils.nlp_utils import ClusterFrequencyCounter
 from flaskr.utils.cluster_utils import TSNEer

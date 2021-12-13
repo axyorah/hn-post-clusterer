@@ -141,9 +141,35 @@ class Clusterer(Observable):
 
     @labels.setter
     def labels(self, val):
-        print("[INFO] calculated labels!")
         self._labels = val
-        self.change('labels', val) # trigger serializer
+        self.change('labels', val) 
+
+    @property
+    def stories(self):
+        return self._stories
+
+    @stories.setter
+    def stories(self, val):
+        self._stories = val
+        self.change('stories', val)
+
+    @property
+    def embeddings(self):
+        return self._stories
+
+    @embeddings.setter
+    def embeddings(self, val):
+        self._embeddings = val
+        self.change('embeddings', val)
+
+    @property
+    def lowdim_embeddings(self):
+        return self._stories
+
+    @lowdim_embeddings.setter
+    def lowdim_embeddings(self, val):
+        self._lowdim_embeddings = val
+        self.change('lowdim_embeddings', val)
 
     def _story_batch_generator(self, delta_ts: int = 100000) -> Generator:
         get_query = f'''
@@ -250,7 +276,7 @@ class Clusterer(Observable):
         batches, (num_batches, num_items, _) = copy_and_measure_batch_generator(gen, num_copies=2)
         self._num_batches = num_batches
         self._num_stories = num_items
-        self._stories = batches[0]
+        self.stories = batches[0]
 
         return batches[1]
 
@@ -281,7 +307,7 @@ class Clusterer(Observable):
         gen = batch_generator(story_batches or self._stories)
         print('[INFO] copying embedding generator...')
         batches = tee(gen, 2)
-        self._embeddings = batches[0]
+        self.embeddings = batches[0]
 
         return batches[1]
 
@@ -300,7 +326,7 @@ class Clusterer(Observable):
         print('[INFO] standardizing embeddings...')
         normalized = self.scaler.fit_transform(embedding_batches or self._embeddings)
         batches = tee(normalized, 2)
-        self._embeddings = batches[0]
+        self.embeddings = batches[0]
 
         return batches[1]
 
@@ -339,11 +365,11 @@ class Clusterer(Observable):
             for batch in batches:
                 yield self.pca.transform(batch)
 
-        lowdim_batches = tee(batch_generator(highdim_batches[1]), 2)
-        self._embeddings = lowdim_batches[0]
-        self.change('pca', self._embeddings) # trigger serializer
+        lowdim_batches = tee(batch_generator(highdim_batches[1]), 3)
+        self.embeddings = lowdim_batches[0]
+        self.lowdim_embeddings = lowdim_batches[1]
 
-        return lowdim_batches[1]
+        return lowdim_batches[2]
 
     def _cluster_embedding_batches(
         self, 
