@@ -41,7 +41,7 @@ class ClustererSerializer(Serializer):
 
     def serialize_pca_explained_variance(self, fname: str) -> FunctionType:
         def helper(name, val):
-            if name == 'pca':
+            if name == 'lowdim_embeddings':
                 print('PCA SERIALIZER TRIGGERED')
                 self._serialize_pca_explained_variance(fname)
         return helper

@@ -136,15 +136,6 @@ class Clusterer(Observable):
         return ClustererBuilder(self)
 
     @property
-    def labels(self):
-        return self._labels
-
-    @labels.setter
-    def labels(self, val):
-        self._labels = val
-        self.change('labels', val) 
-
-    @property
     def stories(self):
         return self._stories
 
@@ -170,6 +161,15 @@ class Clusterer(Observable):
     def lowdim_embeddings(self, val):
         self._lowdim_embeddings = val
         self.change('lowdim_embeddings', val)
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @labels.setter
+    def labels(self, val):
+        self._labels = val
+        self.change('labels', val) 
 
     def _story_batch_generator(self, delta_ts: int = 100000) -> Generator:
         get_query = f'''
@@ -288,7 +288,7 @@ class Clusterer(Observable):
         each element of a batch is a (batch_size, embed_dim) numpy array
         (embed_dim is 768 for default bert transformers and 384 for minis)
         """
-        if story_batches is None and self._stories is None:
+        if story_batches is None and self.stories is None:
             raise RuntimeError(
                 'There is nothing to embed! '+\
                 'Consider running `get_story_batches()` first!'
@@ -317,7 +317,7 @@ class Clusterer(Observable):
         embedding_batches: Optional[Generator] = None
     ) -> Generator:
 
-        if embedding_batches is None and self._embeddings is None:
+        if embedding_batches is None and self.embeddings is None:
             raise RuntimeError(
                 'There is nothing to standardize! '+\
                 'Consider running `get_embedding_batches()` first!'
@@ -349,10 +349,10 @@ class Clusterer(Observable):
                 f'got n_samples={self._num_stories} and n_dims={self._n_pca_dims}!\n' +\
                 'Returning original embeddings without changes.'
             )
-            return embedding_batches or self._embeddings
+            return embedding_batches or self.embeddings
 
         # copy high dim embeddings
-        highdim_batches = tee(embedding_batches or self._embeddings, 2)
+        highdim_batches = tee(embedding_batches or self.embeddings, 2)
 
         # train pca
         print(f'[INFO] reducing embedding dimensionality to {self._n_pca_dims}...')
@@ -375,7 +375,7 @@ class Clusterer(Observable):
         self, 
         embedding_batches: Optional[Generator] = None
     ) -> None:
-        if embedding_batches is None and self._embeddings is None:
+        if embedding_batches is None and self.embeddings is None:
             raise RuntimeError(
                 'There is nothing to cluster yet! ' +\
                 'You must obtain and story embeddings first! ' +\
@@ -383,7 +383,7 @@ class Clusterer(Observable):
             )
 
         print('[INFO] copying embeddings')
-        batches = tee(embedding_batches or self._embeddings, 2)
+        batches = tee(embedding_batches or self.embeddings, 2)
         
         # train kmeans
         print(f'[INFO] clustering stories to {self._n_clusters} clusters...')
