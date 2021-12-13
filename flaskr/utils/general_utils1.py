@@ -25,6 +25,7 @@ from flaskr.utils.cluster_utils import (
 from flaskr.utils.db_utils import DBHelper as dbh
 from flaskr.models.story import Story
 
+
 class Pipeliner:
     def __init__(self):
         self.pipe = []
@@ -57,6 +58,7 @@ class Batcher:
 
         # last batch
         yield prev + curr
+
 
 class ClustererBuilder:
     def __init__(self, clusterer: 'Clusterer'):
@@ -328,13 +330,11 @@ class Clusterer:
                 'Consider running `get_embedding_batches()` or `set_embedding_batches()`'
             )
 
-        # TODO: n_clusters should be accessed from form request
         print('[INFO] copying embeddings')
         batches = tee(embedding_batches or self._embeddings, 2)
         
-        print(f'[INFO] clustering stories to {self._n_clusters} clusters...')
-        #self.kmeans = MiniBatchKMeans(n_clusters=n_clusters)
         # train kmeans
+        print(f'[INFO] clustering stories to {self._n_clusters} clusters...')
         for batch in batches[0]:
             self.kmeans.partial_fit(batch)
 
