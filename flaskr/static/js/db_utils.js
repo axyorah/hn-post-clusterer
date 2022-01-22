@@ -13,35 +13,32 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         return
     }
 
-    // set `beginId` to the first item on `beginTs` date
-    fetch(
-        `/time/first_id_on?` + 
-        `year=${beginDate.getFullYear()}&month=${beginDate.getMonth()+1}&day=${beginDate.getDate()}`
+    // set `beginId` to the first item on `beginDate`
+    fetchFirstIdOnDay(
+        beginDate.getFullYear(), 
+        beginDate.getMonth()+1,
+        beginDate.getDate()
     )
-    .then(res => checkForServerErrors(res))
-    .then(res => res.json())
     .then(res => {
-        console.log(`first id on ${beginDate}: ${res.data.id}`);
-        beginId = res.data.id;
+        beginId = res;
+        console.log(`first id on ${beginDate}: ${beginId}`);
     })
-    // set `endId` to the first item on `endTs` date
-    .then(res => fetch(
-        `/time/first_id_on?` + 
-        `year=${endDate.getFullYear()}&month=${endDate.getMonth()+1}&day=${endDate.getDate()}`
+    // set `endId` to the first item on `endDate`
+    .then(_ => fetchFirstIdOnDay(
+        endDate.getFullYear(), 
+        endDate.getMonth()+1,
+        endDate.getDate()
     ))
-    .then(res => checkForServerErrors(res))
-    .then(res => res.json())
     .then(res => {
-        console.log(`first id on ${endDate}: ${res.data.id}`);
-        endId = res.data.id;
+        endId = res;
+        console.log(`first id on ${endDate}: ${endId}`);
     })
-    // set `params` obj needed to send post req to `/db/items`
     .then(res => {
         return {
             'sender': 'db-seeder',
             'seed-id-begin-range': beginId,
             'seed-id-end-range': endId
-        }        
+        }
     })
     // seed db with entries within specified id range
     .then(params => postData('/db/items', params))
@@ -54,5 +51,5 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         this.innerHTML = 'Get Data';
         console.log(err);
         addAlertMessage(err);
-    })
+    });
 })
