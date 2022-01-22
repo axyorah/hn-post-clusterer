@@ -34,7 +34,6 @@ def create_app(test_config=None):
             page_routes,
             db_routes,
             io_routes,
-            date_routes,
             cluster_routes
         )
         from flaskr.dashapp import init_dashboard
