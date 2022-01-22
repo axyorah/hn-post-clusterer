@@ -90,7 +90,9 @@ function addDateToNode(date, node) {
 
     const selectYear = getSelectElement(node.id + '-year');
     let years = [];
-    for (let y = 2006; y <= year; y++) years.push(y);
+    for (let y = 2006; y <= new Date().getFullYear(); y++) {
+        years.push(y);
+    }
     addOptionsToSelect(selectYear, years, years, year);
 
     const selectMonth = getSelectElement(node.id + '-month');
