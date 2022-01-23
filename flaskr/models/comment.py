@@ -84,7 +84,7 @@ class Comment:
             DELETE FROM comment WHERE comment_id = ?;
         """
         delete_parent_query = """
-            DELETE FROM parent WHERE comment_id = ?;
+            DELETE FROM parent WHERE parent_id = ?;
         """
         DBHelper.mod_query(delete_comment_query, [self.comment_id])
         DBHelper.mod_query(delete_parent_query, [self.comment_id])
