@@ -36,6 +36,11 @@ def create_app(test_config=None):
             io_routes,
             cluster_routes
         )
+        from flaskr.routes.api import (
+            general_routes,
+            story_routes,
+            comment_routes
+        )
         from flaskr.dashapp import init_dashboard
         app = init_dashboard(app)
         return app
