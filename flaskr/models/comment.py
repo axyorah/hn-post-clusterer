@@ -73,6 +73,7 @@ class Comment:
             self.author,
             self.unix_time,
             self.body,
+            self.parent_id,
             self.comment_id
         ]
         # TODO: update parent table???
