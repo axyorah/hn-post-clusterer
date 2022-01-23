@@ -153,10 +153,14 @@ class Story:
         DBHelper.mod_query(update_query, params)
 
     def delete(self) -> None:
-        delete_query = """
-            DELETE FROM story WHERE story_id = ?
+        delete_story_query = """
+            DELETE FROM story WHERE story_id = ?;
         """
-        DBHelper.mod_query(delete_query, [self.story_id])
+        delete_parent_query = """
+            DELETE FROM parent WHERE parent_id = ?;
+        """
+        DBHelper.mod_query(delete_story_query, [self.story_id])
+        DBHelper.mod_query(delete_parent_query, [self.story_id])
 
 class StoryList:
     @classmethod
