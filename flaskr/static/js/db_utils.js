@@ -28,7 +28,7 @@ function translateResponseJsonToSchema(json) {
         return;
     } else if (json.type === 'story') {
         // if undefined - replace by null (undefined in not JSON.stringifiable)
-        Object.keys(story2schema).forEach(key => {            
+        Object.keys(story2schema).forEach(key => {
             item[key] = json[story2schema[key]] || null;
         });
     } else if (json.type === 'comment') {
@@ -47,25 +47,29 @@ async function fetchSingleItemFromHNAndAddToDb(id, storyNeedsUpdate=false) {
     )
     .then(res => res.json())
     .then(res => translateResponseJsonToSchema(res))
-    .then(item => {
+    .then(async (item) => {
         // skip if empty, deleted or dead
         if (!item || item.deleted || item.dead) {
-            console.log(`${id}: got empty, deleted or dead, skipping...`);
+            console.log(
+                `[${new Date().toISOString()}] `+
+                `${id}: got empty, deleted or dead, skipping...`
+            );
             return;
         }
 
         // add to db
         console.log(
+            `[${new Date().toISOString()}] `
             `${id}: got ${item.type} from `+
-            `${new Date(parseInt(item.unix_time) * 1000).toDateString()}, `+
-            `${storyNeedsUpdate ? 'updading' : 'adding to db'}...`
+            `${new Date(parseInt(item.unix_time) * 1000).toISOString()}, `+
+            `${storyNeedsUpdate ? 'updading' : 'adding to db' }... `
         );
         if (storyNeedsUpdate) {
-            postData(`/api/stories/${id}/`, item, 'PUT');
+            await postData(`/api/stories/${id}/`, item, 'PUT');
         } else if (item.type === 'story') {
-            postData(`/api/stories/`, item, 'POST');
+            await postData(`/api/stories/`, item, 'POST');
         } else if (item.type === 'comment') {
-            postData(`/api/comments/`, item, 'POST');
+            await postData(`/api/comments/`, item, 'POST');
         }
         return item;
     })
@@ -96,12 +100,16 @@ async function maybeFetchSingleItemFromHNAndAddToDb(id) {
     // maybe add to db
     .then(async (res) => {
         if ( comment ) {
-            console.log(`${id}: comment already in db, skipping...`);
+            console.log(
+                `[${new Date().toISOString()}] ` +
+                `${id}: comment already in db, skipping...`
+            );
             return comment;
         } else if ( story ) {
-            // story is already in db, but it might need an update
-            //return await fetchSingleItemFromHNAndAddToDb(id, true);
-            console.log(`${id}: story already in db, skipping...`);
+            console.log(
+                `[${new Date().toISOString()}] ` +
+                `${id}: story already in db, skipping...`
+            );
             return story;
         } else {
             // add new item to db
@@ -112,25 +120,22 @@ async function maybeFetchSingleItemFromHNAndAddToDb(id) {
 }
 
 async function getItemRangeFromHNAndAddToDb(beginId, endId) {
-
     async function fetchItemWithKidsRecursively(id) {
-        maybeFetchSingleItemFromHNAndAddToDb(id)
+        await maybeFetchSingleItemFromHNAndAddToDb(id)
         .then(item => {
-            console.log(item);
             if (item && item.kids) {
-                //console.log(`${id} with kids: ${item.kids}`)
                 item.kids.forEach(childId => {
                     if (childId > endId) {
                         fetchItemWithKidsRecursively(childId);
                     }
                 });
             }
-        });        
+        });
     }
 
+    const throttler = new Semaphore(1);
     for (let id = beginId; id <= endId; id++) {
-        console.log(`awaiting for ${id}`);
-        await fetchItemWithKidsRecursively(id);
+        throttler.callFunction(fetchItemWithKidsRecursively, id);
     }
 
 }
