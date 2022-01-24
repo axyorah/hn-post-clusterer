@@ -1,3 +1,140 @@
+const story2schema = {
+    'story_id': 'id',
+    'author': 'by',
+    'unix_time': 'time',
+    'body': 'text',
+    'url': 'url',
+    'score': 'score',
+    'title': 'title',
+    'num_comments': 'descendants',
+    'kids': 'kids', // not in schema but we need it...
+    'type': 'type', // not in schema,
+    'deleted': 'deleted',
+    'dead': 'dead'
+};
+
+const comment2schema = {
+    'comment_id': 'id',
+    'author': 'by',
+    'unix_time': 'time',
+    'body': 'text',
+    'parent_id': 'parent',
+    'type': 'type' // not in schema...
+};
+
+function translateResponseJsonToSchema(json) {
+    const item = new Object();
+    if (json === null) {
+        return;
+    } else if (json.type === 'story') {
+        // if undefined - replace by null (undefined in not JSON.stringifiable)
+        Object.keys(story2schema).forEach(key => {            
+            item[key] = json[story2schema[key]] || null;
+        });
+    } else if (json.type === 'comment') {
+        // if undefined - replace by null (undefined in not JSON.stringifiable)
+        Object.keys(comment2schema).forEach(key => {
+            item[key] = json[comment2schema[key]] || null;
+        });
+    }
+    return item;
+}
+
+async function fetchSingleItemFromHNAndAddToDb(id, storyNeedsUpdate=false) {
+    // get item from hn
+    return await fetch(
+        `https://hacker-news.firebaseio.com/v0/item/${id}.json`
+    )
+    .then(res => res.json())
+    .then(res => translateResponseJsonToSchema(res))
+    .then(item => {
+        // skip if empty, deleted or dead
+        if (!item || item.deleted || item.dead) {
+            console.log(`${id}: got empty, deleted or dead, skipping...`);
+            return;
+        }
+
+        // add to db
+        console.log(
+            `${id}: got ${item.type} from `+
+            `${new Date(parseInt(item.unix_time) * 1000).toDateString()}, `+
+            `${storyNeedsUpdate ? 'updading' : 'adding to db'}...`
+        );
+        if (storyNeedsUpdate) {
+            postData(`/api/stories/${id}/`, item, 'PUT');
+        } else if (item.type === 'story') {
+            postData(`/api/stories/`, item, 'POST');
+        } else if (item.type === 'comment') {
+            postData(`/api/comments/`, item, 'POST');
+        }
+        return item;
+    })
+    .catch(err => console.error(err));
+}
+
+async function maybeFetchSingleItemFromHNAndAddToDb(id) {
+    /*
+    checks if item with given id is already in db:
+    - if item is comment and it is in db - skips
+    - X [if item is story and it is in db - fetches it again and updates db]
+    - if item is story and it is in db - skips
+    - if item is not in db: fetches it from hn and adds it to db
+    */
+    
+    let story, comment;
+
+    // check if story is in db
+    return await fetch(`/api/stories/${id}`)
+    .then(res => res.json())
+    .then(res => res.data)
+    .then(res => {story = res;})
+    // check if comment is in db
+    .then(_ => fetch(`/api/comments/${id}`))
+    .then(res => res.json())
+    .then(res => res.data)
+    .then(res => {comment = res;})
+    // maybe add to db
+    .then(async (res) => {
+        if ( comment ) {
+            console.log(`${id}: comment already in db, skipping...`);
+            return comment;
+        } else if ( story ) {
+            // story is already in db, but it might need an update
+            //return await fetchSingleItemFromHNAndAddToDb(id, true);
+            console.log(`${id}: story already in db, skipping...`);
+            return story;
+        } else {
+            // add new item to db
+            return await fetchSingleItemFromHNAndAddToDb(id, false);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+async function getItemRangeFromHNAndAddToDb(beginId, endId) {
+
+    async function fetchItemWithKidsRecursively(id) {
+        maybeFetchSingleItemFromHNAndAddToDb(id)
+        .then(item => {
+            console.log(item);
+            if (item && item.kids) {
+                //console.log(`${id} with kids: ${item.kids}`)
+                item.kids.forEach(childId => {
+                    if (childId > endId) {
+                        fetchItemWithKidsRecursively(childId);
+                    }
+                });
+            }
+        });        
+    }
+
+    for (let id = beginId; id <= endId; id++) {
+        console.log(`awaiting for ${id}`);
+        await fetchItemWithKidsRecursively(id);
+    }
+
+}
+
 seedSubmitBtn.addEventListener('click', function (evt) {
     //start in-progress spinner animation
     this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
@@ -52,4 +189,4 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         console.log(err);
         addAlertMessage(err);
     });
-})
+});
