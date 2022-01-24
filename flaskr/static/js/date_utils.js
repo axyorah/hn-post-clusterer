@@ -98,7 +98,7 @@ async function binSearchTs(lo, hi, targetTs) {
     while (lo <= hi) {
         mi = Math.floor((lo + hi) / 2);
         
-        await id2ts(mi).then(res => {ts = res}); // await!!!
+        ts = await id2ts(mi); // await!!!
         
         if (targetTs > ts) {
             lo = mi + 1;
