@@ -92,6 +92,23 @@ async function id2ts(itemId) {
     }
 }
 
+async function binSearchTs(lo, hi, targetTs) {
+    // use binsearch to find first id higher than timestamp
+    let mi, ts;
+    while (lo <= hi) {
+        mi = Math.floor((lo + hi) / 2);
+        
+        await id2ts(mi).then(res => {ts = res}); // await!!!
+        
+        if (targetTs > ts) {
+            lo = mi + 1;
+        } else {
+            hi = mi - 1;
+        }
+    }
+    return hi + 1;
+}
+
 async function fetchFirstIdOnDay(year, month, day) {
     /*
     returns first hn item id (story or comment) on specified date;
@@ -115,27 +132,15 @@ async function fetchFirstIdOnDay(year, month, day) {
     .then(async (res) => {        
         await id2ts(maxId).then(res => {maxTs = res}); // await!!!
         if (targetTs > maxTs) {
-            throw new Error('Specified date is out of range');
-        } 
-    })    
-    .then(async (res) => {
-        // use binsearch to find first id higher than timestamp
-        let lo = 1;
-        let hi = maxId;
-        let mi, ts;
-        while (lo <= hi) {
-            mi = Math.floor((lo + hi) / 2);
-            
-            await id2ts(mi).then(res => {ts = res}); // await!!!
-            //console.log(`lo: ${lo}, hi: ${hi}, targetTs: ${targetTs}, ts: ${ts}`);
-            
-            if (targetTs > ts) {
-                lo = mi + 1;
-            } else {
-                hi = mi - 1;
-            }
-        }        
-        return hi + 1;
+            //throw new Error('Specified date is out of range');
+            console.log(
+                `Specified date (${new Date(targetTs * 1000).toISOString()}) is out of range, ` +
+                `using current date ${new Date(maxTs * 1000).toISOString()} instead.`
+            );
+            return maxId;
+        } else {
+            return await binSearchTs(1, maxId, targetTs);
+        }
     })
     .catch(err => console.log(err));
 }
