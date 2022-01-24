@@ -59,7 +59,7 @@ async function fetchSingleItemFromHNAndAddToDb(id, storyNeedsUpdate=false) {
 
         // add to db
         console.log(
-            `[${new Date().toISOString()}] `
+            `[${new Date().toISOString()}] ` +
             `${id}: got ${item.type} from `+
             `${new Date(parseInt(item.unix_time) * 1000).toISOString()}, `+
             `${storyNeedsUpdate ? 'updading' : 'adding to db' }... `
@@ -80,22 +80,21 @@ async function maybeFetchSingleItemFromHNAndAddToDb(id) {
     /*
     checks if item with given id is already in db:
     - if item is comment and it is in db - skips
-    - X [if item is story and it is in db - fetches it again and updates db]
     - if item is story and it is in db - skips
     - if item is not in db: fetches it from hn and adds it to db
     */
-    
-    let story, comment;
+    async function getItemFromDb(id, endpoint) {
+        return await fetch(`/api/${endpoint}/${id}/`)
+        .then(res => res.json())
+        .then(res => res.data)
+        .catch(err => console.log(err));
+    }
 
-    // check if story is in db
-    return await fetch(`/api/stories/${id}`)
-    .then(res => res.json())
-    .then(res => res.data)
+    let story, comment;
+    // check if story/comment is in db
+    return await getItemFromDb(id, 'stories')
     .then(res => {story = res;})
-    // check if comment is in db
-    .then(_ => fetch(`/api/comments/${id}`))
-    .then(res => res.json())
-    .then(res => res.data)
+    .then(_ => getItemFromDb(id, 'comments'))
     .then(res => {comment = res;})
     // maybe add to db
     .then(async (res) => {
