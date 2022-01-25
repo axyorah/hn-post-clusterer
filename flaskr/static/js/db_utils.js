@@ -186,23 +186,4 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         this.innerHTML = 'Get Data';
         // remove `Cancel` button
     });
-    // .then(res => {
-    //     return {
-    //         'sender': 'db-seeder',
-    //         'seed-id-begin-range': beginId,
-    //         'seed-id-end-range': endId
-    //     }
-    // })
-    // // seed db with entries within specified id range
-    // .then(params => postData('/db/items', params))
-    // .then(res => checkForServerErrors(res))
-    // .then(res => {
-    //     // stop spinner animation
-    //     this.innerHTML = 'Get Data';
-    // })
-    // .catch(err => {
-    //     this.innerHTML = 'Get Data';
-    //     console.log(err);
-    //     addAlertMessage(err);
-    // });
 });
