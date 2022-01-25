@@ -8,6 +8,10 @@ Simple one-page app that attempts to bring some extra order to [HN](https://news
 as well as visualizes all posts as points in 2D space
 - prints titles/urls for all posts from a selected cluster
 
+Here's a rough flowsheet diagram:
+
+<img src="flaskr/static/imgs/hn-post-clusterer.drawio.png" width=700>
+
 ## What's under the hood
 ### Clustering
 In short: to find similar posts we perform the k-means clustering on each post comments converted to number arrays with the help of transformers.
