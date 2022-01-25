@@ -116,16 +116,17 @@ function setupDateFilter(fromRoot, toRoot) {
 
     // set `from`-date: min-date or today - 7days
     let fromDate;
-    fetch('/db/stats')
+    fetch('/api/meta/')
     .then(res => res.json())
     .then(res => {
         if (
-            res === undefined || res.data === undefined || 
-            res.data.stories === undefined || res.data.stories.num === 0
+            res === undefined || 
+            res.stories === undefined || 
+            res.stories.num === 0
         ) {
             throw new Error('db is empty!');
         }
-        return fetch(`https://hacker-news.firebaseio.com/v0/item/${res.data.stories.min}.json?print=pretty`)        
+        return fetch(`https://hacker-news.firebaseio.com/v0/item/${res.stories.min}.json?print=pretty`)        
     })
     .then(res => res.json())
     .then(res => {
