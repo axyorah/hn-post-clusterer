@@ -204,17 +204,27 @@ def get_comments_by_id():
 
     id_list = [int(i) for i in request.args.get("ids").split(",") if i.isnumeric()]
 
-    try:
-        comments = CommentList.find_by_ids(id_list)
-        # if no comments found - empty list returned but no error is raised
-        print(f"got {len(comments)} comments from db")
+    if id_list:
+        try:
+            comments = CommentList.find_by_ids(id_list)
+            # if no comments found - empty list returned but no error is raised
+            print(f"got {len(comments)} comments from db")
+            return jsonify({
+                "message": f"got {len(comments)} comments from db",
+                "data": [comment.json() for comment in comments],
+            }), 200
+        except Exception as e:
+            print(e.args[0])
+            return jsonify({
+                "message": "couldn't get comments from db",
+                "errors": e.args[0],
+            }), 500
+    else:
+        msg = (
+            "comments with speicifed ids not found "
+            "(should be `/api/comments?ids=1,2,3`)"
+        )
         return jsonify({
-            "message": f"got {len(comments)} comments from db",
-            "data": [comment.json() for comment in comments],
-        }), 200
-    except Exception as e:
-        print(e.args[0])
-        return jsonify({
-            "message": "couldn't get comments from db",
-            "errors": e.args[0],
-        }), 500
+            "message": msg,
+            "errors": msg
+        }), 404
