@@ -97,7 +97,7 @@ showSemanticClusterPostsBtn.addEventListener('click', function (evt) {
             res.data['label'],
             targetLabel
         );
-        return fetch(`/db/stories?ids=${filtered_ids.join(',')}`)
+        return fetch(`/api/stories?ids=${filtered_ids.join(',')}`)
     })
     .then(res => checkForServerErrors(res))
     .then(res => res.json())
