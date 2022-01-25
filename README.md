@@ -40,23 +40,15 @@ To set this project up locally open your terminal/command prompt and run the fol
 $ git clone https://github.com/axyorah/hn-post-clusterer.git
 ```
 
-- create fresh python virtual environment for this project by; to do that go to the project root and run:
+- create and activate fresh python virtual environment for this project; to do that go to the project root and run:
   - if you're on Linux or Mac:
   ```bash
   $ python3 -m venv venv
+  $ source venv/bin/activate
   ```
   - if you're on Windows:
   ```bash
-  py -3 -m venv venv
-  ```
-
-- activate the environment:
-  - If you're on Linux or Mac run:
-  ```bash
-  $ source venv/bin/activate
-  ````
-  - if you're on Windows run:
-  ```bash
+  python -m venv venv
   venv\Scripts\activate.bat
   ```
 
@@ -82,3 +74,6 @@ $ venv/bin/pip3 install -r requirements.txt
   ```
 
 - in your browser go to `localhost:5000` and follow the instructions. Do note that to begin with clustering you'd first need to populate your local database with at least 100 posts with 5+ comments. It might take a while to fetch them over internet. Luckily, you'd only need to do it once.
+
+## Acknowledgements
+To throttle requests sent by client I use semaphore as implemented by [Weiming Wu](https://gist.github.com/weimingw/a32d070a760dbc92ebb716b51bd44ac2#file-semaphore-js)
