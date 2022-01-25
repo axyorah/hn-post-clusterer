@@ -29,8 +29,9 @@ def validate_story(item):
         "title": {str},
         "num_comments": {int},
     }
+    optional = {"url"}
 
-    validate(item, schema, 'story')
+    validate(item, schema, item_type='story', optional=optional)
 
 
 
@@ -61,12 +62,12 @@ def add_story_to_db():
         "author": ...,
         "unix_time": ....,
         "body": ...,
-        "url": ...,
+        "url": ...[OPTIONAL],
         "score": ...,
         "title": ...,
         "num_comments": ...,
-        "deleted": ...,
-        "dead": ...,
+        "deleted": ...[OPTIONAL],
+        "dead": ...[OPTIONAL],
     }
     """
     try:
@@ -127,15 +128,18 @@ def update_story_in_db(id):
     """
     try:
         item = request.get_json()
+        print(item)
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
-        })
+        }), 400
 
     try:
         validate_story(item)
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": e.args[0],
             "errors": e.args[0]
@@ -145,7 +149,7 @@ def update_story_in_db(id):
         return jsonify({
             "message": f"updating story with wrong id: {id} != {item['story_id']}",
             "error": f"updating story with wrong id: {id} != {item['story_id']}"
-        })
+        }), 400
 
     # update db
     try:

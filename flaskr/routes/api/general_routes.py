@@ -13,15 +13,15 @@ from flaskr.models.comment import (
     CommentList,
 )
 
-def validate(item, schema, item_type='item'):
+def validate(item, schema, item_type='item', optional={}):
     for field in schema:
-        if field not in item:
-            raise Exception(f"{item_type} is missing `{field}` field")
-        if type(item[field]) not in schema[field]:
-            raise Exception(
-                    f"{item_type} field `{field}` is expected to be of {schema[field]} type, "
-                    f"got {type(item[field])}"
-                )
+        if field not in item and field not in optional:
+            raise NameError(f"{item_type} is missing `{field}` field")
+        if field in item and type(item[field]) not in schema[field]:
+            raise TypeError(
+                f"{item_type} field `{field}` is expected to be of {schema[field]} type, "
+                f"got {type(item[field])}"
+            )
 
 @app.route("/api/", strict_slashes=False)
 def get_api_routes():

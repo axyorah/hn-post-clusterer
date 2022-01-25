@@ -27,7 +27,7 @@ def validate_comment(item):
         "parent_id": {int},
     }
 
-    validate(item, schema, 'comment')
+    validate(item, schema, item_type='comment')
 
 @app.route("/api/comments/<string:id>/", strict_slashes=False)
 def get_comment_by_id(id):
@@ -37,11 +37,13 @@ def get_comment_by_id(id):
     comment = Comment.find_by_id(id)
         
     if comment:
+        print(f"got comment {id} from db")
         return jsonify({
             "message": f"got comment {id} from db",
             "data": comment.json(),
         })
-    else: 
+    else:
+        print(f"item `{id}` not found")
         return jsonify({
             "message": f"item `{id}` not found",
     }), 404
@@ -62,6 +64,7 @@ def add_comment_to_db():
     try:
         item = request.get_json()
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
@@ -70,6 +73,7 @@ def add_comment_to_db():
     try:
         validate_comment(item)
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": e.args[0],
             "errors": e.args[0]
@@ -78,6 +82,7 @@ def add_comment_to_db():
     # check if it's already in db
     comment = Comment.find_by_id(item['comment_id'])
     if comment:
+        print(f"comment {item['comment_id']} is already in database")
         return jsonify({
             "message": f"comment {item['comment_id']} is already in database",
         }), 400
@@ -86,12 +91,13 @@ def add_comment_to_db():
     try:
         comment = Comment(**item)
         comment.add()
-
+        print(f"item {item['comment_id']} added to db")
         return jsonify({
             "message": f"item {item['comment_id']} added to db",
             "data": comment.json()
         })
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": f"couldn't add item {item['comment_id']} to db",
             "errors": e.args[0]
@@ -113,6 +119,7 @@ def update_comment_in_db(id):
     try:
         item = request.get_json()
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
@@ -121,12 +128,14 @@ def update_comment_in_db(id):
     try:
         validate_comment(item)
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": e.args[0],
             "errors": e.args[0]
         }), 400
 
     if int(id) != item['comment_id']:
+        print(f"updating comment with wrong id: {id} != {item['comment_id']}")
         return jsonify({
             "message": f"updating comment with wrong id: {id} != {item['comment_id']}",
             "error": f"updating comment with wrong id: {id} != {item['comment_id']}"
@@ -137,11 +146,13 @@ def update_comment_in_db(id):
         comment = Comment(**item)
         comment.update()
 
+        print(f"item {id} updated")
         return jsonify({
             "message": f"item {id} updated",
             "data": comment.json()
         })
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": f"couldn't add item {item['comment_id']} to db",
             "errors": e.args[0]
@@ -154,14 +165,17 @@ def delete_comment_from_db(id):
         comment = Comment.find_by_id(id)
         if comment or (not story and not comment):
             comment.delete()
+            print(f"item {id} deleted")
             return jsonify({
                 "message": f"item {id} deleted",
             })
         elif story:
+            print(f"item {id} is a story")
             return jsonify({
                 "message": f"item {id} is a story",
             }), 400
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": f"couldn't delete item {id}",
             "errors": e.args[0]
@@ -175,6 +189,7 @@ def get_comments_by_id():
     use as `/db/comments?ids=1,2,3`
     """
     if request.args.get("ids") is None:
+        print("could not understand the request; ")
         return jsonify({
             "message": (
                 "could not understand the request; "
@@ -187,11 +202,13 @@ def get_comments_by_id():
     try:
         comments = CommentList.find_by_ids(id_list)
         # if no comments found - empty list returned but no error is raised
+        print(f"got {len(comments)} comments from db")
         return jsonify({
             "message": f"got {len(comments)} comments from db",
             "data": [comment.json() for comment in comments],
         })
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": "couldn't get comments from db",
             "errors": e.args[0],
