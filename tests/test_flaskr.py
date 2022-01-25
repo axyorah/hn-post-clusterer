@@ -7,136 +7,372 @@ $ pytest
 """
 import os, json
 
+def check_get(client, url, code):
+    rv = client.get(url)
+    assert rv.status_code == code 
+    return rv
+
+def check_post(client, url, data, code):
+    rv = client.post(
+        url, 
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps(data)
+    )
+    assert rv.status_code == code
+    return rv
+
+def check_put(client, url, data, code):
+    rv = client.put(
+        url, 
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps(data)
+    )
+    assert rv.status_code == code
+    return rv
+
+def check_del(client, url, code):
+    rv = client.delete(url)
+    assert rv.status_code == code
+    return rv
+
+
+# ----------------------------------
+# ------------ GENERAL -------------
+# ----------------------------------
 def test_index_ok(client):
     rv = client.get('/')
     assert rv.status_code == 200 and b'HN POST CLUSTERER' in rv.data
 
-# def test_empty_db(client):
-#     """Start with a blank database."""
+def test_empty_db(client):
+    """Start with a blank database"""
+    rv = check_get(client, '/api/meta/', 200)
+    assert rv.json.get("stories") and not rv.json.get("stories").get('num')
 
-#     rv = client.get('/db/stats')
-#     res = rv.json
-#     assert rv.status_code == 200 and res.get('data') and res.get('data').get("stories") and \
-#         not res.get('data').get("stories").get('num')
+# ----------------------------------
+# ------------- STORY --------------
+# ----------------------------------
+def test_post_story_to_db_ok(client):
+    # post new story
+    data = {
+            "author": "cbushko",
+            "body": None,
+            "num_comments": 0,
+            "score": 8,
+            "story_id": 27812656,
+            "title": "Dropbox Engineering Career Framework",
+            "unix_time": 1626110314,
+            "url": "https://dropbox.github.io/dbx-career-framework/"
+    }
+    check_post(client, '/api/stories/', data, 201)
 
-# def test_post_to_db_ok(client):
-#     # fetch items from hn and post them to db
-#     rv = client.post('/db/items', 
-#         headers={'Content-Type': 'application/json'},
-#         data=json.dumps({
-#             'sender': 'db-seeder',
-#             'seed-id-begin-range': 27700200,
-#             'seed-id-end-range': 27700210
-#     }))
-#     assert rv.status_code == 200
+    # one of the optional fields is missing
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": 27399581,
+        "title": "LOL just got kicked out of  @ycombinator",
+        "unix_time": 1622844115,
+        #"url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_post(client, '/api/stories/', data, 201)
+
+def test_post_story_to_db_fail(client):
+    # story already in db
+    data = {
+        "author": "cbushko",
+        "body": None,
+        "num_comments": 0,
+        "score": 8,
+        "story_id": 27812656,
+        "title": "Dropbox Engineering Career Framework",
+        "unix_time": 1626110314,
+        "url": "https://dropbox.github.io/dbx-career-framework/"
+    }
+    check_post(client, '/api/stories/', data, 400)
+
+    # one of the required fields is missing
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": 27399581,
+        "title": "LOL just got kicked out of  @ycombinator",
+        #"unix_time": 1622844115,
+        "url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_post(client, '/api/stories/', data, 400)
+
+    # one of the required fields is wrong type
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": "abc",
+        "title": "LOL just got kicked out of  @ycombinator",
+        "unix_time": 1622844115,
+        "url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_post(client, '/api/stories/', data, 400)
+
+def test_get_story_from_db_ok(client):
+    check_get(client, '/api/stories/27812656/', 200)
+
+def test_get_story_from_db_fail(client):
+    check_get(client, '/api/stories/27812657/', 404)
+
+def test_get_stories_ok(client):
+    rv = check_get(client, '/api/stories?ids=27812656', 200)
+    assert rv.json.get('data', None) is not None
+    assert isinstance(rv.json['data'], list)
+    assert len(rv.json['data']) == 1
+
+def test_get_stories_fail(client):
+    # query string is badly formatted 1
+    rv = client.get('/api/stories?id=27812656')
+    assert rv.status_code == 400
+
+    # query string is badly formatted 1
+    rv = client.get('/api/stories?ids=27812656;27700210')
+    assert rv.status_code == 404
+
+    # ids correspond to comments/not added items
+    rv = client.get('/api/stories?ids=27812657')
+    assert rv.status_code == 200 and not len(rv.json.get('data'))
+
+    # ids are not numeric
+    rv = client.get('/api/stories?ids=abc,def')
+    assert rv.status_code == 404
+
+def test_put_story_to_db_ok(client):
+    # put already existing story to db
+    data = {
+        "author": "cbushko",
+        "body": None,
+        "num_comments": 0,
+        "score": 8,
+        "story_id": 27812656,
+        "title": "Dropbox Engineering Career Framework",
+        "unix_time": 1626110314,
+        "url": "https://dropbox.github.io/dbx-career-framework/"
+    }
+    check_put(client, '/api/stories/27812656/', data, 200)
+
+    # one of the optional fields is missing
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": 27399581,
+        "title": "LOL just got kicked out of  @ycombinator",
+        "unix_time": 1622844115,
+        #"url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_put(client, '/api/stories/27399581/', data, 200)
+
+def test_put_story_to_db_fail(client):
+    # one of the required fields is missing
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": 27399581,
+        "title": "LOL just got kicked out of  @ycombinator",
+        #"unix_time": 1622844115,
+        "url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_put(client, '/api/stories/27399581/', data, 400)
+
+    # one of the required fields is wrong type
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": "abc",
+        "title": "LOL just got kicked out of  @ycombinator",
+        "unix_time": 1622844115,
+        "url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_put(client, '/api/stories/27399581/', data, 400)
+
+    # updating wrong story
+    data = {
+        "author": "bqe",
+        "body": None,
+        "num_comments": 588,
+        "score": 1041,
+        "story_id": 27399581,
+        "title": "LOL just got kicked out of  @ycombinator",
+        "unix_time": 1622844115,
+        "url": "https://twitter.com/paulbiggar/status/1400904600421535744"
+    }
+    check_put(client, '/api/stories/27812656/', data, 400)
+
+def test_del_story_from_db_ok(client):
+    # delete existing story
+    check_get(client, '/api/stories/27812656/', 200)
+    check_del(client, '/api/stories/27812656/', 200)
+
+    # delete non-existing story
+    print(dir(client))
+    check_get(client, '/api/stories/27812656/', 404)
+    check_del(client, '/api/stories/27812656/', 200)
+
+
+# ----------------------------------
+# ----------- COMMENT --------------
+# ----------------------------------
+def test_post_comment_to_db_ok(client):
+    # fetch items from hn and post them to db
+    data = {
+        "author": "p4bl0",
+        "body": (
+            "There are other ways of having a distributed immutable ledger than a blockchain, "
+            "if you don&#x27;t have the constraints of a decentralized adversarial context. "
+            "You don&#x27;t have this context for diplomas.<p>"
+            "Also, neither revocation nor security and privacy does seem like "
+            "good examples of what a blockchain would allow "
+            "that a non-blockchain based approach wouldn&#x27;t."
+        ),
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_post(client, '/api/comments/', data, 201)
+
+def test_post_comment_to_db_fail(client):
+    # comment already in db
+    data = {
+        "author": "p4bl0",
+        "body": (
+            "There are other ways of having a distributed immutable ledger than a blockchain, "
+            "if you don&#x27;t have the constraints of a decentralized adversarial context. "
+            "You don&#x27;t have this context for diplomas.<p>"
+            "Also, neither revocation nor security and privacy does seem like "
+            "good examples of what a blockchain would allow "
+            "that a non-blockchain based approach wouldn&#x27;t."
+        ),
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_post(client, '/api/comments/', data, 400)
+
+    # one of the required fields is missing
+    data = {
+        "author": "p4bl0",
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_post(client, '/api/comments/', data, 400)
+
+    # one of the required fields is wrong type
+    data = {
+        "author": "p4bl0",
+        "body": None,
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_post(client, '/api/comments/', data, 400)
+
+def test_get_comment_from_db_ok(client):
+    check_get(client, '/api/comments/30063390/', 200)
+
+def test_get_comment_from_db_fail(client):
+    check_get(client, '/api/comments/27812656/', 404)
+
+def test_get_comments_ok(client):
+    rv = check_get(client, '/api/comments?ids=30063390', 200)
+    assert rv.json.get('data', None) is not None
+    assert isinstance(rv.json['data'], list)
+    assert len(rv.json['data']) == 1
+
+def test_get_comments_fail(client):
+    # query string is badly formatted 1
+    rv = client.get('/api/comments?id=30063390')
+    assert rv.status_code == 400
+
+    # query string is badly formatted 1
+    rv = client.get('/api/comments?ids=30063390;30063390')
+    assert rv.status_code == 404
+
+    # ids correspond to comments/not added items
+    rv = client.get('/api/comments?ids=27812656')
+    assert rv.status_code == 200 and not len(rv.json.get('data'))
+
+    # ids are not numeric
+    rv = client.get('/api/comments?ids=abc,def')
+    assert rv.status_code == 404
+
+def test_put_comment_to_db_ok(client):
+    # put already existing comment to db
+    data = {
+        "author": "p4bl0",
+        "body": (
+            "There are other ways of having a distributed immutable ledger than a blockchain, "
+            "if you don&#x27;t have the constraints of a decentralized adversarial context. "
+            "You don&#x27;t have this context for diplomas.<p>"
+            "Also, neither revocation nor security and privacy does seem like "
+            "good examples of what a blockchain would allow "
+            "that a non-blockchain based approach wouldn&#x27;t."
+        ),
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_put(client, '/api/comments/30063390/', data, 200)
+
+def test_put_comment_to_db_fail(client):
+    # one of the required fields is missing
+    data = {
+        "author": "p4bl0",
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_put(client, '/api/comments/30063390/', data, 400)
+
+    # one of the required fields is wrong type
+    data = {
+        "author": "p4bl0",
+        "body": None,
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_post(client, '/api/comments/', data, 400)
+
+    # updating wrong comment
+    data = {
+        "author": "p4bl0",
+        "body": None,
+        "comment_id": 30063390,
+        "parent_id": 30063265,
+        "unix_time": 1643055409
+    }
+    check_put(client, '/api/comments/30063391', data, 400)
+
+def test_del_comment_from_db_ok(client):
+    # delete existing comment
+    check_get(client, '/api/comments/30063390/', 200)
+    check_del(client, '/api/comments/30063390/', 200)
+
+    # delete non-existing comment
+    check_get(client, '/api/comments/30063390/', 404)
+    check_del(client, '/api/comments/30063390/', 200)
     
-#     rv = client.get('/db/stats')
-#     res = rv.json
-#     assert rv.status_code == 200 and res.get('data') and res.get('data')
 
-#     # there should be 3 new storeis
-#     assert res.get('data').get("stories").get('num') == 3
-
-#     # there should be 8 new comments
-#     assert res.get('data').get("comments").get('num') == 8
-
-# def test_post_to_db_fail(client):    
-#     # sender not specified
-#     params = {
-#             'seed-id-begin-range': 27700200,
-#             'seed-id-end-range': 27700210
-#     }
-#     rv = client.post('/db/items', 
-#         headers={'Content-Type': 'application/json'},
-#         data=json.dumps(params))
-#     assert rv.status_code == 400
-
-#     # sender not recognised
-#     params = {
-#             'sender': 'abc',
-#             'seed-id-begin-range': 27700200,
-#             'seed-id-end-range': 27700210
-#     }
-#     rv = client.post('/db/items', 
-#         headers={'Content-Type': 'application/json'},
-#         data=json.dumps(params))
-#     assert rv.status_code == 400
-
-#     # one of the ids is not numeric
-#     params = {
-#             'sender': 'db-seeder',
-#             'seed-id-begin-range': "abc",
-#             'seed-id-end-range': 27700210
-#     }
-#     rv = client.post('/db/items', 
-#         headers={'Content-Type': 'application/json'},
-#         data=json.dumps(params))
-#     assert rv.status_code == 400
-
-#     # min id > max id
-#     params = {
-#             'sender': 'db-seeder',
-#             'seed-id-begin-range': 27700210,
-#             'seed-id-end-range': 27700200
-#     }
-#     rv = client.post('/db/items', 
-#         headers={'Content-Type': 'application/json'},
-#         data=json.dumps(params))
-#     assert rv.status_code == 400
-
-# def test_get_stories_ok(client):
-#     rv = client.get('/db/stories?ids=27700200,27700210')
-#     res = rv.json
-#     assert rv.status_code == 200 and len(res.get('data')) == 2 and \
-#         res.get('data')[0].get('story_id') == 27700200 and res.get('data')[0].get('unix_time') == 1625153690 and \
-#         res.get('data')[1].get('story_id') == 27700210 and res.get('data')[1].get('unix_time') == 1625153743
-
-# def test_get_stories_fail(client):
-#     # query string is badly formatted 1
-#     rv = client.get('/db/stories?id=27700200,27700210')
-#     assert rv.status_code == 400
-
-#     # query string is badly formatted 1
-#     rv = client.get('/db/stories?ids=27700200;27700210')
-#     assert rv.status_code == 404
-
-#     # ids correspond to comments
-#     rv = client.get('/db/stories?ids=27700201,27700211')
-#     assert rv.status_code == 200 and not len(rv.json.get('data'))
-
-#     # ids are not numeric
-#     rv = client.get('/db/stories?ids=abc,def')
-#     assert rv.status_code == 404
-
-# def test_first_id_on_date_ok(client):
-#     url = '/time/first_id_on?year={}&month={}&day={}'
-#     rv = client.get(url.format(2021, 7, 1))
-#     res = rv.json
-#     assert rv.status_code == 200 and res.get('data') and res.get('data').get('id') == 27693892
-
-# def test_first_id_on_date_fail(client):
-#     url = '/time/first_id_on?year={}&month={}&day={}'
-
-#     # date does not exist 1
-#     rv = client.get(url.format(2021, 2, 31))
-#     assert rv.status_code == 400
-
-#     # date does not exist 2
-#     rv = client.get(url.format(2021, 13, 31))
-#     assert rv.status_code == 400
-
-#     # date is in the future
-#     rv = client.get(url.format(3021, 7, 1))
-#     assert rv.status_code == 400
-    
-#     # date is not numeric
-#     rv = client.get(url.format("abc", 7, 1))
-#     assert rv.status_code == 400
-
-#     # query string is wrongly formatted
-#     rv = client.get('/time/first_id_on?y=2021&m=7&d=1')
-#     assert rv.status_code == 400
-
+# ----------------------------------
+# -------------- IO ----------------
+# ----------------------------------
 def test_read_file_ok(client):
     # make temp dummy data files
     with open('data/test.txt', 'w') as f:
