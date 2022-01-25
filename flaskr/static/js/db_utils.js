@@ -135,6 +135,7 @@ async function getItemRangeFromHNAndAddToDb(beginId, endId) {
     const throttler = new Semaphore(1);
     for (let id = beginId; id <= endId; id++) {
         throttler.callFunction(fetchItemWithKidsRecursively, id);
+        // stop if `Cancel` btn is clicked
     }
 
 }
@@ -142,6 +143,8 @@ async function getItemRangeFromHNAndAddToDb(beginId, endId) {
 seedSubmitBtn.addEventListener('click', function (evt) {
     //start in-progress spinner animation
     this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
+
+    // add `Cancel` button
 
     // convert date-filter node values to timestamps
     let beginId, endId;
@@ -174,11 +177,14 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         endId = res;
         console.log(`first id on ${endDate}: ${endId}`);
     })
-    .then(_ => getItemRangeFromHNAndAddToDb(beginId, endId))
+    .then(_ => getItemRangeFromHNAndAddToDb(beginId, endId)) // pass `Cancel` btn as arg
     .catch(err => {
-            this.innerHTML = 'Get Data';
-            console.log(err);
-            addAlertMessage(err);
+        console.log(err);
+        addAlertMessage(err);
+    })
+    .finally(res => {
+        this.innerHTML = 'Get Data';
+        // remove `Cancel` button
     });
     // .then(res => {
     //     return {
