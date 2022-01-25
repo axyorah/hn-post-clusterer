@@ -201,7 +201,7 @@ def get_stories_by_id():
     fetches stories with specified ids from db;
     stories are returned in json's `data` field;
     stories contain additional field `children` with all comments in a single html;
-    use as `/db/stories?ids=1,2,3`
+    use as `/api/stories?ids=1,2,3`
     """
     if request.args.get("ids") is None:
         return jsonify({
@@ -212,17 +212,27 @@ def get_stories_by_id():
         }), 400
 
     id_list = [int(i) for i in request.args.get("ids").split(",") if i.isnumeric()]
-
-    try:
-        stories = StoryList.find_by_ids_with_children(id_list)
-        # if no stories found - empty list returned but no error is raised
+    
+    if id_list:
+        try:
+            stories = StoryList.find_by_ids_with_children(id_list)
+            # if no stories found - empty list returned but no error is raised
+            return jsonify({
+                "message": f"got {len(stories)} stories from db",
+                "data": [story.json() for story in stories],
+            }), 200
+        except Exception as e:
+            return jsonify({
+                "message": "couldn't get stories from db",
+                "errors": e.args[0],
+            }), 500
+    else:
+        msg = (
+            "stories with speicifed ids not found "
+            "(should be `/api/stories?ids=1,2,3`)"
+        )
         return jsonify({
-            "message": f"got {len(stories)} stories from db",
-            "data": [story.json() for story in stories],
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "message": "couldn't get stories from db",
-            "errors": e.args[0],
-        }), 500
+            "message": msg,
+            "errors": msg
+        }), 404
 
