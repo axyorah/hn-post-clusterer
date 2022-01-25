@@ -41,7 +41,7 @@ def get_comment_by_id(id):
         return jsonify({
             "message": f"got comment {id} from db",
             "data": comment.json(),
-        })
+        }), 200
     else:
         print(f"item `{id}` not found")
         return jsonify({
@@ -68,7 +68,7 @@ def add_comment_to_db():
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
-        })
+        }), 400
 
     try:
         validate_comment(item)
@@ -95,7 +95,7 @@ def add_comment_to_db():
         return jsonify({
             "message": f"item {item['comment_id']} added to db",
             "data": comment.json()
-        })
+        }), 201
     except Exception as e:
         print(e.args[0])
         return jsonify({
@@ -123,7 +123,7 @@ def update_comment_in_db(id):
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
-        })
+        }), 200
 
     try:
         validate_comment(item)
@@ -139,7 +139,7 @@ def update_comment_in_db(id):
         return jsonify({
             "message": f"updating comment with wrong id: {id} != {item['comment_id']}",
             "error": f"updating comment with wrong id: {id} != {item['comment_id']}"
-        })
+        }), 400
 
     # update db
     try:
@@ -150,7 +150,7 @@ def update_comment_in_db(id):
         return jsonify({
             "message": f"item {id} updated",
             "data": comment.json()
-        })
+        }), 200
     except Exception as e:
         print(e.args[0])
         return jsonify({
@@ -168,7 +168,7 @@ def delete_comment_from_db(id):
             print(f"item {id} deleted")
             return jsonify({
                 "message": f"item {id} deleted",
-            })
+            }), 200
         elif story:
             print(f"item {id} is a story")
             return jsonify({
@@ -206,7 +206,7 @@ def get_comments_by_id():
         return jsonify({
             "message": f"got {len(comments)} comments from db",
             "data": [comment.json() for comment in comments],
-        })
+        }), 200
     except Exception as e:
         print(e.args[0])
         return jsonify({
