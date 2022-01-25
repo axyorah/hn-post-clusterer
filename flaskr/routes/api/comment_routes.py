@@ -163,7 +163,7 @@ def delete_comment_from_db(id):
     try:
         story = Story.find_by_id(id)
         comment = Comment.find_by_id(id)
-        if comment or (not story and not comment):
+        if comment:
             comment.delete()
             print(f"item {id} deleted")
             return jsonify({
@@ -174,6 +174,11 @@ def delete_comment_from_db(id):
             return jsonify({
                 "message": f"item {id} is a story",
             }), 400
+        elif (not story) and (not comment):
+            print(f"item {id} not in db")
+            return jsonify({
+                "message": f"item {id} not in db",
+            }), 200
     except Exception as e:
         print(e.args[0])
         return jsonify({
