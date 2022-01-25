@@ -32,7 +32,6 @@ def create_app(test_config=None):
     with app.app_context():
         from flaskr.routes import (
             page_routes,
-            db_routes,
             io_routes,
             cluster_routes
         )
