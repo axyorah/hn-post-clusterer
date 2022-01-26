@@ -22,6 +22,7 @@ const comment2schema = {
     'type': 'type' // not in schema...
 };
 
+
 function translateResponseJsonToSchema(json) {
     const item = new Object();
     if (json === null) {
@@ -137,11 +138,15 @@ async function getItemRangeFromHNAndAddToDb(beginId, endId) {
         });
     }
 
-    const throttler = new Semaphore(1);
-    for (let id = beginId; id <= endId; id++) {
-        throttler.callFunction(fetchItemWithKidsRecursively, id);
-        // stop if `Cancel` btn is clicked
+    async function callFunction(id) {
+        if (!hiddenCancelSeedDbBtn.clicked && id <= endId) {
+            await fetchItemWithKidsRecursively(id);
+            id++;
+            callFunction(id+1);
+        }
     }
+
+    await callFunction(beginId);
 
 }
 
@@ -150,6 +155,12 @@ seedSubmitBtn.addEventListener('click', function (evt) {
     this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
 
     // add `Cancel` button
+    hiddenCancelSeedDbBtn.unhide();
+    hiddenCancelSeedDbBtn.unclick();
+    hiddenCancelSeedDbBtn.btn.addEventListener('click', (evt) => {
+        this.innerHTML = 'Get Data';
+        hiddenCancelSeedDbBtn.hide();
+    })
 
     // convert date-filter node values to timestamps
     let beginId, endId;
@@ -185,13 +196,13 @@ seedSubmitBtn.addEventListener('click', function (evt) {
         endId = res;
         console.log(`first id on ${endDate}: ${endId}`);
     })
-    .then(_ => getItemRangeFromHNAndAddToDb(beginId, endId)) // pass `Cancel` btn as arg
+    .then(async _ => await getItemRangeFromHNAndAddToDb(beginId, endId)) // pass `Cancel` btn as arg
     .catch(err => {
+        this.innerHTML = 'Get Data';
+        hiddenCancelSeedDbBtn.hide();
+        hiddenCancelSeedDbBtn.unclick();
+
         console.log(err);
         addAlertMessage(err);
-    })
-    .finally(res => {
-        this.innerHTML = 'Get Data';
-        // remove `Cancel` button
     });
 });
