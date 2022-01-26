@@ -156,6 +156,9 @@ seedSubmitBtn.addEventListener('click', function (evt) {
     const beginDate = getDateFromDateNode(seedDateBeginRoot);
     const endDate = getDateFromDateNode(seedDateEndRoot);
 
+    addDateToNode(beginDate, seedDateBeginRoot);
+    addDateToNode(endDate, seedDateEndRoot);
+
     if (beginDate.valueOf() > endDate.valueOf()) {
         this.innerHTML = 'Get Data';
         addAlertMessage('`From`-date should come before `To`-date');
