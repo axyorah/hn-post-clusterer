@@ -104,9 +104,12 @@ function addDateToNode(date, node) {
     const days = [...Array(31).keys()].map(val => val+1);
     addOptionsToSelect(selectDay, days, days, day);
 
-    node.appendChild(selectYear);
-    node.appendChild(selectMonth);
-    node.appendChild(selectDay);
+    // remove old children if present and add new ones
+    [selectYear, selectMonth, selectDay].forEach(child => {
+        const oldChild = node.querySelector(`#${child.id}`);
+        if (oldChild) node.removeChild(oldChild);
+        node.appendChild(child);
+    })
 }
 
 function setupDateFilter(fromRoot, toRoot) {
