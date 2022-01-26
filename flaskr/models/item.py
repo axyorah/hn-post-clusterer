@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Tuple, Set, Optional, Generator, Union
 
 from flaskr.utils.db_utils import DBHelper
-from flaskr.models.story import Story
 
 class Item:
     SCHEMA = [
