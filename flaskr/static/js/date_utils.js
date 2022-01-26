@@ -51,7 +51,7 @@ function getDateFromDateNode(node) {
         ].map(val => parseInt(val));
         
         const dateObj = new Date(y, m-1, d);
-        adjustDateNodeDisplay(node, dateObj);
+        //adjustDateNodeDisplay(node, dateObj);
 
         return dateObj;
     } else {

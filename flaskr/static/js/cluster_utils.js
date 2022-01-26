@@ -48,6 +48,9 @@ semanticClusterBtn.addEventListener('click', function (evt) {
         'model-name': transformerModelName.value,
     };
 
+    addDateToNode(getDateFromDateNode(showDateBeginRoot), showDateBeginRoot);
+    addDateToNode(getDateFromDateNode(showDateEndRoot), showDateEndRoot);
+
     // show `in-progress`
     semanticClusterBtn.innerHTML = `${spinnerAmination} Clustering Posts...`;
 
