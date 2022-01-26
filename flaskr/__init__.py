@@ -38,7 +38,8 @@ def create_app(test_config=None):
         from flaskr.routes.api import (
             general_routes,
             story_routes,
-            comment_routes
+            comment_routes,
+            item_routes
         )
         from flaskr.dashapp import init_dashboard
         app = init_dashboard(app)
