@@ -142,7 +142,7 @@ async function getItemRangeFromHNAndAddToDb(beginId, endId) {
         if (!hiddenCancelSeedDbBtn.clicked && id <= endId) {
             await fetchItemWithKidsRecursively(id);
             id++;
-            callFunction(id+1);
+            setTimeout(() => callFunction(id+1), 1);
         }
     }
 
