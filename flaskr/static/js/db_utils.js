@@ -29,12 +29,14 @@ function translateResponseJsonToSchema(json) {
     } else if (json.type === 'story') {
         // if undefined - replace by null (undefined in not JSON.stringifiable)
         Object.keys(story2schema).forEach(key => {
-            item[key] = json[story2schema[key]] || null;
+            item[key] = json[story2schema[key]] !== undefined ? 
+                json[story2schema[key]] : null;
         });
     } else if (json.type === 'comment') {
         // if undefined - replace by null (undefined in not JSON.stringifiable)
         Object.keys(comment2schema).forEach(key => {
-            item[key] = json[comment2schema[key]] || null;
+            item[key] = json[comment2schema[key]] !== undefined ?
+                json[comment2schema[key]] : null;
         });
     }
     return item;
@@ -46,17 +48,20 @@ async function fetchSingleItemFromHNAndAddToDb(id, storyNeedsUpdate=false) {
         `https://hacker-news.firebaseio.com/v0/item/${id}.json`
     )
     .then(res => res.json())
-    .then(res => translateResponseJsonToSchema(res))
-    .then(async (item) => {
+    .then(res => {
         // skip if empty, deleted or dead
-        if (!item || item.deleted || item.dead) {
-            console.log(
+        if (!res || res.deleted || res.dead) {
+            const msg = (
                 `[${new Date().toISOString()}] `+
                 `${id}: got empty, deleted or dead, skipping...`
             );
-            return;
+            throw Error(msg);
+        } else {
+            return res;
         }
-
+    })
+    .then(res => translateResponseJsonToSchema(res))
+    .then(async (item) => {
         // add to db
         console.log(
             `[${new Date().toISOString()}] ` +
