@@ -42,11 +42,13 @@ def get_story_by_id(id):
     """
     story = Story.find_by_id(id)        
     if story:
+        print(f"got story {id} for db")
         return jsonify({
             "message": "got story from db",
             "data": story.json()
         })
-    else: 
+    else:
+        print(f"item {id} not found")
         return jsonify({
             "message": f"item `{id}` not found",
             "errors": f"item `{id}` not found"
@@ -73,6 +75,7 @@ def add_story_to_db():
     try:
         item = request.get_json()
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": "couldn't parse request",
             "errors": e.args[0]
@@ -81,6 +84,7 @@ def add_story_to_db():
     try:
         validate_story(item)
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": e.args[0],
             "errors": e.args[0]
@@ -98,11 +102,13 @@ def add_story_to_db():
         story = Story(**item)
         story.add()
 
+        print(f"item {item['story_id']} added to db")
         return jsonify({
             "message": f"item {item['story_id']} added to db",
             "data": story.json()
         }), 201
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": f"couldn't add item {item['story_id']} to db",
             "errors": e.args[0]
@@ -128,7 +134,6 @@ def update_story_in_db(id):
     """
     try:
         item = request.get_json()
-        print(item)
     except Exception as e:
         print(e.args[0])
         return jsonify({
@@ -146,6 +151,7 @@ def update_story_in_db(id):
         }), 400
 
     if int(id) != item['story_id']:
+        print(f"updating story with wrong id: {id} != {item['story_id']}")
         return jsonify({
             "message": f"updating story with wrong id: {id} != {item['story_id']}",
             "error": f"updating story with wrong id: {id} != {item['story_id']}"
@@ -156,11 +162,13 @@ def update_story_in_db(id):
         story = Story(**item)
         story.update()
 
+        print(f"item {id} updated")
         return jsonify({
             "message": f"item {id} updated",
             "data": story.json()
         }), 200
     except Exception as e:
+        print(e.args[0])
         return jsonify({
             "message": f"couldn't add item {item['story_id']} to db",
             "errors": e.args[0]
@@ -217,11 +225,13 @@ def get_stories_by_id():
         try:
             stories = StoryList.find_by_ids_with_children(id_list)
             # if no stories found - empty list returned but no error is raised
+            print(f"got {len(stories)} stories from db")
             return jsonify({
                 "message": f"got {len(stories)} stories from db",
                 "data": [story.json() for story in stories],
             }), 200
         except Exception as e:
+            print(e.args[0])
             return jsonify({
                 "message": "couldn't get stories from db",
                 "errors": e.args[0],
@@ -231,6 +241,7 @@ def get_stories_by_id():
             "stories with speicifed ids not found "
             "(should be `/api/stories?ids=1,2,3`)"
         )
+        print(msg)
         return jsonify({
             "message": msg,
             "errors": msg
