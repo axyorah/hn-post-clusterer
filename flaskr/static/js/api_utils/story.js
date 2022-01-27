@@ -22,9 +22,10 @@ class HNStory extends Story {
     constructor(params) {
         super(params);
 
-        this.kids = params.kids,
-        this.type = params.type,
-        this.deleted = params.deleted,
+        this.children = params.children;
+        this.kids = params.kids;
+        this.type = params.type;
+        this.deleted = params.deleted;
         this.dead = params.dead
     }
 
@@ -38,13 +39,14 @@ class HNStory extends Story {
         'title': 'title',
         'num_comments': 'descendants',
         'kids': 'kids', // not in schema but we need it...
+        'children': 'children', // not in schema,
         'type': 'type', // not in schema,
         'deleted': 'deleted',
         'dead': 'dead'
     }
 
     OPTIONAL = [
-        'body', 'url', 'kids', 
+        'body', 'url', 'kids', 'children',
         'type', 'deleted', 'dead'
     ];
 
