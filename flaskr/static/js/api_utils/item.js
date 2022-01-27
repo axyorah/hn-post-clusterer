@@ -43,6 +43,7 @@ class HNItem extends Item {
     constructor(params) {
         super(params);
 
+        this.ITEM_ID = params.id;
         this.deleted = params.deleted,
         this.dead = params.dead
     }

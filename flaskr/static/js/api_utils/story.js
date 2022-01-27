@@ -22,6 +22,7 @@ class HNStory extends Story {
     constructor(params) {
         super(params);
 
+        this.ITEM_ID = params.id;
         this.children = params.children;
         this.kids = params.kids;
         this.type = params.type;
@@ -29,7 +30,7 @@ class HNStory extends Story {
         this.dead = params.dead
     }
 
-    HN_TO_DB = {
+    static DB_TO_HN = {
         'story_id': 'id',
         'author': 'by',
         'unix_time': 'time',
@@ -45,7 +46,7 @@ class HNStory extends Story {
         'dead': 'dead'
     }
 
-    OPTIONAL = [
+    static OPTIONAL = [
         'body', 'url', 'kids', 'children',
         'type', 'deleted', 'dead'
     ];
@@ -54,12 +55,12 @@ class HNStory extends Story {
         const item = new Object();
         if (json === null) {
             return;
-        } else if ('story_id' in json) {
+        } else if (json.type === 'story') {
             Object.keys(this.SCHEMA).forEach(key => {
-                item[key] = json[this.SCHEMA[key]] !== undefined ? 
-                    json[this.SCHEMA[key]] : null;
+                item[key] = json[this.DB_TO_HN[key]] !== undefined ? 
+                    json[this.DB_TO_HN[key]] : null;
             });
         }
-        return item;
+        return new Story(item);
     }
 }
