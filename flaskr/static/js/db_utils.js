@@ -155,59 +155,59 @@ async function getItemRangeFromHNAndAddToDb(beginId, endId) {
 
 }
 
-seedSubmitBtn.addEventListener('click', function (evt) {
-    //start in-progress spinner animation
-    this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
+// seedSubmitBtn.addEventListener('click', function (evt) {
+//     //start in-progress spinner animation
+//     this.innerHTML = `${spinnerAmination} Getting Data from HN...`;
 
-    // add `Cancel` button
-    hiddenCancelSeedDbBtn.unhide();
-    hiddenCancelSeedDbBtn.unclick();
-    hiddenCancelSeedDbBtn.btn.addEventListener('click', (evt) => {
-        this.innerHTML = 'Get Data';
-        hiddenCancelSeedDbBtn.hide();
-    })
+//     // add `Cancel` button
+//     hiddenCancelSeedDbBtn.unhide();
+//     hiddenCancelSeedDbBtn.unclick();
+//     hiddenCancelSeedDbBtn.btn.addEventListener('click', (evt) => {
+//         this.innerHTML = 'Get Data';
+//         hiddenCancelSeedDbBtn.hide();
+//     })
 
-    // convert date-filter node values to timestamps
-    let beginId, endId;
-    const beginDate = getDateFromDateNode(seedDateBeginRoot);
-    const endDate = getDateFromDateNode(seedDateEndRoot);
+//     // convert date-filter node values to timestamps
+//     let beginId, endId;
+//     const beginDate = getDateFromDateNode(seedDateBeginRoot);
+//     const endDate = getDateFromDateNode(seedDateEndRoot);
 
-    addDateToNode(beginDate, seedDateBeginRoot);
-    addDateToNode(endDate, seedDateEndRoot);
+//     addDateToNode(beginDate, seedDateBeginRoot);
+//     addDateToNode(endDate, seedDateEndRoot);
 
-    if (beginDate.valueOf() > endDate.valueOf()) {
-        this.innerHTML = 'Get Data';
-        addAlertMessage('`From`-date should come before `To`-date');
-        return
-    }
+//     if (beginDate.valueOf() > endDate.valueOf()) {
+//         this.innerHTML = 'Get Data';
+//         addAlertMessage('`From`-date should come before `To`-date');
+//         return
+//     }
 
-    // set `beginId` to the first item on `beginDate`
-    fetchFirstIdOnDay(
-        beginDate.getFullYear(), 
-        beginDate.getMonth()+1,
-        beginDate.getDate()
-    )
-    .then(res => {
-        beginId = res;
-        console.log(`first id on ${beginDate}: ${beginId}`);
-    })
-    // set `endId` to the first item on `endDate`
-    .then(_ => fetchFirstIdOnDay(
-        endDate.getFullYear(), 
-        endDate.getMonth()+1,
-        endDate.getDate()
-    ))
-    .then(res => {
-        endId = res;
-        console.log(`first id on ${endDate}: ${endId}`);
-    })
-    .then(async _ => await getItemRangeFromHNAndAddToDb(beginId, endId)) // pass `Cancel` btn as arg
-    .catch(err => {
-        this.innerHTML = 'Get Data';
-        hiddenCancelSeedDbBtn.hide();
-        hiddenCancelSeedDbBtn.unclick();
+//     // set `beginId` to the first item on `beginDate`
+//     fetchFirstIdOnDay(
+//         beginDate.getFullYear(), 
+//         beginDate.getMonth()+1,
+//         beginDate.getDate()
+//     )
+//     .then(res => {
+//         beginId = res;
+//         console.log(`first id on ${beginDate}: ${beginId}`);
+//     })
+//     // set `endId` to the first item on `endDate`
+//     .then(_ => fetchFirstIdOnDay(
+//         endDate.getFullYear(), 
+//         endDate.getMonth()+1,
+//         endDate.getDate()
+//     ))
+//     .then(res => {
+//         endId = res;
+//         console.log(`first id on ${endDate}: ${endId}`);
+//     })
+//     .then(async _ => await getItemRangeFromHNAndAddToDb(beginId, endId)) // pass `Cancel` btn as arg
+//     .catch(err => {
+//         this.innerHTML = 'Get Data';
+//         hiddenCancelSeedDbBtn.hide();
+//         hiddenCancelSeedDbBtn.unclick();
 
-        console.log(err);
-        addAlertMessage(err);
-    });
-});
+//         console.log(err);
+//         addAlertMessage(err);
+//     });
+// });
