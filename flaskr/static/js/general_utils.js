@@ -1,27 +1,5 @@
 const spinnerAmination = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
-class HiddenButton {
-    constructor(btn) {
-        this.clicked = false;
-        this.btn = btn;
-        this.btn.addEventListener('click', (evt) => {
-            this.clicked = true;
-        });
-    }
-
-    hide = function() {
-        this.btn.style.display = 'none';
-    }
-
-    unhide = function() {
-        this.btn.style.display = '';
-    }
-
-    unclick = function() {
-        this.clicked = false;
-    }
-}
-
 function urlify(json) {
     const entries = Object.keys(json).map(key => `${key}=${json[key]}`);
     return entries.join('&')
@@ -82,6 +60,3 @@ function checkForServerErrors(res) {
     }
     return res;
 }
-
-const hiddenCancelSeedDbBtn = new HiddenButton(seedCancelBtn);
-hiddenCancelSeedDbBtn.hide();

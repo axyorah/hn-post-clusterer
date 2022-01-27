@@ -74,6 +74,3 @@ $ venv/bin/pip3 install -r requirements.txt
   ```
 
 - in your browser go to `localhost:5000` and follow the instructions. Do note that to begin with clustering you'd first need to populate your local database with at least 100 posts with 5+ comments. It might take a while to fetch them over internet. Luckily, you'd only need to do it once.
-
-## Acknowledgements
-To throttle requests sent by client I use semaphore as implemented by [Weiming Wu](https://gist.github.com/weimingw/a32d070a760dbc92ebb716b51bd44ac2#file-semaphore-js)
