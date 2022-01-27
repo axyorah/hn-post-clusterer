@@ -71,7 +71,7 @@ async function fetchSingleItemFromHNAndAddToDb(id, storyNeedsUpdate=false) {
             `${storyNeedsUpdate ? 'updading' : 'adding to db' }... `
         );
         if (storyNeedsUpdate) {
-            await postData(`/api/stories/${id}/`, item, 'PUT');
+            await postData(`/api/stories/${item.story_id}/`, item, 'PUT');
         } else if (item.type === 'story') {
             await postData(`/api/stories/`, item, 'POST');
         } else if (item.type === 'comment') {
