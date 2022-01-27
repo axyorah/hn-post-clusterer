@@ -12,7 +12,7 @@ class AbstractItem {
 
     json = function () {
         const item = new Object();
-        Object.keys(this.SCHEMA).forEach(key => {
+        Object.keys(this.constructor.SCHEMA).forEach(key => {
             item[key] = (this[key] !== undefined) ? this[key] : null;
         })
         return item;
@@ -33,16 +33,16 @@ class AbstractItem {
     }
 
     validate = function() {
-        Object.keys(this.SCHEMA).forEach(key => {
+        Object.keys(this.constructor.SCHEMA).forEach(key => {
             if (
                 (this[key] === undefined || this[key] === null) && 
-               !(this.OPTIONAL.includes(key))
+               !(this.constructor.OPTIONAL.includes(key))
             ) {
                 throw ReferenceError(`Required '${key}' is missing!`);
             }
-            if (!(this.SCHEMA[key].includes(typeof(this[key])))) {
+            if (!(this.constructor.SCHEMA[key].includes(typeof(this[key])))) {
                 throw TypeError(
-                    `Field ${key} should be ${this.SCHEMA[key].join(' or ')}, ` +
+                    `Field ${key} should be ${this.constructor.SCHEMA[key].join(' or ')}, ` +
                     `got ${this[key]} of type ${typeof(this[key])}`
                 );
             }
@@ -70,15 +70,27 @@ class AbstractItem {
 
     add = async function () {
         this.validate();
-        await postData(`/api/${this.ENDPOINT}/`, this.json(), 'POST');
+        await postData(
+            `/api/${this.constructor.ENDPOINT}/`, 
+            this.json(), 
+            'POST'
+        );
     }
 
     update = async function () {
         this.validate();
-        await postData(`/api/${this.ENDPOINT}/${this.ITEM_ID}`, this.json(), 'PUT');
+        await postData(
+            `/api/${this.constructor.ENDPOINT}/${this.ITEM_ID}`, 
+            this.json(), 
+            'PUT'
+        );
     }
 
     delete = async function () {
-        await postData(`/api/${this.ENDPOINT}/${this.ITEM_ID}`, new Object(), 'DELETE');
+        await postData(
+            `/api/${this.constructor.ENDPOINT}/${this.ITEM_ID}`, 
+            new Object(), 
+            'DELETE'
+        );
     }
 }
