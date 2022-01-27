@@ -96,28 +96,33 @@ async function maybeFetchSingleItemFromHNAndAddToDb(id) {
         .catch(err => console.log(err));
     }
 
-    let story, comment;
     // check if story/comment is in db
-    return await getItemFromDb(id, 'stories')
-    .then(res => {story = res;})
-    .then(_ => getItemFromDb(id, 'comments'))
-    .then(res => {comment = res;})
+    return await getItemFromDb(id, 'items')
     // maybe add to db
-    .then(async (res) => {
-        if ( comment ) {
-            console.log(
-                `[${new Date().toISOString()}] ` +
-                `${id}: comment already in db, skipping...`
-            );
-            return comment;
-        } else if ( story ) {
-            console.log(
-                `[${new Date().toISOString()}] ` +
-                `${id}: story already in db, skipping...`
-            );
-            return story;
+    .then(async (item) => {
+        if (item && item.type === 'story') {
+            const story = await getItemFromDb(id, 'stories');
+            if (story) {
+                console.log(
+                    `[${new Date().toISOString()}] ` +
+                    `${id}: story already in db, skipping...`
+                );
+                return story;
+            }
+        } else if (item && item.type == 'comment') {
+            const comment = await getItemFromDb(id, 'comments');
+            if (comment) {
+                console.log(
+                    `[${new Date().toISOString()}] ` +
+                    `${id}: comment already in db, skipping...`
+                );
+                return comment;
+            }
         } else {
-            // add new item to db
+            return await fetchSingleItemFromHNAndAddToDb(id, false);
+        }
+
+        if (!story && !comment) {
             return await fetchSingleItemFromHNAndAddToDb(id, false);
         }
     })
