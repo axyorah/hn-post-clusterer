@@ -4,25 +4,24 @@ class HNLoader {
         this.cancelBtn = cancelBtn;
         this.logTextBox = logTextBox;
 
-        this._prepareButtons();
+        this.logLimit = 500;
+
+        this._init();
     }
 
-    _prepareButtons = function() {
+    _init = function() {
         const submitBtnInitInnerHTML = 'Get Data';
         const submitBtnInProgressInnerHTML = `${spinnerAmination} Getting Data from HN...`;
 
         this.cancelBtn.reset = function() {
-            //this.hidden = true;
             this.style.display = 'none';
             this.clicked = false;
         };
         this.cancelBtn.ready = function() {
-            //this.hidden = false;
             this.style.display = '';
             this.clicked = false;
         };
         this.cancelBtn.react = function() {
-            //this.hidden = true;
             this.style.display = 'none';
             this.clicked = true;
         };
@@ -43,8 +42,19 @@ class HNLoader {
             this.onSubmit();
         });
 
+        this.logTextBox.reset = function() {
+            this.style.display = 'none';
+            this.innerHTML = '';
+        }
+
+        this.logTextBox.ready = function() {
+            this.style.display = 'block';
+            this.innerHTML = '';
+        }
+
         this.submitBtn.reset();
         this.cancelBtn.reset();
+        this.logTextBox.reset();
     }
 
     _getDateRangeFromForm = function () {
@@ -67,19 +77,27 @@ class HNLoader {
     }
 
     _getIdRangeFromDateRange = async function (beginDate, endDate) {
+        let msg;
+
         const beginId = await fetchFirstIdOnDay(
             beginDate.getFullYear(), 
             beginDate.getMonth()+1,
             beginDate.getDate()
         );
-        console.log(`first id on ${beginDate}: ${beginId}`);
+        msg = (`first id on ${beginDate.toDateString()}: ${beginId}`);
+        //console.log(msg);
+        this.logTextBox.innerHTML = 
+            this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
 
         const endId = await fetchFirstIdOnDay(
             endDate.getFullYear(), 
             endDate.getMonth()+1,
             endDate.getDate()
         );
-        console.log(`first id on ${endDate}: ${endId}`);
+        msg = (`first id on ${endDate.toDateString()}: ${endId}`);
+        //console.log(msg);
+        this.logTextBox.innerHTML = 
+            this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
 
         return {
             'beginId': beginId,
@@ -91,24 +109,30 @@ class HNLoader {
         // give buttons appropriate look
         this.submitBtn.ready(); // in-progress animation
         this.cancelBtn.ready(); // unhide, unclick
+        this.logTextBox.ready(); // show cleared log window
 
         // read date range from form
         const {beginDate, endDate} = this._getDateRangeFromForm();
 
         // convert date range to id range
         const {beginId, endId} = await this._getIdRangeFromDateRange(
-            beginDate, endDate)
-        ;
+            beginDate, endDate
+        );
 
         // fetch items from HN and add them to db
+        // adjust log length on each step (in needed)
         // reset buttons at the end
         const go = async (id) => {
             if (!this.cancelBtn.clicked && id <= endId) {
                 await this.maybeLoadItemWithKidsRecursively(id);
+                while (this.logTextBox.children.length >= this.logLimit) {
+                    this.logTextBox.removeChild(this.logTextBox.firstChild);
+                }
                 setTimeout(() => go(id+1), 1);
             } else {
                 this.submitBtn.reset();
                 this.cancelBtn.reset();
+                //this.logTextBox.reset(); // <-- keep log!
             }
         }
     
@@ -116,6 +140,7 @@ class HNLoader {
         .catch(err => {
             this.submitBtn.reset();
             this.cancelBtn.reset();
+            //this.logTextBox.reset(); // <-- keep log!
     
             console.log(err);
             addAlertMessage(err);
@@ -145,16 +170,22 @@ class HNLoader {
        return await Item.getOneById(id)
        .then(async (item) => {
            if (item && item.type === 'story') {
-                console.log(
+                const msg = (
                     `[${new Date().toISOString()}] ` +
                     `${id}: story already in db, skipping...`
                 );
+                //console.log(msg);
+                this.logTextBox.innerHTML = 
+                    this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
                 return await Story.getOneById(id);
             } else if (item && item.type === 'comment') {
-                console.log(
+                const msg = (
                     `[${new Date().toISOString()}] ` +
                     `${id}: comment already in db, skipping...`
                 );
+                //console.log(msg);
+                this.logTextBox.innerHTML = 
+                    this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
                 return await Comment.getOneById(id);
             } else {
                 return await this.loadSingleItem(id);
@@ -174,7 +205,9 @@ class HNLoader {
                     `[${new Date().toISOString()}] `+
                     `${id}: got empty, deleted or dead, skipping...`
                 );
-                console.log(msg);
+                //console.log(msg);
+                this.logTextBox.innerHTML = 
+                    this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
                 return;
             } else {
                 return res;
@@ -195,12 +228,15 @@ class HNLoader {
         })
         .then(item => {
             if (item) {
-                console.log(
+                const msg = (
                     `[${new Date().toISOString()}] ` +
                     `${id}: got ${'story_id' in item ? 'story' : 'comment'} from `+
                     `${new Date(parseInt(item.unix_time) * 1000).toISOString()}, `+
                     `adding to db... `
                 );
+                //console.log(msg);
+                this.logTextBox.innerHTML = 
+                    this.logTextBox.innerHTML + `<span>${msg}</br></span>`;
                 return item;
             }
         })
@@ -208,4 +244,6 @@ class HNLoader {
     }
 }
 
-const loader = new HNLoader(seedSubmitBtn, seedCancelBtn);
+const loader = new HNLoader(
+    seedSubmitBtn, seedCancelBtn, logTextBox
+);

@@ -8,6 +8,17 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.box {
+    background-color: rgb(76, 73, 82);
+    border-radius: 2px;
+    border-color: none;
+    border-width: 0px;
+    padding: 5%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    color: white;
+}
+
 .title-box {
     width: 100%;
     display: flex;
@@ -22,6 +33,21 @@ body {
     justify-content: space-between;
 }
 
+#log-textbox {
+    display: none;
+    height: 15em;
+    background-color: rgb(40, 38, 43);
+    padding: 2%;
+    margin-top: 2%;
+    margin-bottom: 0%;
+
+    overflow-wrap: break-word;
+    word-break: break-all;
+    overflow: scroll;
+    scrollbar-color: rgb(40, 38, 43);
+    scrollbar-track-color: rgb(40, 38, 43);
+}
+
 section {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -29,17 +55,6 @@ section {
 
 a {
     color:rgb(3, 205, 255);
-}
-
-.box {
-    background-color: rgb(76, 73, 82);
-    border-radius: 2px;
-    border-color: none;
-    border-width: 0px;
-    padding: 5%;
-    margin-top: 5%;
-    margin-bottom: 5%;
-    color: white;
 }
 
 .hor {
